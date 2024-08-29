@@ -88,7 +88,7 @@ public class JwtUtil {
             return expirationDate.before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
-            log.warn("유효하지 않은 토큰입니다.");
+            log.warn("유효하지 않은 토큰입니다."); //
             throw new TokenException(TokenErrorResult.INVALID_TOKEN);
         }
     }
