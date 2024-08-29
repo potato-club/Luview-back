@@ -22,4 +22,18 @@ public class RefreshToken {
 
     @Column(name = "token", nullable = false)
     private String token;
+
+    @Column(name = "refresh_token", nullable = false)
+    private String refreshToken;
+
+    public RefreshToken(UUID userId, String token, String refreshToken) {
+        this.userId = userId;
+        this.token = token;
+        this.refreshToken = refreshToken;
+    }
+
+    public RefreshToken update(String newRefreshToken) {
+        this.refreshToken = newRefreshToken;
+        return this;
+    }
 }

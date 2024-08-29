@@ -1,0 +1,88 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    url: jdbc:mysql://localhost:3306/sys
+    password: 1234
+
+    h2:
+      console:
+        enabled: true
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
+    open-in-view: true
+    show-sql: true
+    generate-ddl: true
+
+  sql:
+    init:
+      mode: always
+
+
+jwt:
+  issuer: jihun6548@naver.com
+  secret_key: spring
+  secret: "eFdxI0pTXzdCS1RhSGt0N1p3TG5CdjN6dnJkYWFuVVpMN0hHSGFHVXZIV1c="
+  redirect: http://localhost:8080/login?name=%s&access_token=%s&refresh_token=%s
+  access-token:
+    expiration-time: 3600000
+  refresh-token:
+    expiration-time: 604800000
+
+
+security:
+  oauth2:
+    client:
+      registration:
+
+        google:
+          client-id: 405713133306-r8pjpqo8ki55n85nf4mf97iuabdcpvv1.apps.googleusercontent.com
+          client-secret: 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
+          scope:
+            - email
+          redirect-uri: http://localhost:8080/login/oauth2/code/google
+
+        kakao:
+          client-id: 80a004d8cad430733920485d4b4eb81b
+          client-secret: yzhnDANiGzLf2Tj09XPE4wH9YMpEqwFH
+          scope:
+            - profile_nickname
+          authorization-grant-type: authorization_code
+          redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+          client-name: Kakao
+          client-authentication-method: client_secret_post
+
+        naver:
+          client-id: HyKBwdjFoFay3UI2v73a
+          client-secret: E5ASpW2GcC
+          scope:
+            - name
+          client-name: Naver
+          authorization-grant-type: authorization_code
+          redirect-uri: http://localhost:8080/login/oauth2/code/naver
+
+      provider:
+        kakao:
+          authorization-uri: https://kauth.kakao.com/oauth/authorize
+          token-uri: https://kauth.kakao.com/oauth/token
+          user-info-uri: https://kapi.kakao.com/v2/user/me
+          user-name-attribute: id
+
+        naver:
+          authorization-uri: https://nid.naver.com/oauth2.0/authorize
+          token-uri: https://nid.naver.com/oauth2.0/token
+          user-info-uri: https://openapi.naver.com/v1/nid/me
+          user-name-attribute: response
