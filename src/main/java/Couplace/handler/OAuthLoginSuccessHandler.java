@@ -27,6 +27,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
     @Value("${jwt.redirect}")
     private String REDIRECT_URI;
 
@@ -42,9 +43,9 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication; // OAuth2 토큰
-        final String provider = token.getAuthorizedClientRegistrationId(); // provider 추출
-        OAuth2UserInfo oAuth2UserInfo = null;
+        OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
+        final String provider = token.getAuthorizedClientRegistrationId();
+        OAuth2UserInfo oAuth2UserInfo;
 
         switch (provider) {
             case "google" -> {
@@ -104,6 +105,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         RefreshToken newRefreshToken = RefreshToken.builder()
                 .userId(user.getUserId())
                 .token(refreshToken)
+                .refreshToken(UUID.randomUUID().toString())  // 추가된 필드에 대한 설정
                 .build();
         refreshTokenRepository.save(newRefreshToken);
 

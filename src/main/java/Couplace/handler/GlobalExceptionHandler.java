@@ -7,6 +7,7 @@ import Couplace.api.ApiResponse;
 import Couplace.token.TokenErrorResult;
 import Couplace.token.TokenException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
@@ -36,5 +37,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public String handleException(Exception e, Model model) {
         model.addAttribute("errorMessage", e.getMessage());
         return "error/500";  // custom error page
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        // 예외 메시지에서 중요한 정보를 로그로 출력할 수 있습니다.
+        System.err.println("Data integrity violation: " + ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Data integrity violation occurred: " + ex.getMessage());
     }
 }
