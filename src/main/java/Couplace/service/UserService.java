@@ -21,6 +21,8 @@ public class UserService {
                 .email(dto.getEmail())
                 .password(bCryptPasswordEncoder.encode(dto.getPassword()))
                 .name(dto.getName()) // name 필드 설정
+                .nickname(dto.getNickname())
+                .birthdate(dto.getBirthdate())
                 .provider("local") // 기본 제공자 설정
                 .providerId("") // 기본 제공자 ID 설정
                 .build()).getId();

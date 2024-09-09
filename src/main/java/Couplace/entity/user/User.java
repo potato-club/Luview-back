@@ -45,6 +45,12 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "nickname")
+    private String nickname;
+
+    @Column(name = "birthdate", nullable = false)
+    private String birthdate;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -54,12 +60,14 @@ public class User implements UserDetails {
     private LocalDateTime updatedAt;
 
     @Builder
-    public User(String name, String provider, String providerId, String email, String password, LocalDateTime createdAt, LocalDateTime updatedAt, String auth) {
+    public User(String name, String provider, String providerId, String email, String password, String birthdate, String nickname,LocalDateTime createdAt, LocalDateTime updatedAt, String auth) {
         this.name = name;
         this.provider = provider;
         this.providerId = providerId;
         this.email = email;
         this.password = password;
+        this.birthdate=birthdate;
+        this.nickname=nickname;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
