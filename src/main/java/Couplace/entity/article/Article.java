@@ -1,5 +1,6 @@
-package Couplace.entity;
+package Couplace.entity.article;
 
+import Couplace.entity.like.Like;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,6 +11,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
@@ -47,4 +50,7 @@ public class Article {
         this.title = title;
         this.content = content;
     }
+
+    @OneToMany(mappedBy = "article") // 'Like' 엔티티의 'article' 필드를 참조
+    private List<Like> likes = new ArrayList<>();
 }

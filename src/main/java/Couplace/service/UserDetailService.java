@@ -1,6 +1,6 @@
 package Couplace.service;
 
-import Couplace.entity.User;
+import Couplace.entity.user.User;
 import Couplace.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -2,14 +2,13 @@ package Couplace.service;
 
 import Couplace.dto.AddArticleRequest;
 import Couplace.dto.UpdateArticleRequest;
-import Couplace.entity.Article;
+import Couplace.entity.article.Article;
 import Couplace.repository.BlogRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 
 @RequiredArgsConstructor
 @Service

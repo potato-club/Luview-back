@@ -1,4 +1,4 @@
-package Couplace.controller;
+package Couplace.controller.user;
 
 import Couplace.dto.AddUserRequest;
 import Couplace.service.UserService;

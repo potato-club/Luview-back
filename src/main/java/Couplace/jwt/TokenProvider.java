@@ -1,6 +1,6 @@
 package Couplace.jwt;
 
-import Couplace.entity.User;
+import Couplace.entity.user.User;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

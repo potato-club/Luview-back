@@ -1,6 +1,6 @@
 package Couplace.handler;
 
-import Couplace.entity.User;
+import Couplace.entity.user.User;
 import Couplace.info.KakaoUserInfo;
 import Couplace.info.NaverUserInfo;
 import Couplace.info.OAuth2UserInfo;

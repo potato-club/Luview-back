@@ -1,8 +1,8 @@
-package Couplace.controller;
+package Couplace.controller.blog;
 
 import Couplace.dto.ArticleListViewResponse;
 import Couplace.dto.ArticleViewResponse;
-import Couplace.entity.Article;
+import Couplace.entity.article.Article;
 import Couplace.service.BlogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

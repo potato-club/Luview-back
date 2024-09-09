@@ -1,5 +1,6 @@
-package Couplace.entity;
+package Couplace.entity.user;
 
+import Couplace.entity.like.Like;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -9,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -91,4 +93,7 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true; //계정 사용 가능 확인
     }
+
+    @OneToMany(mappedBy = "user") // 'Like' 엔티티의 'user' 필드를 참조
+    private List<Like> likes = new ArrayList<>();
 }

@@ -1,6 +1,6 @@
 package Couplace.dto;
 
-import Couplace.entity.Article;
+import Couplace.entity.article.Article;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

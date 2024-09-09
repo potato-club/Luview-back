@@ -1,11 +1,13 @@
 package Couplace.service;
 
-import Couplace.entity.User;
+import Couplace.entity.user.User;
 import Couplace.dto.AddUserRequest;
 import Couplace.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -24,7 +26,7 @@ public class UserService {
                 .build()).getId();
     }
 
-    public User findById(Long userId) {
+    public User findById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Unexpected user"));
     }

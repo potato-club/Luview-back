@@ -1,9 +1,9 @@
-package Couplace.controller;
+package Couplace.controller.blog;
 
 import Couplace.dto.AddArticleRequest;
 import Couplace.dto.ArticleResponse;
 import Couplace.dto.UpdateArticleRequest;
-import Couplace.entity.Article;
+import Couplace.entity.article.Article;
 import Couplace.service.BlogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
