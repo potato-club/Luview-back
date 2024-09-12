@@ -1,6 +1,6 @@
 package Couplace.service;
 
-import Couplace.dto.AddArticleRequest;
+import Couplace.dto.article.AddArticleRequest;
 import Couplace.dto.UpdateArticleRequest;
 import Couplace.entity.article.Article;
 import Couplace.repository.BlogRepository;

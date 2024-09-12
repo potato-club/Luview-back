@@ -1,7 +1,7 @@
 package Couplace.controller.blog;
 
-import Couplace.dto.AddArticleRequest;
-import Couplace.dto.ArticleResponse;
+import Couplace.dto.article.AddArticleRequest;
+import Couplace.dto.article.ArticleResponse;
 import Couplace.dto.UpdateArticleRequest;
 import Couplace.entity.article.Article;
 import Couplace.service.BlogService;

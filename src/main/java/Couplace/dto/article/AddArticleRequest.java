@@ -1,4 +1,4 @@
-package Couplace.dto;
+package Couplace.dto.article;
 
 
 import Couplace.entity.article.Article;

@@ -1,7 +1,7 @@
 package Couplace.controller.blog;
 
-import Couplace.dto.ArticleListViewResponse;
-import Couplace.dto.ArticleViewResponse;
+import Couplace.dto.article.ArticleListViewResponse;
+import Couplace.dto.article.ArticleViewResponse;
 import Couplace.entity.article.Article;
 import Couplace.service.BlogService;
 import lombok.RequiredArgsConstructor;

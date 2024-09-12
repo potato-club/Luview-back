@@ -1,5 +1,6 @@
 package Couplace.entity.article;
 
+import Couplace.entity.comment.Comment;
 import Couplace.entity.like.Like;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -53,4 +54,7 @@ public class Article {
 
     @OneToMany(mappedBy = "article") // 'Like' 엔티티의 'article' 필드를 참조
     private List<Like> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "article" )
+    private List<Comment> comments = new ArrayList<>();
 }
