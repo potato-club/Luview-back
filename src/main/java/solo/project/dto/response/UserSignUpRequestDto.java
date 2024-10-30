@@ -33,7 +33,6 @@ public class UserSignUpRequestDto {
 
     public User toEntity() {
         return User.builder()
-                .uid(String.valueOf(UUID.randomUUID()))
                 .email(email)
                 .password(password)
                 .nickname(nickname)

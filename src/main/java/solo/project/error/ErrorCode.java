@@ -22,7 +22,9 @@ public enum ErrorCode {
     INVALID_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "401_Invalid", "Invalid access: token in blacklist"),
     INTERNAL_SERVER_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "500", "500 Server Error"),
     REFRESH_TOKEN_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"2000","Failed to create refresh token!"),
-    ACCESS_TOKEN_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"2001","Failed to create access token!");
+    ACCESS_TOKEN_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"2001","Failed to create access token!"),
+    EXPIRED_REFRESH_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR,"1006","Failed to expired refresh token!"),
+    EXPIRED_ACCESS_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR,"1007","Failed to expired access token!");
 
     private final HttpStatus status;
     private final String code;

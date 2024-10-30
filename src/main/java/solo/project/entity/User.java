@@ -8,13 +8,17 @@ import solo.project.dto.request.UserUpdateRequestDto;
 import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name="users")
 public class User extends BaseTimeEntity{
     @Id
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
+    private Long id;
 
     @Column(unique=true, nullable = false)
     private String nickname;
@@ -22,8 +26,11 @@ public class User extends BaseTimeEntity{
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column
+    @Column(nullable = false) //
     private String password;
+
+    @Column(nullable = false)
+    private LocalDate birthDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -40,12 +47,13 @@ public class User extends BaseTimeEntity{
     private boolean emailOtp;
 
     @Builder
-    public User(String uid, String nickname, String email, String password, UserRole userRole,LoginType loginType ,boolean deleted , boolean emailOtp) {
-        this.uid = uid;
+    public User(Long id,String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
+        this.id=id;
         this.nickname = nickname;
         this.email = email;
         this.password = password;
         this.userRole = userRole;
+        this.birthDate = birthDate;
         this.loginType = loginType;
         this.deleted= deleted;
         this.emailOtp = emailOtp;
