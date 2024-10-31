@@ -36,6 +36,8 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+
+//액세스 리프레쉬 토큰 생성, 유효기간 만료, id값을 통해 email 찾기, 토큰의 암호화 복호화
 public class JwtTokenProvider {
     private final UserRepository userRepository;
 
