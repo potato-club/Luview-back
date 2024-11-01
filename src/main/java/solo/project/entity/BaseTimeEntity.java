@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public class BaseTimeEntity {
-    //작성일
+    //작성일, 등록일, 커플연동 시작 날짜
     @CreatedDate
     private LocalDate createdDate;
 
