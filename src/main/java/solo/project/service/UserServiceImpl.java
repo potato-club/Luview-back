@@ -3,17 +3,21 @@ package solo.project.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import solo.project.dto.jwt.JwtTokenProvider;
 import solo.project.dto.request.UserLoginRequestDto;
 import solo.project.dto.request.UserProfileResponseDto;
+import solo.project.dto.request.UserUpdateRequestDto;
 import solo.project.dto.response.UserLoginResponseDto;
 import solo.project.dto.response.UserSignUpRequestDto;
 import solo.project.entity.User;
 import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
 import solo.project.error.ErrorCode;
+import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.UserRepository;
 
@@ -24,6 +28,8 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RedisJwtService redisJwtService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     //이메일 , 탈퇴 회원, 2차인증 확인 아닐경우 오류 코드 출력
     @Override
@@ -86,15 +92,73 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public void updateUser(UserUpdateRequestDto requestDto, HttpServletRequest request){
+        User user = findUserByToken(request);
+
+
+    }
+
+    // Refresh Token과 Access Token을 각각 확인하고 삭제
+    @Override
+    public void logout(HttpServletRequest request) {
+        Optional.ofNullable(jwtTokenProvider.resolveRefreshToken(request))
+                .ifPresent(redisJwtService::delValues);
+
+        Optional.ofNullable(jwtTokenProvider.resolveAccessToken(request))
+                .ifPresent(redisJwtService::delValues);
+    }
+
+    @Override
+    public User findUserByToken(HttpServletRequest request) {
+        String token = jwtTokenProvider.resolveRefreshToken(request);
+        if (token == null) {
+            throw new UnAuthorizedException("토큰이 존재하지 않습니다.", ErrorCode.INVALID_TOKEN_EXCEPTION);
+        }
+
+        String email = jwtTokenProvider.findUserEmailByToken(token);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("해당 이메일을 가진 사용자를 찾을 수 없습니다.", ErrorCode.));
+    }
+
+
+    public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
+        jwtTokenProvider.validateRefreshToken(refreshToken);
+        String newAccessToken= jwtTokenProvider.reissueAccessToken(refreshToken,response);
+        jwtTokenProvider.setHeaderAccessToken(response,newAccessToken);
+    }
+    //사용자 이메일 액세스 생성,, 예외처리를 넣어야하나.. 흠..
+
+    //회원 탈퇴 메서드
+    @Override
+    public void withdrawalMembership(HttpServletRequest request) {
+        User user= findUserByToken(request);
+        user.setDeleted(true);
+        this.logout(request);
+    }
+
+    //탈퇴 취소 메서드
+    @Override
+    @Transactional
+    public void cancelWithdrawal(String email, boolean agreement) {
+        if (userRepository.existsByEmailAndDeleted(email, true) && agreement) {
+            User user = userRepository.findByEmail(email).orElseThrow(() -> {
+                throw new UnAuthorizedException("401", ErrorCode.ACCESS_DENIED_EXCEPTION);
+            });
+
+            user.setDeleted(false);
+            userRepository.save(user);
+        }else {
+            throw new UnAuthorizedException("401_NOT_ALLOW", ErrorCode.NOT_ALLOW_WRITE_EXCEPTION);
+        }
+    }
+
+    @Override
     public UserProfileResponseDto viewProfile(HttpServletRequest request) {
         return null;
     }
 
-    @Override
-    public void logout(HttpServletRequest request) {
-
-    }
-
+    //토큰 발급
     public void setJwtTokenInHeader(String email, HttpServletResponse response){
         Optional<User> user = userRepository.findByEmail(email);
 
@@ -104,6 +168,12 @@ public class UserServiceImpl implements UserService{
 
         UserRole userRole = user.get().getUserRole();
 
-    }
+        String accessToken= jwtTokenProvider.createAccessToken(email,userRole);
+        String refreshToken = jwtTokenProvider.createRefreshToken(email,userRole);
 
+        jwtTokenProvider.setHeaderAccessToken(response,accessToken);
+        jwtTokenProvider.setHeaderRefreshToken(response,refreshToken);
+
+        redisJwtService.setValues(refreshToken,email);
+    }
 }

@@ -37,7 +37,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 
-//액세스 리프레쉬 토큰 생성, 유효기간 만료, id값을 통해 email 찾기, 토큰의 암호화 복호화
+//액세스 리프레쉬 토큰 생성, 유효기간 만료, EMAIL값을 통해서 토큰 발급 처리
 public class JwtTokenProvider {
     private final UserRepository userRepository;
 
@@ -61,25 +61,25 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createAccessToken(Long id, UserRole role) {
+    public String createAccessToken(String email, UserRole role) {
         try {
-            return this.createToken(id, role, accessTokenValidTime, "access");
+            return this.createToken(email, role, accessTokenValidTime, "access");
         } catch (Exception e) {
             throw new TokenCreationException("액세스 토큰 생성 실패", ErrorCode.ACCESS_TOKEN_CREATION_FAILED);
         }
     }
 
-    public String createRefreshToken(Long id, UserRole role) {
+    public String createRefreshToken(String email, UserRole role) {
         try {
-            return this.createToken(id, role, refreshTokenValidTime, "refresh");
+            return this.createToken(email, role, refreshTokenValidTime, "refresh");
         } catch (Exception e) {
             throw new TokenCreationException("리프레쉬 토큰 생성 실패", ErrorCode.REFRESH_TOKEN_CREATION_FAILED);
         }
     }
 
-    public String createToken(Long id, UserRole role, long tokenValid, String tokenType) throws Exception {
+    public String createToken(String email, UserRole role, long tokenValid, String tokenType) throws Exception {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("pk", id);
+        jsonObject.addProperty("pk", email);
         jsonObject.addProperty("role", role.ordinal());
         jsonObject.addProperty("tokenType", tokenType);
 
@@ -128,15 +128,15 @@ public class JwtTokenProvider {
         return new String(c.doFinal(decodeByte),StandardCharsets.UTF_8);
     } //암호화 복호화 완벽하게 이해함
 
-    public Long extractValueFromToken(String token, String key) throws Exception {
+    public String extractValueFromToken(String token, String key) throws Exception {
         JsonElement value = extraValue(token).get(key);
         if (value == null) {
             throw new IllegalArgumentException("토큰에 키가 존재하지 않습니다: " + key);
         }
-        return value.getAsLong();
+        return value.getAsString();
     }// 리팩토링
 
-    public Long extractId(String token) throws Exception {
+    public String extractEmail(String token) throws Exception {
         return extractValueFromToken(token, "pk");
     }
 
@@ -146,11 +146,11 @@ public class JwtTokenProvider {
 
     //토큰으로 역할 추출 , 우리는 유저 하나만 존재함 사용 x
     public String extractMemberId(String token) throws Exception {
-        Long id = extractId(token);
+        String email = extractEmail(token);
         String role = extractRole(token); // 토큰에서 역할 추출
 
         if ("1".equals(role)) {
-            Optional<User> userOptional = userRepository.findById(id); // 이메일로 사용자 찾기
+            Optional<User> userOptional = userRepository.findByEmail(email); // 이메일로 사용자 찾기
             if (userOptional.isEmpty()) {
                 throw new NotFoundException("사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION);
             }
@@ -263,9 +263,9 @@ public class JwtTokenProvider {
     public String reissueAccessToken(String refreshToken, HttpServletResponse response) {
         try{
             this.validateRefreshToken(refreshToken);
-            Long id =findUserIdByToken(refreshToken);
-            Optional<User> user=userRepository.findById(id);
-            return createAccessToken(id, user.get().getUserRole());
+            String email =findUserEmailByToken(refreshToken);
+            Optional<User> user=userRepository.findByEmail(email);
+            return createAccessToken(email, user.get().getUserRole());
         }catch (ExpiredJwtException e){
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return ErrorCode.EXPIRED_ACCESS_TOKEN.getMessage();
@@ -273,23 +273,25 @@ public class JwtTokenProvider {
             throw new RuntimeException(e);
         }
     }
+    //RefreshToken은 AccessToken의 유효기간이 짧아 따로 구현하지 않음 그냥 리프레쉬는 새로 발급
+    //하는 방식으로 함
 
-    //리프레쉬 토큰을 받아서 이메일 찾음, 아니라면 예외를 던지고 아이디값을 던짐
-    public Long findUserIdByToken(String token)throws Exception{
+    //리프레쉬 토큰을 받아서 이메일 찾음, 아니라면 예외를 던지고 이메일을 던짐
+    public String findUserEmailByToken(String token)throws Exception{
         String accessTokenType= extractTokenType(token);
 
         if("access".equals(accessTokenType)){
             throw new UnAuthorizedException("AccessToken은 사용 할 수 없습니다.", ErrorCode.ACCESS_DENIED_EXCEPTION);
         }
 
-        return token == null? null : userRepository.findById(extractId(token))
-                .orElseThrow(() -> new NotFoundException("토큰에 해당되는 사용자 이메일을 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION)).getId();
+        return token == null? null : userRepository.findByEmail(extractEmail(token))
+                .orElseThrow(() -> new NotFoundException("토큰에 해당되는 사용자 이메일을 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION)).getEmail();
     }
 
-    public Optional<User> extractIdByRequest(HttpServletRequest request) throws Exception{
+    public Optional<User> extractEmailByRequest(HttpServletRequest request) throws Exception{
         String userToken= resolveAccessToken(request);
-        Long tokenId=extractId(userToken);
-        return userRepository.findById(tokenId);
+        String tokenId=extractEmail(userToken);
+        return userRepository.findByEmail(tokenId);
     }
 }
 

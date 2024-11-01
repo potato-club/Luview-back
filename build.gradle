@@ -57,6 +57,9 @@ dependencies {
     //encodeHex
     implementation 'commons-codec:commons-codec:1.15'
 
+    //Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 }
 
 tasks.named('test') {
