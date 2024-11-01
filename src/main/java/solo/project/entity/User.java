@@ -20,11 +20,11 @@ public class User extends BaseTimeEntity{
     @Column
     private Long id;
 
-    @Column(unique=true, nullable = false)
-    private String nickname;
-
     @Column(nullable = false)
     private String name;
+
+    @Column(unique=true, nullable = false)
+    private String nickname;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -50,10 +50,10 @@ public class User extends BaseTimeEntity{
     private boolean emailOtp;
 
     @Builder
-    public User(Long id,String nickname, String name,String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
+    public User(Long id,String name, String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
         this.id=id;
+        this.name=name;
         this.nickname = nickname;
-        this.name = name;
         this.email = email;
         this.password = password;
         this.userRole = userRole;
