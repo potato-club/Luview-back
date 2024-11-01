@@ -1,4 +1,4 @@
-package solo.project.dto.response;
+package solo.project.dto.User.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 import solo.project.entity.User;
 import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
-
-import java.util.UUID;
 
 @Builder
 @Data

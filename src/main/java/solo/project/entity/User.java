@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import solo.project.dto.request.UserUpdateRequestDto;
+import solo.project.dto.User.request.UserUpdateRequestDto;
 import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
 
@@ -19,6 +19,9 @@ public class User extends BaseTimeEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
+
+    @Column(nullable = false)
+    private String name;
 
     @Column(unique=true, nullable = false)
     private String nickname;
@@ -47,8 +50,9 @@ public class User extends BaseTimeEntity{
     private boolean emailOtp;
 
     @Builder
-    public User(Long id,String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
+    public User(Long id,String name, String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
         this.id=id;
+        this.name=name;
         this.nickname = nickname;
         this.email = email;
         this.password = password;
