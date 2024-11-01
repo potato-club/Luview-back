@@ -1,6 +1,7 @@
 package solo.project.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,16 +13,13 @@ public class Review extends BaseTimeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column
   private Long id;
-
-  private String writer;
 
   private String title;
 
   private String content;
 
-
-
+  @Column(columnDefinition = "TINYINT(1)")
+  private boolean deleted;
 
 }
