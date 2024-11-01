@@ -1,4 +1,4 @@
-package solo.project.dto.user.request;
+package solo.project.dto.User.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,6 @@ import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
 
 import java.time.LocalDate;
-
 
 @Builder
 @Data
