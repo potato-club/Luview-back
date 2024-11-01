@@ -1,6 +1,7 @@
 package solo.project.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,15 +27,26 @@ public class Place {
   @Column(nullable = false)
   private String place_name;
 
-  @Column(nullable = false)
+  @Column
   private String phone_number;
 
-  @Column(nullable = false)
+  @Column
   private double latitude;
 
-  @Column(nullable = false)
+  @Column
   private double longitude;
 
+  @Builder
+  public Place(Long id, String kakaoplace_id, String address_name, String category_group_name, String place_name, String phone_number, double latitude, double longitude) {
+    this.id = id;
+    this.kakaoplace_id = kakaoplace_id;
+    this.address_name = address_name;
+    this.category_group_name = category_group_name;
+    this.place_name = place_name;
+    this.phone_number = phone_number;
+    this.latitude = latitude;
+    this.longitude = longitude;
+  }
 
 }
 
