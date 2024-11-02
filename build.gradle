@@ -34,16 +34,13 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    //Driver 의존성
+    // MySQL Driver
     implementation 'mysql:mysql-connector-java:8.0.33'
 
-    //Schema 의존성
+    // Swagger
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.15'
 
-    //PasswordEncoder 의존성
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-
-    //JWT 의존성
+    // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.5'
@@ -51,15 +48,15 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-    //Google Gson 의존성
-    implementation 'com.google.code.gson:gson:2.10.1' // 최신 버전을 사용하세요
+    // Google Gson
+    implementation 'com.google.code.gson:gson:2.10.1'
 
-    //encodeHex
+    // EncodeHex
     implementation 'commons-codec:commons-codec:1.15'
 
-    //Redis
+    // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
+    // implementation 'redis.clients.jedis:jedis:3.6.2' // 필요시 추가
 }
 
 tasks.named('test') {

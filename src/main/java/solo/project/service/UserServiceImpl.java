@@ -3,14 +3,13 @@ package solo.project.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import solo.project.dto.jwt.JwtTokenProvider;
 import solo.project.dto.request.UserLoginRequestDto;
 import solo.project.dto.request.UserProfileResponseDto;
-import solo.project.dto.request.UserUpdateRequestDto;
 import solo.project.dto.response.UserLoginResponseDto;
 import solo.project.dto.response.UserSignUpRequestDto;
 import solo.project.entity.User;
@@ -31,6 +30,11 @@ public class UserServiceImpl implements UserService{
     private final RedisJwtService redisJwtService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    private User findByEmailOrThrow(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("해당 이메일을 가진 사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+    }
+
     //이메일 , 탈퇴 회원, 2차인증 확인 아닐경우 오류 코드 출력
     @Override
     public UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response) {
@@ -50,7 +54,7 @@ public class UserServiceImpl implements UserService{
                         .build();
             }
         }
-        User user =userRepository.findByEmail(requestDto.getEmail()).orElseThrow();
+        User user =findByEmailOrThrow(requestDto.getEmail());
 
         //패스워드가 일치하지 않을경우 에러코드 발생
         if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
@@ -91,13 +95,6 @@ public class UserServiceImpl implements UserService{
         return userRepository.findByNickname(nickname).isPresent();
     }
 
-    @Override
-    public void updateUser(UserUpdateRequestDto requestDto, HttpServletRequest request){
-        User user = findUserByToken(request);
-
-
-    }
-
     // Refresh Token과 Access Token을 각각 확인하고 삭제
     @Override
     public void logout(HttpServletRequest request) {
@@ -108,6 +105,7 @@ public class UserServiceImpl implements UserService{
                 .ifPresent(redisJwtService::delValues);
     }
 
+    @SneakyThrows
     @Override
     public User findUserByToken(HttpServletRequest request) {
         String token = jwtTokenProvider.resolveRefreshToken(request);
@@ -116,8 +114,7 @@ public class UserServiceImpl implements UserService{
         }
 
         String email = jwtTokenProvider.findUserEmailByToken(token);
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("해당 이메일을 가진 사용자를 찾을 수 없습니다.", ErrorCode.));
+        return findByEmailOrThrow(email);
     }
 
 
@@ -142,10 +139,7 @@ public class UserServiceImpl implements UserService{
     @Transactional
     public void cancelWithdrawal(String email, boolean agreement) {
         if (userRepository.existsByEmailAndDeleted(email, true) && agreement) {
-            User user = userRepository.findByEmail(email).orElseThrow(() -> {
-                throw new UnAuthorizedException("401", ErrorCode.ACCESS_DENIED_EXCEPTION);
-            });
-
+            User user = findByEmailOrThrow(email);
             user.setDeleted(false);
             userRepository.save(user);
         }else {
@@ -153,6 +147,7 @@ public class UserServiceImpl implements UserService{
         }
     }
 
+    //수정 해야함 이거 쓸지 모르겠음 코드
     @Override
     public UserProfileResponseDto viewProfile(HttpServletRequest request) {
         return null;

@@ -15,7 +15,6 @@ public interface UserService {
     UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response);
     void signUp(UserSignUpRequestDto requestDto, HttpServletResponse response);
     boolean isNicknameDuplicated(String nickname);
-    void updateUser(UserUpdateRequestDto requestDto, HttpServletRequest request) throws IOException;
     UserProfileResponseDto viewProfile(HttpServletRequest request);
     void logout(HttpServletRequest request);
     User findUserByToken(HttpServletRequest request);
