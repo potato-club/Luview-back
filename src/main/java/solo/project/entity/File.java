@@ -14,15 +14,17 @@ public class File {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false, length = 512)
   private String fileUrl;
 
+  @Column(nullable = false)
   private String fileName;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)  // File n ~ 1 User
   @JoinColumn(name = "user_id")
   private User user;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)  // File n ~ 1 Review
   @JoinColumn(name = "review_id")
   private Review review;
 
