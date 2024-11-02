@@ -7,20 +7,22 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "comments")
-public class Comment extends BaseTimeEntity{
+public class ReviewPlace {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String content;
+  @Column(nullable = false)
+  private int score;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  private User user;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "review_id")
+  @JoinColumn(name = "review_id",nullable = false)
   private Review review;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "place_id",nullable = false)
+  private Place place;
+
 
 }

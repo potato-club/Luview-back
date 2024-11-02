@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -31,10 +34,13 @@ public class Place {
   private String phone_number;
 
   @Column
-  private double latitude;
+  private Double latitude;
 
   @Column
-  private double longitude;
+  private Double longitude;
+
+  @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ReviewPlace> reviewPlaces = new ArrayList<>();
 
   @Builder
   public Place(Long id, String kakaoplace_id, String address_name, String category_group_name, String place_name, String phone_number, double latitude, double longitude) {
