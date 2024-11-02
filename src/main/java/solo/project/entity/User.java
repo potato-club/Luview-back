@@ -1,6 +1,7 @@
 package solo.project.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +10,13 @@ import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor
-@Table(name="users")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)  // 이거 사용시 파라미터가 있는 생성자나 빌터 패턴으로만 객체 생성할 수 있음
+@Table(name="users")                                // 기본 생성자를 생성하되, 접근 수준을 PROTECTED로 제한하는 Lombok 어노테이션
 public class User extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,6 +51,13 @@ public class User extends BaseTimeEntity{
 
     @Column(columnDefinition = "TINYINT(1)")
     private boolean emailOtp;
+
+    // 아래 필드는 유저에 대한 모든 "사진, 즐겨찾기"들을 저장하는 리스트입니다.
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<File> files = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Favorites> favorites = new ArrayList<>();
 
     @Builder
     public User(Long id,String name, String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
