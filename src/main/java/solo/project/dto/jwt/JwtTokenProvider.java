@@ -60,10 +60,15 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    private void logError(Exception e, String message) {
+        log.error(message, e); // 예외와 메시지를 로그에 기록
+    }
+
     public String createAccessToken(String email, UserRole role) {
         try {
             return this.createToken(email, role, accessTokenValidTime, "access");
         } catch (Exception e) {
+            logError(e, "액세스 토큰 생성 실패");
             throw new TokenCreationException("액세스 토큰 생성 실패", ErrorCode.ACCESS_TOKEN_CREATION_FAILED);
         }
     }
@@ -104,13 +109,13 @@ public class JwtTokenProvider {
     }
     //AES를 사용하여 암호화
     private String encrypt(String plainToken) throws Exception {
-        SecretKeySpec secretKeySpec =new SecretKeySpec(aesKey.getBytes(StandardCharsets.UTF_8),"AES");
-        IvParameterSpec IV=new IvParameterSpec(aesKey.substring(0,16).getBytes());
+        SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey.getBytes(StandardCharsets.UTF_8), "AES");
+        IvParameterSpec IV = new IvParameterSpec(aesKey.substring(0, 16).getBytes());
 
-        Cipher c=Cipher.getInstance("AES/CBC/PKCS5Padding");
-        c.init(Cipher.ENCRYPT_MODE, secretKeySpec,IV);
+        Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        c.init(Cipher.ENCRYPT_MODE, secretKeySpec, IV);
 
-        byte[] encryptionByte =c.doFinal(plainToken.getBytes(StandardCharsets.UTF_8));
+        byte[] encryptionByte = c.doFinal(plainToken.getBytes(StandardCharsets.UTF_8));
 
         return Hex.encodeHexString(encryptionByte);
     }

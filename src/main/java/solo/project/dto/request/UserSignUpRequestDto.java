@@ -9,6 +9,8 @@ import solo.project.entity.User;
 import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
 
+import java.time.LocalDate;
+
 
 @Builder
 @Data
@@ -24,6 +26,9 @@ public class UserSignUpRequestDto {
     @Schema(description = "닉네임")
     private String nickname;
 
+    @Schema(description = "생년월일")
+    private LocalDate birthDate;
+
     @Schema(description = "USER / MANAGER", example = "USER / MANAGER")
     private UserRole userRole;
 
@@ -35,6 +40,7 @@ public class UserSignUpRequestDto {
                 .email(email)
                 .password(password)
                 .nickname(nickname)
+                .birthDate(birthDate)
                 .userRole(userRole)
                 .loginType(loginType)
                 .build();

@@ -36,37 +36,63 @@ public class UserServiceImpl implements UserService{
     }
 
     //이메일 , 탈퇴 회원, 2차인증 확인 아닐경우 오류 코드 출력
+
     @Override
     public UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response) {
-        if(!userRepository.existsByEmailAndDeletedAndEmailOtp(requestDto.getEmail(),false, true)) {
-            if (!userRepository.existsByEmail(requestDto.getEmail())) {
-                return UserLoginResponseDto.builder()
-                        .responseCode("2001") //회원이 아닐 경우 코드
-                        .build();
-            } else if (userRepository.existsByEmailAndDeletedIsTrue(requestDto.getEmail())) {
-                return UserLoginResponseDto.builder()
-                        .responseCode("2002") //탈퇴를 한 경우
-                        .build();
-            }else if (userRepository.existsByEmailAndDeletedIsFalse(requestDto.getEmail())) {
-                userRepository.delete(userRepository.findByEmail(requestDto.getEmail()).orElseThrow());
-                return UserLoginResponseDto.builder()
-                        .responseCode("2003") //2차인증이 제대로 되지 않은 경우
-                        .build();
-            }
+        // 회원이 아닌 경우
+        if (!userRepository.existsByEmail(requestDto.getEmail())) {
+            return UserLoginResponseDto.builder()
+                    .responseCode("2001") // 회원이 아닐 경우 코드
+                    .build();
         }
-        User user =findByEmailOrThrow(requestDto.getEmail());
-
-        //패스워드가 일치하지 않을경우 에러코드 발생
-        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+        // 탈퇴한 회원인 경우
+        if (userRepository.existsByEmailAndDeletedIsTrue(requestDto.getEmail())) {
+            return UserLoginResponseDto.builder()
+                    .responseCode("2002") // 탈퇴한 경우
+                    .build();
+        }
+        // 회원 정보 조회
+        User user = findByEmailOrThrow(requestDto.getEmail());
+        // 패스워드가 일치하지 않을 경우 에러 코드 발생
+        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
             throw new UnAuthorizedException("401", ErrorCode.ACCESS_DENIED_EXCEPTION);
         }
-
         this.setJwtTokenInHeader(requestDto.getEmail(), response);
-
         return UserLoginResponseDto.builder()
                 .responseCode("200")
                 .build();
-}
+    }
+//    @Override
+//    public UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response) {
+//        if(!userRepository.existsByEmailAndDeletedAndEmailOtp(requestDto.getEmail(),false, true)) {
+//            if (!userRepository.existsByEmail(requestDto.getEmail())) {
+//                return UserLoginResponseDto.builder()
+//                        .responseCode("2001") //회원이 아닐 경우 코드
+//                        .build();
+//            } else if (userRepository.existsByEmailAndDeletedIsTrue(requestDto.getEmail())) {
+//                return UserLoginResponseDto.builder()
+//                        .responseCode("2002") //탈퇴를 한 경우
+//                        .build();
+//            }else if (userRepository.existsByEmailAndDeletedIsFalse(requestDto.getEmail())) {
+//                userRepository.delete(userRepository.findByEmail(requestDto.getEmail()).orElseThrow());
+//                return UserLoginResponseDto.builder()
+//                        .responseCode("2003") //2차인증이 제대로 되지 않은 경우
+//                        .build();
+//            }
+//        }
+//        User user =findByEmailOrThrow(requestDto.getEmail());
+//
+//        //패스워드가 일치하지 않을경우 에러코드 발생
+//        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+//            throw new UnAuthorizedException("401", ErrorCode.ACCESS_DENIED_EXCEPTION);
+//        }
+//
+//        this.setJwtTokenInHeader(requestDto.getEmail(), response);
+//
+//        return UserLoginResponseDto.builder()
+//                .responseCode("200")
+//                .build();
+//}
 
     @Override
     @Transactional
@@ -77,7 +103,7 @@ public class UserServiceImpl implements UserService{
 
         //카카오 쇼설을 넣어야합니다.
 
-        if(requestDto.getLoginType().equals(LoginType.NOMAL)){ //로컬은 2차 인증 후 토큰 발급
+        if(requestDto.getLoginType().equals(LoginType.NORMAL)){ //로컬은 2차 인증 후 토큰 발급
             requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
             User user = requestDto.toEntity();

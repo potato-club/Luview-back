@@ -30,10 +30,10 @@ spring:
       port: 6379
 
 jwt:
-  secret: ENC(UlZ02BRJgkenoobwLjpwL2dLYJH7a5Irih/qM60IY8E=)
+  secret: ENC(L0SMyiS9QqgWuSakyPSc7J0aM6HezOpYLiwrwmJ6rRav+9WC6sReujEAPST1h3eFqp89YJsmkZ5FSyav/4oXNA==)
   accessExpiration: 3600000
   refreshExpiration: 604800000
-  aesKey: ENC(OUwMPl254UMVXv0QRhI0umueQvG+eXHL)
+  aesKey: ENC(mbqqJa4wFXb8ye5EY5i8Ieizoy/vfRhcmbRtJbe4weQ=)
 
 jasypt:
   encryptor:

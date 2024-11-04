@@ -26,7 +26,7 @@ public class User extends BaseTimeEntity{
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false) //
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -37,7 +37,7 @@ public class User extends BaseTimeEntity{
     private UserRole userRole;
 
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(length = 50)
     private LoginType loginType;
 
     @Column(columnDefinition = "TINYINT(1)")

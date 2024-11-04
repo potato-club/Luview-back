@@ -22,11 +22,6 @@ public class WebConfig implements WebMvcConfigurer {
         return new RestTemplate();
     }
 
-    @Bean // 암호화 인터페이스 구현
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
-
     //Cors 설정 지금은 Local로만 설정
     @Override
     public void addCorsMappings(final CorsRegistry registry) {
