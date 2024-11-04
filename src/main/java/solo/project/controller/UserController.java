@@ -4,13 +4,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import solo.project.dto.request.UserCancel;
 import solo.project.dto.request.UserLoginRequestDto;
-import solo.project.dto.request.UserProfileResponseDto;
+import solo.project.dto.response.UserProfileResponseDto;
 import solo.project.dto.response.UserLoginResponseDto;
-import solo.project.dto.response.UserSignUpRequestDto;
+import solo.project.dto.request.UserSignUpRequestDto;
 import solo.project.service.UserService;
 
 @RestController
@@ -20,51 +20,62 @@ import solo.project.service.UserService;
 public class UserController {
     private final UserService userService;
 
+    //회원가입
     @PostMapping("/signup")
-    public ResponseEntity<Void> signUp(@RequestBody UserSignUpRequestDto requestDto, HttpServletResponse response) {
-        userService.signUp(requestDto, response);
-        return ResponseEntity.status(HttpStatus.CREATED).build(); // 201 Created
+    public ResponseEntity<String> userSignUp(@RequestBody UserSignUpRequestDto requestDto, HttpServletResponse response){
+        userService.signUp(requestDto,response);
+        return ResponseEntity.ok("회원가입이 완료되었습니다");
     }
 
-    // 로그인
+    //로그인
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponseDto> login(@RequestBody UserLoginRequestDto requestDto, HttpServletResponse response) {
-        UserLoginResponseDto loginResponse = userService.login(requestDto, response);
-        return ResponseEntity.ok(loginResponse); // 200 OK
+    public UserLoginResponseDto login(@RequestBody UserLoginRequestDto requestDto, HttpServletResponse response) {
+        return userService.login(requestDto, response);
     }
 
     // 프로필 조회
     @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponseDto> viewProfile(HttpServletRequest request) {
-        UserProfileResponseDto profile = userService.viewProfile(request);
-        return ResponseEntity.ok(profile); // 200 OK
+    public UserProfileResponseDto viewProfile(HttpServletRequest request) {
+        return userService.viewProfile(request);
     }
 
     // 로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public ResponseEntity<String> logout(HttpServletRequest request) {
         userService.logout(request);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.ok("로그아웃 되었습니다.");
     }
+
 
     // 닉네임 중복 확인
     @GetMapping("/nickname/duplicate")
-    public ResponseEntity<Boolean> isNicknameDuplicated(@RequestParam String nickname) {
+    public ResponseEntity<?> isNicknameDuplicated(@RequestParam String nickname){
         boolean isDuplicated = userService.isNicknameDuplicated(nickname);
-        return ResponseEntity.ok(isDuplicated); // 200 OK
+        return ResponseEntity.ok().body(isDuplicated);
     }
 
     // 회원 탈퇴
-    @DeleteMapping("/withdrawal")
-    public ResponseEntity<Void> withdrawalMembership(HttpServletRequest request) {
+    @PutMapping("/withdrawal")
+    public ResponseEntity<String> withdrawalMembership(HttpServletRequest request) {
         userService.withdrawalMembership(request);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.ok("회원탈퇴가 완료 되었습니다.");
     }
 
     // 탈퇴 취소
-    @PostMapping("/cancel-withdrawal")
-    public ResponseEntity<Void> cancelWithdrawal(@RequestParam String email, @RequestParam boolean agreement) {
-        userService.cancelWithdrawal(email, agreement);
-        return ResponseEntity.noContent().build(); // 204 No Content
+    @PutMapping("/cancel")
+    public ResponseEntity<String> cancelWithdrawal(@RequestBody UserCancel cancelDto) {
+        userService.cancelWithdrawal(cancelDto.getEmail(), cancelDto.isAgreement());
+        return ResponseEntity.ok("회원탈퇴가 취소 되었습니다.");
+    }
+
+    @GetMapping("/reissue")
+    public ResponseEntity<String> reissueToken(HttpServletRequest request, HttpServletResponse response) {
+        userService.reissueToken(request, response);
+        return ResponseEntity.ok("토큰 재발급이 완료되었습니다.");
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<String> validateToken(){
+        return ResponseEntity.ok("Access Token");
     }
 }

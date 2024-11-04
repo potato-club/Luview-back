@@ -9,8 +9,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.util.LinkedList;
-
 @Configuration
 public class RedisConfig {
 
@@ -18,8 +16,8 @@ public class RedisConfig {
     private final int redisPort; // Redis 서버 포트
 
     // Constructor to inject Redis host and port from application properties
-    public RedisConfig(@Value("${spring.redis.host}") final String redisHost,
-                       @Value("${spring.redis.port}") final int redisPort) {
+    public RedisConfig(@Value("${spring.data.redis.host}") final String redisHost,
+                       @Value("${spring.data.redis.port}") final int redisPort) {
         this.redisHost = redisHost;
         this.redisPort = redisPort;
     }

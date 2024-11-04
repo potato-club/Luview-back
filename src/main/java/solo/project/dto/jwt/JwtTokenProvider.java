@@ -40,10 +40,9 @@ import java.util.Optional;
 //액세스 리프레쉬 토큰 생성, 유효기간 만료, EMAIL값을 통해서 토큰 발급 처리
 public class JwtTokenProvider {
     private final UserRepository userRepository;
-
     private final CustomUserDetailsService customUserDetailsService;
 
-    @Value("${jwt.secretKey}")
+    @Value("${jwt.secret}")
     private String secretKey;
 
     @Value("${jwt.accessExpiration}")

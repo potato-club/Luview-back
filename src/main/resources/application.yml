@@ -1,9 +1,10 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
     url: jdbc:mysql://localhost:3306/soloproject
+    username: root
     password: 1234
+
   h2:
     console:
       enabled: true
@@ -27,3 +28,15 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+jwt:
+  secret: ENC(UlZ02BRJgkenoobwLjpwL2dLYJH7a5Irih/qM60IY8E=)
+  accessExpiration: 3600000
+  refreshExpiration: 604800000
+  aesKey: ENC(OUwMPl254UMVXv0QRhI0umueQvG+eXHL)
+
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}
+
+
