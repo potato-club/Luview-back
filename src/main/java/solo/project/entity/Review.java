@@ -27,6 +27,10 @@ public class Review extends BaseTimeEntity {
   @Column(columnDefinition = "TINYINT(1)")
   private boolean deleted;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
+
   // 아래 필드는 리뷰에 대한 모든 "좋아요, 장소, 사진, 댓글"들을 저장하는 리스트입니다.
   @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ReviewPlace> reviewPlaces = new ArrayList<>();

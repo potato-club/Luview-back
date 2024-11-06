@@ -52,12 +52,15 @@ public class User extends BaseTimeEntity{
     @Column(columnDefinition = "TINYINT(1)")
     private boolean emailOtp;
 
-    // 아래 필드는 유저에 대한 모든 "사진, 즐겨찾기"들을 저장하는 리스트입니다.
+    // 아래 필드는 유저에 대한 모든 "사진, 즐겨찾기, 리뷰"들을 저장하는 리스트입니다.
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Favorites> favorites = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
 
     @Builder
     public User(Long id,String name, String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
