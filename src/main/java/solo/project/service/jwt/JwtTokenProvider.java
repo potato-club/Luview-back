@@ -1,4 +1,4 @@
-package solo.project.dto.jwt;
+package solo.project.service.jwt;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

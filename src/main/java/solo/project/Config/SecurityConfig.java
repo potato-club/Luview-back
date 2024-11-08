@@ -1,6 +1,7 @@
 package solo.project.Config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -11,13 +12,29 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import solo.project.error.OAuth2LoginSuccessHandler;
+import solo.project.service.jwt.JwtTokenProvider;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
+
+    private final JwtTokenProvider jwtTokenProvider;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
+    @Value("${spring.security.oauth2.client.registration.kakao-local.client-id}")
+    private String kakaoClientId;
+
+    @Value("${spring.security.oauth2.client.registration.kakao-local.client-secret}")
+    private String kakaoClientSecret;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -26,13 +43,19 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
-                .cors(Customizer.withDefaults()) // CORS 기본 설정
-                .httpBasic(AbstractHttpConfigurer::disable) // 기본 HTTP 인증 비활성화
-                .formLogin(AbstractHttpConfigurer::disable); // 폼 로그인 비활성화
+        http.csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable);
+
+        // OAuth2 로그인 설정
+        http.oauth2Login(oauth2Login -> oauth2Login
+                .clientRegistrationRepository(clientRegistrationRepository())  // OAuth2 클라이언트 등록 정보 설정
+                .successHandler(oAuth2LoginSuccessHandler)
+                .permitAll());  // 로그인 관련 URL 모두 허용
 
         http.authorizeHttpRequests(authorize -> authorize
-                // Swagger 관련 URL 허용
+                .requestMatchers("/login/kakao").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui/index.html").permitAll()
                 .anyRequest().permitAll() // 모든 요청에 대해 접근 허용
         );
@@ -41,9 +64,41 @@ public class SecurityConfig {
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
 
-        // JWT 필터 제거
-        // http.addFilterBefore(new JwtAuthorizationTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
+
+    // OAuth2 클라이언트 등록을 위한 Bean 추가 (InMemory 설정 예시)
+    @Bean
+    public ClientRegistrationRepository clientRegistrationRepository() {
+        ClientRegistration kakaoClientRegistration = ClientRegistration.withRegistrationId("kakao-local")
+                .clientId(kakaoClientId) // 환경변수로 대체
+                .clientSecret(kakaoClientSecret) // 환경변수로 대체
+                .authorizationUri("https://kauth.kakao.com/oauth/authorize")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .tokenUri("https://kauth.kakao.com/oauth/token")
+                .userInfoUri("https://kapi.kakao.com/v2/user/me")
+                .clientName("Kakao")
+                .redirectUri("http://localhost:8080/login/oauth2/code/kakao")
+                .scope("account_email")
+                .userNameAttributeName("id")
+                .authorizationGrantType(org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE)
+                .build();
+
+//                .clientId(kakaoClientId)
+//                .clientSecret(kakaoClientSecret)
+//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+//                .authorizationGrantType(org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE)
+//                .redirectUri("http://localhost:8080/login/oauth2/code/kakao")
+//                .scope("account_email")
+//                .authorizationUri("https://kauth.kakao.com/oauth/authorize")
+//                .tokenUri("https://kauth.kakao.com/oauth/token")
+//                .userInfoUri("https://kapi.kakao.com/v2/user/me")
+//                .userNameAttributeName("id")
+//                .clientName("Kakao")
+//                .build();
+
+
+        return new InMemoryClientRegistrationRepository(kakaoClientRegistration);
+    }
 }
+

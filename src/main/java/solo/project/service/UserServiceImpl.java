@@ -7,11 +7,13 @@ import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import solo.project.dto.jwt.JwtTokenProvider;
-import solo.project.dto.request.UserLoginRequestDto;
-import solo.project.dto.response.UserProfileResponseDto;
-import solo.project.dto.response.UserLoginResponseDto;
-import solo.project.dto.request.UserSignUpRequestDto;
+import solo.project.dto.user.kakao.UserKakaoResponseDto;
+import solo.project.kakao.KakaoApi;
+import solo.project.service.jwt.JwtTokenProvider;
+import solo.project.dto.user.request.UserLoginRequestDto;
+import solo.project.dto.user.response.UserProfileResponseDto;
+import solo.project.dto.user.response.UserLoginResponseDto;
+import solo.project.dto.user.request.UserSignUpRequestDto;
 import solo.project.entity.User;
 import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
@@ -29,39 +31,71 @@ public class UserServiceImpl implements UserService{
     private final PasswordEncoder passwordEncoder;
     private final RedisJwtService redisJwtService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final KakaoApi kakaoApi;
 
     private User findByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("해당 이메일을 가진 사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
     }
 
-    //이메일 , 탈퇴 회원, 2차인증 확인 아닐경우 오류 코드 출력
+    @Override
+    public UserKakaoResponseDto kakaoLogin(String code,HttpServletRequest request, HttpServletResponse response ){
+        String access_token= kakaoApi.getAccessToken(code, request);
+        String email = kakaoApi.getUserInfo(access_token);
+
+        //토큰으로 상대방의 이메일정보 확인
+        if(userRepository.existsByEmailAndDeleted(email,false)){
+            this.setJwtTokenInHeader(email,response);
+
+            return UserKakaoResponseDto.builder()
+                    .responseCode("200")
+                    .build();
+        }
+        //탈퇴한 회원인지 확인후에 탈퇴취소 회원인경우에는 다시 회원가입
+        if(userRepository.existsByEmailAndDeletedIsTrue(email)){
+            User user=userRepository.findByEmail(email).orElseThrow();
+            user.setDeleted(false);
+            this.setJwtTokenInHeader(email,response);
+
+            return UserKakaoResponseDto.builder()
+                    .responseCode("2000")
+                    .build();
+        }
+
+        return UserKakaoResponseDto.builder()
+                .email(email)
+                .responseCode("201")
+                .build();
+    }
+
+    //이메일 , 탈퇴 회원
 
     @Override
     public UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response) {
         // 회원이 아닌 경우
         if (!userRepository.existsByEmail(requestDto.getEmail())) {
             return UserLoginResponseDto.builder()
-                    .responseCode("2001") // 회원이 아닐 경우 코드
+                    .responseCode("2001, 회원이 아닙니다.") // 회원이 아닐 경우 코드
                     .build();
         }
         // 탈퇴한 회원인 경우
         if (userRepository.existsByEmailAndDeletedIsTrue(requestDto.getEmail())) {
             return UserLoginResponseDto.builder()
-                    .responseCode("2002") // 탈퇴한 경우
+                    .responseCode("2002, 탈퇴하셨습니다.") // 탈퇴한 경우
                     .build();
         }
         // 회원 정보 조회
         User user = findByEmailOrThrow(requestDto.getEmail());
         // 패스워드가 일치하지 않을 경우 에러 코드 발생
         if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
-            throw new UnAuthorizedException("401", ErrorCode.ACCESS_DENIED_EXCEPTION);
+            throw new UnAuthorizedException("401, 패스워드 불일치", ErrorCode.ACCESS_DENIED_EXCEPTION);
         }
         this.setJwtTokenInHeader(requestDto.getEmail(), response);
         return UserLoginResponseDto.builder()
-                .responseCode("200")
+                .responseCode("성공했습니다!! 200!")
                 .build();
     }
+
 //    @Override
 //    public UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response) {
 //        if(!userRepository.existsByEmailAndDeletedAndEmailOtp(requestDto.getEmail(),false, true)) {
@@ -101,9 +135,13 @@ public class UserServiceImpl implements UserService{
             throw new UnAuthorizedException("401", ErrorCode.ACCESS_DENIED_EXCEPTION);
         }//이메일 존재 여부 확인
 
-        //카카오 쇼설을 넣어야합니다.
+        if(requestDto.getLoginType().equals(LoginType.KAKAO)){
+            User user =requestDto.toEntity();
+            user.setEmailOtp(true);
 
-        if(requestDto.getLoginType().equals(LoginType.NORMAL)){ //로컬은 2차 인증 후 토큰 발급
+            userRepository.save(user);
+            this.setJwtTokenInHeader(requestDto.getEmail(), response);
+        }else if(requestDto.getLoginType().equals(LoginType.NORMAL)){ //로컬은 2차 인증 후 토큰 발급
             requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
             User user = requestDto.toEntity();
@@ -173,7 +211,7 @@ public class UserServiceImpl implements UserService{
         }
     }
 
-    //수정 해야함 이거 쓸지 모르겠음 코드
+    //유저 정보 추후 추가
     @Override
     public UserProfileResponseDto viewProfile(HttpServletRequest request) {
         return null;

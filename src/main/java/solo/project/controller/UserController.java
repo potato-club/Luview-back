@@ -7,19 +7,25 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import solo.project.dto.request.UserCancel;
-import solo.project.dto.request.UserLoginRequestDto;
-import solo.project.dto.response.UserProfileResponseDto;
-import solo.project.dto.response.UserLoginResponseDto;
-import solo.project.dto.request.UserSignUpRequestDto;
+import solo.project.dto.user.kakao.UserKakaoResponseDto;
+import solo.project.dto.user.request.UserCancel;
+import solo.project.dto.user.request.UserLoginRequestDto;
+import solo.project.dto.user.response.UserProfileResponseDto;
+import solo.project.dto.user.response.UserLoginResponseDto;
+import solo.project.dto.user.request.UserSignUpRequestDto;
 import solo.project.service.UserService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "users")
+@RequestMapping(value = "/users")
 @Tag(name="User Authorization", description = "유저 및 인증 API")
 public class UserController {
     private final UserService userService;
+    @Operation(summary = "카카오 로그인API")
+    @GetMapping("/login/kakao")
+    public UserKakaoResponseDto kakaoLogin(@RequestParam(required = false) String code, HttpServletRequest request, HttpServletResponse response) {
+        return userService.kakaoLogin(code, request, response);
+    }
 
     //회원가입
     @Operation(summary = "회원가입 API")

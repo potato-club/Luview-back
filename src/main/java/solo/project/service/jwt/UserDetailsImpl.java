@@ -1,4 +1,4 @@
-package solo.project.dto.jwt;
+package solo.project.service.jwt;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

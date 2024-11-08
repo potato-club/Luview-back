@@ -1,4 +1,4 @@
-package solo.project.dto.request;
+package solo.project.dto.user.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -23,6 +23,9 @@ public class UserSignUpRequestDto {
     @Schema(description = "일반 로그인 패스워드", example = "null or password")
     private String password;
 
+    @Schema(description = "이름")
+    private String name;
+
     @Schema(description = "닉네임")
     private String nickname;
 
@@ -38,6 +41,7 @@ public class UserSignUpRequestDto {
     public User toEntity() {
         return User.builder()
                 .email(email)
+                .name(name)
                 .password(password)
                 .nickname(nickname)
                 .birthDate(birthDate)
