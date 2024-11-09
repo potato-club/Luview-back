@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import solo.project.dto.Review.request.ReviewRequestDto;
 import solo.project.dto.Review.response.MainReviewResponseDto;
 import solo.project.dto.Review.response.ReviewResponseDto;
+import solo.project.entity.User;
+import solo.project.repository.ReviewRepository;
+import solo.project.repository.UserRepository;
 
 import java.util.List;
 
@@ -13,10 +16,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
+  private final UserRepository userRepository;
+  private final ReviewRepository reviewRepository;
+  private final PlaceService placeService;
 
   @Override
   public void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
-
+    //User user = userRepository.findByEmail();
 
   }
 

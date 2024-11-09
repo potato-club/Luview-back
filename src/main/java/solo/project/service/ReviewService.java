@@ -2,14 +2,10 @@ package solo.project.service;
 
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.ResponseEntity;
 import solo.project.dto.Review.request.ReviewRequestDto;
 import solo.project.dto.Review.response.MainReviewResponseDto;
 import solo.project.dto.Review.response.ReviewResponseDto;
-import solo.project.entity.Review;
 
-import java.net.http.HttpResponse;
 import java.util.List;
 
 public interface ReviewService {
