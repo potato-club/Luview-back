@@ -22,6 +22,7 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   public void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
+    // 사용자 인증 및 식별 request에서 토큰 값을 받아서
     //User user = userRepository.findByEmail();
 
   }

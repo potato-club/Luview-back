@@ -14,7 +14,7 @@ public class ReviewPlace {
   private Long id;
 
   @Column(nullable = false)
-  private int score;
+  private int rating;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "review_id",nullable = false)

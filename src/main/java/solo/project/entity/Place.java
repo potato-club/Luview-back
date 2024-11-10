@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import solo.project.dto.Place.request.PlaceRequestDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,5 +55,16 @@ public class Place {
     this.longitude = longitude;
   }
 
+  static public Place toEntity(PlaceRequestDto placeRequestDto) {
+    return Place.builder()
+        .kakaoPlaceId(placeRequestDto.getKakaoPlaceId())
+        .addressName(placeRequestDto.getAddressName())
+        .categoryGroupName(placeRequestDto.getCategoryGroupName())
+        .placeName(placeRequestDto.getPlaceName())
+        .phoneNumber(placeRequestDto.getPhoneNumber())
+        .latitude(placeRequestDto.getLatitude())
+        .longitude(placeRequestDto.getLongitude())
+        .build();
+  }
 }
 
