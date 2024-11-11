@@ -1,12 +1,14 @@
 package solo.project.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ReviewPlace {
 
   @Id
@@ -24,5 +26,10 @@ public class ReviewPlace {
   @JoinColumn(name = "place_id",nullable = false)
   private Place place;
 
+  public ReviewPlace(int rating, Review review, Place place) {
+    this.rating = rating;
+    this.review = review;
+    this.place = place;
+  }
 
 }

@@ -173,6 +173,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public User findUserByToken(HttpServletRequest request) {
         String token = jwtTokenProvider.resolveRefreshToken(request);
+        System.out.println(request);
         if (token == null) {
             throw new UnAuthorizedException("토큰이 존재하지 않습니다.", ErrorCode.INVALID_TOKEN_EXCEPTION);
         }
