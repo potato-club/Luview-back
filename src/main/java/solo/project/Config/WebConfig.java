@@ -24,11 +24,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(final CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000",
-                        "https://localhost:3000")
-                .exposedHeaders("authorization", "refreshToken", "Set-Cookie")
+                .allowedOriginPatterns("http://localhost:8080", "https://localhost:3000")  // 패턴 기반 설정으로 여러 출처 허용
                 .allowedHeaders("*")
                 .allowedMethods("*")
-                .allowCredentials(true);
+                .allowCredentials(true)
+                .exposedHeaders("authorization", "refreshToken", "Set-Cookie");
     }
 }

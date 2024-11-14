@@ -23,8 +23,8 @@ public class UserController {
     private final UserService userService;
     @Operation(summary = "카카오 로그인API")
     @GetMapping("/login/kakao")
-    public UserKakaoResponseDto kakaoLogin(@RequestParam(required = false) String code, HttpServletRequest request, HttpServletResponse response) {
-        return userService.kakaoLogin(code, request, response);
+    public UserKakaoResponseDto kakaoLogin(@RequestParam("code") String authorizeCode, HttpServletRequest request, HttpServletResponse response) {
+        return userService.kakaoLogin(authorizeCode, request, response);
     }
 
     //회원가입

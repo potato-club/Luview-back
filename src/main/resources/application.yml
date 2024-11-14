@@ -12,13 +12,14 @@ spring:
     oauth2:
       client:
         registration:
-          kakao-local:
-            client-id: ENC(IfaUg+ijVY7LR6660sGPaK8VcIzNVu4XuiiEVhLB8WIHHAvR3gTSra5F5qdt2hPc)
-            client-secret: ENC(GF1ntZifRplTlHRwDy4CXMT+61fTI1zQSSQ7d3FggVXdU7mAfpcddiGLzMbjInJC)
+          kakao:
+            client-id: b87964884ee98b23696ab1fcceef3dd1
+            client-secret: uJqn60AcgVDkKtxkwu62L6vbT6zCV0Yg
             scope:
               - account_email
+              - profile_nickname
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            redirect-uri: http://localhost:8080/callback
             client-name: Kakao
             client-authentication-method: client_secret_post
         provider:

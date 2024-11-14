@@ -40,8 +40,6 @@ public class RedisJwtService {
         return values !=null;
     }
 
-    //사용자 차단 기능은 구현 X
-
     public void delValues(String token){
         redisTemplate.delete(token);
     }

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
 
-    private SecurityScheme createAPIKeyScheme() {
+    private SecurityScheme createBearerAuthScheme() {
         return new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
                 .bearerFormat("JWT")
@@ -21,8 +21,8 @@ public class SwaggerConfig {
     private OpenApiCustomizer createOpenApiCustomizer(String title, String version) {
         return openApi -> {
             openApi.info(new Info().title(title).version(version));
-            openApi.schemaRequirement("bearerAuth", createAPIKeyScheme());
-            openApi.addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+            openApi.addSecurityItem(new SecurityRequirement().addList("bearerAuth"));  // Bearer Auth 추가
+            openApi.schemaRequirement("bearerAuth", createBearerAuthScheme());  // bearerAuth를 scheme으로 추가
         };
     }
 

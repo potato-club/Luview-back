@@ -12,7 +12,7 @@ import solo.project.entity.User;
 
 @Service
 public interface UserService {
-    UserKakaoResponseDto kakaoLogin(String code, HttpServletRequest request, HttpServletResponse response);
+    UserKakaoResponseDto kakaoLogin(String code,  HttpServletRequest request, HttpServletResponse response);
     UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response);
     void signUp(UserSignUpRequestDto requestDto, HttpServletResponse response);
     boolean isNicknameDuplicated(String nickname);

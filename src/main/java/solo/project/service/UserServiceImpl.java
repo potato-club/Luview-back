@@ -22,6 +22,7 @@ import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.UserRepository;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -39,9 +40,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserKakaoResponseDto kakaoLogin(String code,HttpServletRequest request, HttpServletResponse response ){
+    public UserKakaoResponseDto kakaoLogin(String code,  HttpServletRequest request, HttpServletResponse response){
         String access_token= kakaoApi.getAccessToken(code, request);
-        String email = kakaoApi.getUserInfo(access_token);
+        Map<String, String> userInfo = kakaoApi.getUserInfo(access_token);
+        String email = userInfo.get("email");
+        String nickname = userInfo.get("nickname");
 
         //토큰으로 상대방의 이메일정보 확인
         if(userRepository.existsByEmailAndDeleted(email,false)){
@@ -62,8 +65,18 @@ public class UserServiceImpl implements UserService{
                     .build();
         }
 
+        UserSignUpRequestDto requestDto = UserSignUpRequestDto.builder()
+                .email(email)
+                .nickname(nickname)
+                .loginType(LoginType.KAKAO) // 카카오 로그인 타입으로 설정
+                .build();
+
+        // signUp 메서드를 호출하여 회원가입 처리
+        signUp(requestDto, response);
+
         return UserKakaoResponseDto.builder()
                 .email(email)
+                .nickname(nickname)
                 .responseCode("201")
                 .build();
     }
@@ -137,7 +150,7 @@ public class UserServiceImpl implements UserService{
 
         if(requestDto.getLoginType().equals(LoginType.KAKAO)){
             User user =requestDto.toEntity();
-            user.setEmailOtp(true);
+//            user.setEmailOtp(true);
 
             userRepository.save(user);
             this.setJwtTokenInHeader(requestDto.getEmail(), response);
@@ -169,10 +182,11 @@ public class UserServiceImpl implements UserService{
                 .ifPresent(redisJwtService::delValues);
     }
 
+    //액세스 토큰으로 회원 찾기
     @SneakyThrows
     @Override
     public User findUserByToken(HttpServletRequest request) {
-        String token = jwtTokenProvider.resolveRefreshToken(request);
+        String token = jwtTokenProvider.resolveAccessToken(request);
         if (token == null) {
             throw new UnAuthorizedException("토큰이 존재하지 않습니다.", ErrorCode.INVALID_TOKEN_EXCEPTION);
         }
