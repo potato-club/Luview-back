@@ -105,7 +105,7 @@ public class JwtTokenProvider {
 
     //토큰 헤더 설정
     public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
-        response.setHeader("authorization", "Bearer " + refreshToken);
+        response.setHeader("refreshToken", "Bearer " + refreshToken);
     }
     //AES를 사용하여 암호화
     private String encrypt(String plainToken) throws Exception {
@@ -203,9 +203,12 @@ public class JwtTokenProvider {
 
     //요청을 받으면 AT반환 없다면 null
     public String resolveAccessToken(HttpServletRequest request) {
-        String accessToken = request.getHeader("AT");
-        String refreshToken = request.getHeader("RT");
+        String accessToken = request.getHeader("Authorization");
+        String refreshToken = request.getHeader("refreshToken");
         if (accessToken != null && refreshToken == null) {
+            if (accessToken.startsWith("Bearer ")) {
+                accessToken = accessToken.substring(7); // "Bearer "는 7글자이므로 그 이후 부분을 반환
+            }
             return accessToken;
         }
         return null;
@@ -213,7 +216,7 @@ public class JwtTokenProvider {
 
     //7개로 정의 RT재발급
     public String resolveRefreshToken(HttpServletRequest request) {
-        String refreshToken = request.getHeader("refreshToken");
+        String refreshToken = request.getHeader("Authorization");
         final int tokenPrefixLength = 7;
         if (refreshToken != null && refreshToken.length() > tokenPrefixLength) {
             return refreshToken.substring(tokenPrefixLength);
