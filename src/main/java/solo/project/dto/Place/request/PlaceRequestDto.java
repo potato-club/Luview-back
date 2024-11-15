@@ -10,7 +10,7 @@ public class PlaceRequestDto {
   @Schema(description = "주소")
   private String addressName;
   @Schema(description = "카테고리")
-  private String categoryGroupName;
+  private String category;
   @Schema(description = "상호명")
   private String placeName;
   @Schema(description = "전화번호")

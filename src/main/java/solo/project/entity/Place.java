@@ -26,7 +26,7 @@ public class Place {
   private String addressName;
 
   @Column(nullable = false)
-  private String categoryGroupName;
+  private String category; // enum으로 바꾸기
 
   @Column(nullable = false)
   private String placeName;
@@ -44,11 +44,11 @@ public class Place {
   private List<ReviewPlace> reviewPlaces = new ArrayList<>();
 
   @Builder
-  public Place(Long id, String kakaoPlaceId, String addressName, String categoryGroupName, String placeName, String phoneNumber, double latitude, double longitude) {
+  public Place(Long id, String kakaoPlaceId, String addressName, String category, String placeName, String phoneNumber, double latitude, double longitude) {
     this.id = id;
     this.kakaoPlaceId = kakaoPlaceId;
     this.addressName = addressName;
-    this.categoryGroupName = categoryGroupName;
+    this.category = category;
     this.placeName = placeName;
     this.phoneNumber = phoneNumber;
     this.latitude = latitude;
@@ -59,7 +59,7 @@ public class Place {
     return Place.builder()
         .kakaoPlaceId(placeRequestDto.getKakaoPlaceId())
         .addressName(placeRequestDto.getAddressName())
-        .categoryGroupName(placeRequestDto.getCategoryGroupName())
+        .category(placeRequestDto.getCategory())
         .placeName(placeRequestDto.getPlaceName())
         .phoneNumber(placeRequestDto.getPhoneNumber())
         .latitude(placeRequestDto.getLatitude())

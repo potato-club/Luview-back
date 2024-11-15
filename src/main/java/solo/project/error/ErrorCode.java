@@ -26,6 +26,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"2004","Failed to create refresh token!"),
     ACCESS_TOKEN_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"2005","Failed to create access token!");
 
+
     private final HttpStatus status;
     private final String code;
     private final String message;

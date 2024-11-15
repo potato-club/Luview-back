@@ -2,6 +2,7 @@ package solo.project.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import solo.project.dto.Place.request.PlaceRequestDto;
 import solo.project.dto.Review.request.ReviewRequestDto;
@@ -13,10 +14,11 @@ import solo.project.entity.ReviewPlace;
 import solo.project.entity.User;
 import solo.project.repository.ReviewPlaceRepository;
 import solo.project.repository.ReviewRepository;
-import solo.project.repository.UserRepository;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -62,12 +64,16 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   @Override
-  public List<MainReviewResponseDto> getMainReviews(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
-    return List.of();
+  public List<MainReviewResponseDto> getMainReviews(Pageable pageable) {
+    Page<Review> reviews = reviewRepository.findAllByOrderByCreatedAtDesc(pageable); // 최신순 정렬
+
+    return reviews.stream()
+        .map(this::createMainReviewDto)
+        .collect(Collectors.toList());
   }
 
   @Override
-  public List<ReviewResponseDto> getReviewsByCategory(ReviewRequestDto reviewRequestDto, String category) {
+  public List<ReviewResponseDto> getReviewsByCategory(Pageable pageable) {
     return List.of();
   }
 
@@ -90,4 +96,17 @@ public class ReviewServiceImpl implements ReviewService {
   public void deleteReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
 
   }
+
+  private MainReviewResponseDto createMainReviewDto(Review review) {
+    return MainReviewResponseDto.builder()
+        .category(review.getReviewPlaces().get(0).getPlace().getCategory())
+        .placeName(review.getReviewPlaces().get(0).getPlace().getPlaceName())
+        .title(review.getTitle())
+        .likeCount(review.getLikeCount())
+        .commentCount(review.getCommentCount())
+        .author(review.getUser().getNickname())
+        .firstFileUrl(review.getFiles().get(0).getFileUrl())
+        .build();
+  }
+
 }
