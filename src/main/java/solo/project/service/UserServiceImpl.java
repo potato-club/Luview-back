@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService{
             this.setJwtTokenInHeader(email,response);
 
             return UserKakaoResponseDto.builder()
-                    .responseCode("200")
+                    .responseCode("200, 로그인 되었습니다.")
                     .build();
         }
         //탈퇴한 회원인지 확인후에 탈퇴취소 회원인경우에는 다시 회원가입
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService{
         return UserKakaoResponseDto.builder()
                 .email(email)
                 .nickname(nickname)
-                .responseCode("201")
+                .responseCode("201, 회원가입 후 로그인 되었습니다.")
                 .build();
     }
 
@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService{
         }
         this.setJwtTokenInHeader(requestDto.getEmail(), response);
         return UserLoginResponseDto.builder()
-                .responseCode("성공했습니다!! 200!")
+                .responseCode("로그인 되었습니다.")
                 .build();
     }
 
