@@ -1,4 +1,4 @@
-package solo.project.service.jwt;
+package solo.project.dto.jwt;
 
 import org.springframework.security.core.AuthenticationException;
 

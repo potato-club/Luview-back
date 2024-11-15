@@ -1,4 +1,4 @@
-package solo.project.dto.user.kakao;
+package solo.project.dto.User.kakao;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

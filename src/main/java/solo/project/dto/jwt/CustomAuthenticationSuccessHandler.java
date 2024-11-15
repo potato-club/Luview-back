@@ -1,4 +1,4 @@
-package solo.project.service.jwt;
+package solo.project.dto.jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

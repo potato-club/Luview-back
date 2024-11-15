@@ -18,7 +18,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import solo.project.service.jwt.CustomAuthenticationSuccessHandler;
+import solo.project.dto.jwt.CustomAuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity

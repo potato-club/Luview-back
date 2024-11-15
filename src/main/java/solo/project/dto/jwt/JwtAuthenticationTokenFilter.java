@@ -1,4 +1,4 @@
-package solo.project.service.jwt;
+package solo.project.dto.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
