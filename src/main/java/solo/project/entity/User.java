@@ -32,7 +32,7 @@ public class User extends BaseTimeEntity{
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false) //
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -43,7 +43,7 @@ public class User extends BaseTimeEntity{
     private UserRole userRole;
 
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(length = 50)
     private LoginType loginType;
 
     @Column(columnDefinition = "TINYINT(1)")
@@ -60,19 +60,19 @@ public class User extends BaseTimeEntity{
     private List<Favorites> favorites = new ArrayList<>();
 
     @Builder
-    public User(Long id,String name, String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
-        this.id=id;
-        this.name=name;
-        this.nickname = nickname;
+    public User(Long id, String nickname, String name, String email, String password, UserRole userRole, LocalDate birthDate, LoginType loginType, boolean deleted, boolean emailOtp) {
+        this.id = id;
+        this.nickname = nickname; // 닉네임이 없을 경우 기본값 설정
+        this.name = name != null ? name : "default_name"; // 이름이 없을 경우 기본값 설정
         this.email = email;
-        this.password = password;
-        this.userRole = userRole;
-        this.birthDate = birthDate;
-        this.loginType = loginType;
-        this.deleted= deleted;
+        this.password = password != null ? password : ""; // 비밀번호가 없을 경우 빈 문자열로 설정
+        this.userRole = userRole != null ? userRole : UserRole.USER; // 기본 역할을 USER로 설정
+        this.birthDate = birthDate != null ? birthDate : LocalDate.of(2000, 1, 1); // 카카오에서 생년월일 지급되지 않을 경우 기본값 설정
+        this.loginType = loginType != null ? loginType : LoginType.KAKAO;
+        this.deleted = deleted;
         this.emailOtp = emailOtp;
-
     }
+
 
     public void update(UserUpdateRequestDto userDto){
         this.nickname = userDto.getNickname();

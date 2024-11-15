@@ -16,9 +16,6 @@ public class UserProfileResponseDto {
     @Schema(description = "유저 역할", example = "USER / MANAGER")
     private final UserRole userRole;
 
-    @Schema(description = "가게 Id", example = "1")
-    private final Long storeId;
-
     @Schema(description = "사진 이름")
     private final String fileName;
 
@@ -26,11 +23,10 @@ public class UserProfileResponseDto {
     private final String fileUrl;
 
 
-    public UserProfileResponseDto(String nickname, LoginType loginType, UserRole userRole, Long storeId, String fileName, String fileUrl) {
+    public UserProfileResponseDto(String nickname, LoginType loginType, UserRole userRole,  String fileName, String fileUrl) {
         this.nickname = nickname;
         this.loginType = loginType;
         this.userRole = userRole;
-        this.storeId = storeId;
         this.fileName = fileName;
         this.fileUrl = fileUrl;
     }

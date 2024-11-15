@@ -3,8 +3,6 @@ package solo.project.Config;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -22,20 +20,14 @@ public class WebConfig implements WebMvcConfigurer {
         return new RestTemplate();
     }
 
-    @Bean // 암호화 인터페이스 구현
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
-
     //Cors 설정 지금은 Local로만 설정
     @Override
     public void addCorsMappings(final CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000",
-                        "https://localhost:3000")
-                .exposedHeaders("authorization", "refreshToken", "Set-Cookie")
+                .allowedOriginPatterns("http://localhost:8080", "https://localhost:3000")  // 패턴 기반 설정으로 여러 출처 허용
                 .allowedHeaders("*")
                 .allowedMethods("*")
-                .allowCredentials(true);
+                .allowCredentials(true)
+                .exposedHeaders("authorization", "refreshToken", "Set-Cookie");
     }
 }
