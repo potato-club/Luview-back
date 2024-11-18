@@ -203,10 +203,9 @@ public class JwtTokenProvider {
 
     //요청을 받으면 AT반환 없다면 null
     public String resolveAccessToken(HttpServletRequest request) {
-        String accessToken = request.getHeader("Authorization").substring(7);
-        String refreshToken = request.getHeader("refreshToken").substring(7);
-        if (accessToken != null && refreshToken == null) {
-            return accessToken;
+        String accessToken = request.getHeader("Authorization");
+        if (accessToken != null) {
+            return accessToken.substring(7);
         }
         return null;
     }

@@ -12,11 +12,15 @@ import solo.project.entity.Place;
 import solo.project.entity.Review;
 import solo.project.entity.ReviewPlace;
 import solo.project.entity.User;
+import solo.project.error.ErrorCode;
+import solo.project.error.exception.NotFoundException;
+import solo.project.error.exception.TokenCreationException;
+import solo.project.error.exception.UnAuthorizedException;
+import solo.project.repository.PlaceRepository;
 import solo.project.repository.ReviewPlaceRepository;
 import solo.project.repository.ReviewRepository;
 import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,16 +28,21 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
-  private final ReviewPlaceRepository reviewPlaceRepository;
   private final UserService userService;
   private final ReviewRepository reviewRepository;
   private final PlaceService placeService;
+  private final PlaceRepository placeRepository;
+  private final ReviewPlaceService reviewPlaceService;
+  private final ReviewPlaceRepository reviewPlaceRepository;
 
 
   @Override
   public void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
     // 사용자 인증 및 식별 request에서 토큰 값을 받아서 유저 찾기
     User user = userService.findUserByToken(request);
+    // 장소를 한개 이상 받기 위한 검사 코드 (장소가 없거나 비어있는 리스트일 경우 에러)
+    if(reviewRequestDto.getPlaces() == null || reviewRequestDto.getPlaces().isEmpty())
+      throw new TokenCreationException("장소를 등록해주세요!", ErrorCode.REVIEW_PLACE_NULL);
 
     // 리뷰 엔티티 생성 (한 번만 생성)
     Review review = Review.builder()
@@ -41,40 +50,35 @@ public class ReviewServiceImpl implements ReviewService {
         .title(reviewRequestDto.getTitle())
         .content(reviewRequestDto.getContent())
         .build();
-
     // 리뷰를 저장하고, 리뷰 ID를 받아옴
     Review savedReview = reviewRepository.save(review);
 
-    // 장소와 리뷰 연결 및 평점 설정
-    List<ReviewPlace> reviewPlaces = new ArrayList<>();
+    //장소 저장 후 그 장소들 반환
+    List<PlaceRequestDto> placeRequestDtos = reviewRequestDto.getPlaces();
+    List<Place> places = placeService.createPlace(placeRequestDtos);
 
-    for (PlaceRequestDto placeDto : reviewRequestDto.getPlaces()) {
-      // 장소 생성 또는 조회
-      Place place = placeService.createPlace(placeDto);
 
-      // ReviewPlace 엔티티 생성
-      ReviewPlace reviewPlace = new ReviewPlace(placeDto.getRating(), savedReview, place);
 
-      // ReviewPlace 리스트에 추가
-      reviewPlaces.add(reviewPlace);
-    }
+    // 장소랑 리뷰 받아서 리뷰랑 장소 중간 테이블 생성
+    reviewPlaceService.createReviewPlace(savedReview, places, reviewRequestDto.getRating());
 
-    // ReviewPlace 객체들을 한 번에 저장
-    reviewPlaceRepository.saveAll(reviewPlaces);
   }
 
   @Override
   public List<MainReviewResponseDto> getMainReviews(Pageable pageable) {
-    Page<Review> reviews = reviewRepository.findAllByOrderByCreatedAtDesc(pageable); // 최신순 정렬
-
+    Page<Review> reviews = reviewRepository.findAllByOrderByCreatedDateDesc(pageable); // 최신순 정렬
+    String category = "";
     return reviews.stream()
-        .map(this::createMainReviewDto)
+        .map(review -> createMainReviewDto(review, category))
         .collect(Collectors.toList());
   }
 
   @Override
-  public List<ReviewResponseDto> getReviewsByCategory(Pageable pageable) {
-    return List.of();
+  public List<MainReviewResponseDto> getReviewsByCategory(String category, Pageable pageable) {
+    Page<Review> reviews = reviewRepository.findByPlaceCategory(category, pageable);
+    return reviews.stream()
+        .map(review -> createMainReviewDto(review, category))
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -88,7 +92,20 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   @Override
-  public void updateReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
+  public void updateReview(Long id, ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
+    User user = userService.findUserByToken(request);
+
+    Review review = reviewRepository.findById(id).orElse(null);
+    if (review == null)
+      throw new NotFoundException("수정할 수 없는 리뷰글입니다", ErrorCode.NOT_FOUND_EXCEPTION);
+    if (review.getUser() != user)
+      throw new UnAuthorizedException("게시글 수정 권한이 없습니다", ErrorCode.UNAUTHORIZED_EXCEPTION);
+
+    review.update(reviewRequestDto);  // 제목, 내용 수정
+
+    for(PlaceRequestDto placeRequestDto : reviewRequestDto.getPlaces()) {
+
+    }
 
   }
 
@@ -97,16 +114,28 @@ public class ReviewServiceImpl implements ReviewService {
 
   }
 
-  private MainReviewResponseDto createMainReviewDto(Review review) {
+  private MainReviewResponseDto createMainReviewDto(Review review, String category) {
+    Place place = null;
+    if(category == null || category.isEmpty()){
+      place = review.getReviewPlaces().get(0).getPlace();
+    } else {
+      for (ReviewPlace reviewPlacetemp : review.getReviewPlaces()) {
+        if (reviewPlacetemp.getPlace().getCategory().equals(category)) {
+          place = reviewPlacetemp.getPlace();
+        }
+      }
+    }
+
     return MainReviewResponseDto.builder()
-        .category(review.getReviewPlaces().get(0).getPlace().getCategory())
-        .placeName(review.getReviewPlaces().get(0).getPlace().getPlaceName())
-        .title(review.getTitle())
-        .likeCount(review.getLikeCount())
-        .commentCount(review.getCommentCount())
-        .author(review.getUser().getNickname())
-        .firstFileUrl(review.getFiles().get(0).getFileUrl())
-        .build();
+                                .id(review.getId())
+                                .category(place.getCategory())
+                                .placeName(place.getPlaceName())
+                                .title(review.getTitle())
+                                .likeCount(0) // like 증감 코드 구현후 수정 해야함
+                                .commentCount(0)  // comment 코드 구현후 수정해야함
+                                .userNickName(review.getUser().getNickname())
+                                .firstFileUrl("review.getFiles().get(0).getFileUrl()")  // file 구현후 수정해야함
+                                .build();
   }
 
 }

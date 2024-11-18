@@ -19,6 +19,5 @@ public class PlaceRequestDto {
   private Double latitude;
   @Schema(description = "경도")
   private Double longitude;
-  @Schema(description = "별점")
-  private int rating;
+
 }

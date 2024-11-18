@@ -1,11 +1,8 @@
 package solo.project.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
+import lombok.*;
+import solo.project.dto.Review.request.ReviewRequestDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +43,6 @@ public class Review extends BaseTimeEntity {
 
   // 아래 필드는 리뷰에 대한 모든 "좋아요, 장소, 사진, 댓글"들을 저장하는 리스트입니다.
   @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-  @NonNull
   private List<ReviewPlace> reviewPlaces = new ArrayList<>();
 
   @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -60,9 +56,9 @@ public class Review extends BaseTimeEntity {
 
 
 
-  public void updateReview() {  // dto 만들어서 매개변수로 받을 예정
-    this.title = title;
-    this.content = content;
+  public void update(ReviewRequestDto reviewRequestDto) {
+    this.title = reviewRequestDto.getTitle();
+    this.content = reviewRequestDto.getContent();
   }
 
   public void setDeleted(boolean deleted) {

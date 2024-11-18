@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 import solo.project.entity.Review;
 import solo.project.entity.ReviewPlace;
 
+import java.util.List;
+
 @Repository
 public interface ReviewPlaceRepository extends CrudRepository<ReviewPlace, Long> {
+  List<ReviewPlace> findByReview(Review review);
 }

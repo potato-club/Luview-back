@@ -26,10 +26,15 @@ public class ReviewPlace {
   @JoinColumn(name = "place_id",nullable = false)
   private Place place;
 
-  public ReviewPlace(int rating, Review review, Place place) {
-    this.rating = rating;
+  public ReviewPlace(Review review, Place place, int rating) {
     this.review = review;
     this.place = place;
+    this.rating = rating;
+  }
+
+  public void updatePlace(Place place, int rating) {
+    this.place = place;
+    this.rating = rating;
   }
 
 }

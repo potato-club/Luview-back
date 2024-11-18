@@ -19,6 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MainReviewResponseDto {
+  @Schema(description = "id")
+  private Long id;
   @Schema(description = "카테고리")
   private String category; // 첫 번째 장소의 카테고리
   @Schema(description = "상호명")
@@ -30,10 +32,7 @@ public class MainReviewResponseDto {
   @Schema(description = "댓글 수")
   private int commentCount; // 댓글 수
   @Schema(description = "작성자")
-  private String author; // 작성자
+  private String userNickName; // 작성자
   @Schema(description = "썸네일")
   private String firstFileUrl; // 첫 번째 이미지 URL
-
-
-
 }
