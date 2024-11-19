@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -22,5 +25,14 @@ public class Comment extends BaseTimeEntity{
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "review_id")
   private Review review;
+
+  // 대댓글 관련 추가
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "parent_id")
+  private Comment parent;
+
+  @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Comment> children = new ArrayList<>();
+
 
 }

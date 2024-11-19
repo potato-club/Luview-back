@@ -1,4 +1,4 @@
-package solo.project.service;
+package solo.project.service.Impl;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +20,10 @@ import solo.project.repository.PlaceRepository;
 import solo.project.repository.ReviewPlaceRepository;
 import solo.project.repository.ReviewRepository;
 import org.springframework.data.domain.Pageable;
+import solo.project.service.PlaceService;
+import solo.project.service.ReviewPlaceService;
+import solo.project.service.ReviewService;
+import solo.project.service.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,14 +58,10 @@ public class ReviewServiceImpl implements ReviewService {
     Review savedReview = reviewRepository.save(review);
 
     //장소 저장 후 그 장소들 반환
-    List<PlaceRequestDto> placeRequestDtos = reviewRequestDto.getPlaces();
-    List<Place> places = placeService.createPlace(placeRequestDtos);
-
-
+    List<Place> places = placeService.createPlace(reviewRequestDto.getPlaces());
 
     // 장소랑 리뷰 받아서 리뷰랑 장소 중간 테이블 생성
-    reviewPlaceService.createReviewPlace(savedReview, places, reviewRequestDto.getRating());
-
+    reviewPlaceService.createReviewPlaces(savedReview, places, reviewRequestDto.getPlaces());
   }
 
   @Override
@@ -106,7 +106,6 @@ public class ReviewServiceImpl implements ReviewService {
     for(PlaceRequestDto placeRequestDto : reviewRequestDto.getPlaces()) {
 
     }
-
   }
 
   @Override
@@ -119,11 +118,15 @@ public class ReviewServiceImpl implements ReviewService {
     if(category == null || category.isEmpty()){
       place = review.getReviewPlaces().get(0).getPlace();
     } else {
-      for (ReviewPlace reviewPlacetemp : review.getReviewPlaces()) {
-        if (reviewPlacetemp.getPlace().getCategory().equals(category)) {
-          place = reviewPlacetemp.getPlace();
+      for (ReviewPlace reviewPlace : review.getReviewPlaces()) {
+        if (reviewPlace.getPlace().getCategory().equals(category)) {
+          place = reviewPlace.getPlace();
         }
       }
+    }
+
+    if(place == null) {
+      throw new IllegalArgumentException("No Place found for the given category or review.");
     }
 
     return MainReviewResponseDto.builder()

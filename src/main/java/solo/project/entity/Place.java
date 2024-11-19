@@ -40,6 +40,8 @@ public class Place {
   @Column
   private Double longitude;
 
+
+
   @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ReviewPlace> reviewPlaces = new ArrayList<>();
 

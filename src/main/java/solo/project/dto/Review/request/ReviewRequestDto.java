@@ -18,6 +18,4 @@ public class ReviewRequestDto {
   private String content;
   @Schema(description = "장소")
   private List<PlaceRequestDto> places;
-  @Schema(description = "장소 별점")
-  private int rating;
 }

@@ -1,4 +1,4 @@
-package solo.project.service;
+package solo.project.service.Impl;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,6 +13,8 @@ import solo.project.dto.User.response.UserLoginResponseDto;
 import solo.project.dto.User.request.UserSignUpRequestDto;
 import solo.project.dto.User.kakao.UserKakaoResponseDto;
 import solo.project.kakao.KakaoApi;
+import solo.project.service.RedisJwtService;
+import solo.project.service.UserService;
 import solo.project.service.jwt.JwtTokenProvider;
 import solo.project.entity.User;
 import solo.project.enums.LoginType;
@@ -26,7 +28,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RedisJwtService redisJwtService;
