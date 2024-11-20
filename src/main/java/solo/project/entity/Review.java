@@ -55,6 +55,13 @@ public class Review extends BaseTimeEntity {
   @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Comment> comments = new ArrayList<>();
 
+  @Builder
+  public Review(Long id, String title, String content, boolean deleted) {
+    this.id = id;
+    this.title = title;
+    this.content = content;
+    this.deleted = deleted;
+  }
 
 
   public void update(ReviewRequestDto reviewRequestDto) {

@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import solo.project.entity.User;
 import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
-
 import java.time.LocalDate;
 
 @Builder

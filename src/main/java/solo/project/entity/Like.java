@@ -15,6 +15,9 @@ public class Like {
   @Column
   private Long id;
 
+  @Column(columnDefinition = "TINYINT(1)")
+  private boolean isLiked;
+
   @ManyToOne(fetch = FetchType.LAZY)  // Like n ~ 1 User
   @JoinColumn(name = "user_id")
   private User user;

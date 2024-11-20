@@ -3,16 +3,17 @@ package solo.project.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
-import solo.project.dto.User.kakao.UserKakaoResponseDto;
-import solo.project.entity.User;
+import solo.project.dto.kakao.UserKakaoResponseDto;
 import solo.project.dto.User.request.UserLoginRequestDto;
 import solo.project.dto.User.response.UserLoginResponseDto;
 import solo.project.dto.User.response.UserProfileResponseDto;
 import solo.project.dto.User.request.UserSignUpRequestDto;
+import solo.project.entity.User;
+
 
 @Service
 public interface UserService {
-    UserKakaoResponseDto kakaoLogin(String code, HttpServletRequest request, HttpServletResponse response);
+    UserKakaoResponseDto kakaoLogin(String code,  HttpServletRequest request, HttpServletResponse response);
     UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response);
     void signUp(UserSignUpRequestDto requestDto, HttpServletResponse response);
     boolean isNicknameDuplicated(String nickname);

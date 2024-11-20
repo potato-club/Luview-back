@@ -7,15 +7,13 @@ import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import solo.project.dto.kakao.UserKakaoResponseDto;
+import solo.project.kakao.KakaoApi;
+import solo.project.dto.jwt.JwtTokenProvider;
 import solo.project.dto.User.request.UserLoginRequestDto;
 import solo.project.dto.User.response.UserProfileResponseDto;
 import solo.project.dto.User.response.UserLoginResponseDto;
 import solo.project.dto.User.request.UserSignUpRequestDto;
-import solo.project.dto.User.kakao.UserKakaoResponseDto;
-import solo.project.kakao.KakaoApi;
-import solo.project.service.RedisJwtService;
-import solo.project.service.UserService;
-import solo.project.service.jwt.JwtTokenProvider;
 import solo.project.entity.User;
 import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
@@ -23,7 +21,10 @@ import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.UserRepository;
+import solo.project.service.RedisJwtService;
+import solo.project.service.UserService;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -41,16 +42,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserKakaoResponseDto kakaoLogin(String code,HttpServletRequest request, HttpServletResponse response ){
+    public UserKakaoResponseDto kakaoLogin(String code,  HttpServletRequest request, HttpServletResponse response){
         String access_token= kakaoApi.getAccessToken(code, request);
-        String email = kakaoApi.getUserInfo(access_token);
+        Map<String, String> userInfo = kakaoApi.getUserInfo(access_token);
+        String email = userInfo.get("email");
+        String nickname = userInfo.get("nickname");
 
         //토큰으로 상대방의 이메일정보 확인
         if(userRepository.existsByEmailAndDeleted(email,false)){
             this.setJwtTokenInHeader(email,response);
 
             return UserKakaoResponseDto.builder()
-                    .responseCode("200")
+                    .responseCode("200, 로그인 되었습니다.")
                     .build();
         }
         //탈퇴한 회원인지 확인후에 탈퇴취소 회원인경우에는 다시 회원가입
@@ -64,9 +67,19 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
 
+        UserSignUpRequestDto requestDto = UserSignUpRequestDto.builder()
+                .email(email)
+                .nickname(nickname)
+                .loginType(LoginType.KAKAO) // 카카오 로그인 타입으로 설정
+                .build();
+
+        // signUp 메서드를 호출하여 회원가입 처리
+        signUp(requestDto, response);
+
         return UserKakaoResponseDto.builder()
                 .email(email)
-                .responseCode("201")
+                .nickname(nickname)
+                .responseCode("201, 회원가입 후 로그인 되었습니다.")
                 .build();
     }
 
@@ -94,7 +107,7 @@ public class UserServiceImpl implements UserService {
         }
         this.setJwtTokenInHeader(requestDto.getEmail(), response);
         return UserLoginResponseDto.builder()
-                .responseCode("성공했습니다!! 200!")
+                .responseCode("로그인 되었습니다.")
                 .build();
     }
 
@@ -139,7 +152,7 @@ public class UserServiceImpl implements UserService {
 
         if(requestDto.getLoginType().equals(LoginType.KAKAO)){
             User user =requestDto.toEntity();
-            user.setEmailOtp(true);
+//            user.setEmailOtp(true);
 
             userRepository.save(user);
             this.setJwtTokenInHeader(requestDto.getEmail(), response);
@@ -171,11 +184,11 @@ public class UserServiceImpl implements UserService {
                 .ifPresent(redisJwtService::delValues);
     }
 
+    //액세스 토큰으로 회원 찾기
     @SneakyThrows
     @Override
     public User findUserByToken(HttpServletRequest request) {
         String token = jwtTokenProvider.resolveAccessToken(request);
-        System.out.println(request);
         if (token == null) {
             throw new UnAuthorizedException("토큰이 존재하지 않습니다.", ErrorCode.INVALID_TOKEN_EXCEPTION);
         }

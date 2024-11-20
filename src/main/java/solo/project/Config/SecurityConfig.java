@@ -18,8 +18,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import solo.project.error.OAuth2LoginSuccessHandler;
-import solo.project.service.jwt.JwtTokenProvider;
+import solo.project.dto.jwt.CustomAuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -27,13 +26,12 @@ import solo.project.service.jwt.JwtTokenProvider;
 @EnableMethodSecurity
 public class SecurityConfig implements WebMvcConfigurer {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
-    @Value("${spring.security.oauth2.client.registration.kakao-local.client-id}")
+    @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String kakaoClientId;
 
-    @Value("${spring.security.oauth2.client.registration.kakao-local.client-secret}")
+    @Value("${spring.security.oauth2.client.registration.kakao.client-secret}")
     private String kakaoClientSecret;
 
     @Bean
@@ -51,7 +49,7 @@ public class SecurityConfig implements WebMvcConfigurer {
         // OAuth2 로그인 설정
         http.oauth2Login(oauth2Login -> oauth2Login
                 .clientRegistrationRepository(clientRegistrationRepository())  // OAuth2 클라이언트 등록 정보 설정
-                .successHandler(oAuth2LoginSuccessHandler)
+                .successHandler(customAuthenticationSuccessHandler)
                 .permitAll());  // 로그인 관련 URL 모두 허용
 
         http.authorizeHttpRequests(authorize -> authorize
@@ -70,7 +68,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     // OAuth2 클라이언트 등록을 위한 Bean 추가 (InMemory 설정 예시)
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
-        ClientRegistration kakaoClientRegistration = ClientRegistration.withRegistrationId("kakao-local")
+        ClientRegistration kakaoClientRegistration = ClientRegistration.withRegistrationId("kakao")
                 .clientId(kakaoClientId) // 환경변수로 대체
                 .clientSecret(kakaoClientSecret) // 환경변수로 대체
                 .authorizationUri("https://kauth.kakao.com/oauth/authorize")
@@ -78,25 +76,11 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .tokenUri("https://kauth.kakao.com/oauth/token")
                 .userInfoUri("https://kapi.kakao.com/v2/user/me")
                 .clientName("Kakao")
-                .redirectUri("http://localhost:8080/login/oauth2/code/kakao")
-                .scope("account_email")
+                .redirectUri("http://localhost:8080/callback")
+                .scope("account_email","profile_nickname")
                 .userNameAttributeName("id")
                 .authorizationGrantType(org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE)
                 .build();
-
-//                .clientId(kakaoClientId)
-//                .clientSecret(kakaoClientSecret)
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-//                .authorizationGrantType(org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE)
-//                .redirectUri("http://localhost:8080/login/oauth2/code/kakao")
-//                .scope("account_email")
-//                .authorizationUri("https://kauth.kakao.com/oauth/authorize")
-//                .tokenUri("https://kauth.kakao.com/oauth/token")
-//                .userInfoUri("https://kapi.kakao.com/v2/user/me")
-//                .userNameAttributeName("id")
-//                .clientName("Kakao")
-//                .build();
-
 
         return new InMemoryClientRegistrationRepository(kakaoClientRegistration);
     }

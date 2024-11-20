@@ -15,110 +15,183 @@ import org.springframework.web.client.RestTemplate;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.UnAuthorizedException;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class KakaoApi {
 
-    private static final Logger logger = LoggerFactory.getLogger(KakaoApi.class);
-
-    private final RestTemplate restTemplate;
-
-    //나중에 도메인 추가
-
-    @Value("${spring.security.oauth2.client.registration.kakao-local.client-id}")
+    @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String kakaoClientId;
 
-    @Value("${spring.security.oauth2.client.registration.kakao-local.client-secret}")
-    private String kakaoClientSecret;
-
-    @Value("${spring.security.oauth2.client.registration.kakao-local.redirect-uri}")
+    @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
     private String kakaoLocalRedirectUri;
 
-    private static final String ACCESS_TOKEN_REQUEST_URL = "https://kauth.kakao.com/oauth/token";
-    private static final String USER_INFO_REQUEST_URL = "https://kapi.kakao.com/v2/user/me";
+    @Value("${spring.security.oauth2.client.registration.kakao.client-secret}")
+    private String kakaoClientSecret;
 
-    //사용자 토큰 추출
-    public String getAccessToken(String authorizationCode, HttpServletRequest request) {
-        HttpHeaders headers = createHeaders(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String, String> parameters = createTokenRequestParams(authorizationCode, request);
+    private final RestTemplate restTemplate;
+    private static final String reqAccessTokenURL = "https://kauth.kakao.com/oauth/token";
+    private static final String reqUserInfoURL = "https://kapi.kakao.com/v2/user/me";
 
-        return executePostRequest(ACCESS_TOKEN_REQUEST_URL, headers, parameters, "access_token");
-    }
+    private static final Logger logger = LoggerFactory.getLogger(KakaoApi.class);
 
-    //사용자 정보 요청
-    public String getUserInfo(String accessToken) {
-        HttpHeaders headers = createHeadersWithAuth(accessToken);
+    public String getAccessToken(String authorize_code, HttpServletRequest request) {
+        String access_Token;
 
-        return executeGetRequest(USER_INFO_REQUEST_URL, headers, "kakao_account", "email");
-    }
-
-    private HttpHeaders createHeaders(MediaType contentType) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(contentType);
-        return headers;
-    }
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-    private HttpHeaders createHeadersWithAuth(String accessToken) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        return headers;
-    }
+        String redirectUri = this.selectRedirectUri(request);
 
-    private MultiValueMap<String, String> createTokenRequestParams(String authorizationCode, HttpServletRequest request) {
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
         parameters.add("grant_type", "authorization_code");
         parameters.add("client_id", kakaoClientId);
         parameters.add("client_secret", kakaoClientSecret);
-        parameters.add("redirect_uri", selectRedirectUri(request));
-        parameters.add("code", authorizationCode);
-        return parameters;
+        parameters.add("redirect_uri", redirectUri);
+        parameters.add("code", authorize_code);
+
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(parameters, headers);
+
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(reqAccessTokenURL, requestEntity, String.class);
+
+        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+            JsonObject jsonObject = JsonParser.parseString(Objects.requireNonNull(responseEntity.getBody())).getAsJsonObject();
+            access_Token = jsonObject.get("access_token").getAsString();
+        } else {
+            // Log the response for debugging
+            String errorMessage = responseEntity.getBody();
+            Logger logger = LoggerFactory.getLogger(KakaoApi.class);
+            logger.error("Failed to get access token. Response: " + errorMessage);
+            throw new UnAuthorizedException("Failed to get access token!", ErrorCode.KAKAO_ACCESS_TOKEN_FAILED);
+        }
+
+        return access_Token;
+    }
+
+    public Map<String, String> getUserInfo(String accessToken) {
+        String email;
+        String nickname;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity request = new HttpEntity(headers);
+
+        ResponseEntity<String> responseEntity = restTemplate.exchange(reqUserInfoURL, HttpMethod.GET, request, String.class);
+
+        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+            JsonObject jsonObject = JsonParser.parseString(Objects.requireNonNull(responseEntity.getBody())).getAsJsonObject();
+            JsonObject kakaoAccount = jsonObject.getAsJsonObject("kakao_account");
+            email = kakaoAccount.getAsJsonObject().get("email").getAsString();
+            JsonObject profile = kakaoAccount.getAsJsonObject("profile");
+            nickname = profile.get("nickname").getAsString();
+        } else {
+            throw new UnAuthorizedException("Failed to get user info!", ErrorCode.KAKAO_USER_INFO_FAILED);
+        }
+
+        Map<String, String> userInfo = new HashMap<>();
+        userInfo.put("email", email);
+        userInfo.put("nickname", nickname);
+        return userInfo;
     }
 
     private String selectRedirectUri(HttpServletRequest request) {
-        String originHeader = request.getHeader("Origin");
-        return (originHeader != null && originHeader.contains("Loveiw.com"))
-                ? "http://localhost:8080/login/oauth2/code/kakao"
-                : kakaoLocalRedirectUri;
-    }
+        String originHeader = request.getHeader("authorization");
 
-    private String executePostRequest(String url, HttpHeaders headers, MultiValueMap<String, String> parameters, String key) {
-        try {
-            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(parameters, headers);
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
-            return extractJsonValue(responseEntity, key, ErrorCode.KAKAO_ACCESS_TOKEN_FAILED, "AccessToken을 얻는 것을 실패했습니다.");
-        } catch (Exception e) {
-            logger.error("Failed to get access token: {}", e.getMessage());
-            throw new UnAuthorizedException("AccessToken을 얻는 것을 실패했습니다.", ErrorCode.KAKAO_ACCESS_TOKEN_FAILED);
-        }
-    }
-
-    private String executeGetRequest(String url, HttpHeaders headers, String parentKey, String childKey) {
-        try {
-            HttpEntity<String> request = new HttpEntity<>(headers);
-            ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-            return extractJsonValue(responseEntity, parentKey, childKey, ErrorCode.KAKAO_USER_INFO_FAILED, "유저의 정보를 얻지 못했습니다.");
-        } catch (Exception e) {
-            logger.error("Failed to get user info: {}", e.getMessage());
-            throw new UnAuthorizedException("유저의 정보를 얻지 못했습니다.", ErrorCode.KAKAO_USER_INFO_FAILED);
-        }
-    }
-
-    private String extractJsonValue(ResponseEntity<String> responseEntity, String key, ErrorCode errorCode, String errorMessage) {
-        if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
-            JsonObject jsonObject = JsonParser.parseString(responseEntity.getBody()).getAsJsonObject();
-            return jsonObject.get(key).getAsString();
+        if (originHeader != null && originHeader.contains("Bearer")) {
+            return kakaoLocalRedirectUri; // authorization 헤더가 있는 경우
         } else {
-            throw new UnAuthorizedException(errorMessage, errorCode);
+            return kakaoLocalRedirectUri; // authorization 헤더가 없는 경우
         }
     }
 
-    private String extractJsonValue(ResponseEntity<String> responseEntity, String parentKey, String childKey, ErrorCode errorCode, String errorMessage) {
-        if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
-            JsonObject jsonObject = JsonParser.parseString(responseEntity.getBody()).getAsJsonObject();
-            JsonObject parentObject = jsonObject.getAsJsonObject(parentKey);
-            return parentObject.get(childKey).getAsString();
-        } else {
-            throw new UnAuthorizedException(errorMessage, errorCode);
-        }
-    }
 }
+
+
+
+//@Service
+//@RequiredArgsConstructor
+//public class KakaoApi {
+//
+//    @Value("${spring.security.oauth2.client.registration.kakao-local.client-id}")
+//    private String kakaoClientId;
+//
+//    @Value("${spring.security.oauth2.client.registration.kakao-local.redirect-uri}")
+//    private String kakaoLocalRedirectUri;
+//
+//    private final RestTemplate restTemplate;
+//    private static final String reqAccessTokenURL = "https://kauth.kakao.com/oauth/token";
+//    private static final String reqUserInfoURL = "https://kapi.kakao.com/v2/user/me";
+//
+//    public String getAccessToken(String authorize_code, HttpServletRequest request) {
+//        String access_Token;
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+//
+//        String redirectUri = this.selectRedirectUri(request);
+//
+//        MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+//        parameters.add("grant_type", "authorization_code");
+//        parameters.add("client_id", kakaoClientId);
+//        parameters.add("redirect_uri", redirectUri);
+//        parameters.add("code", authorize_code);
+//
+//        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(parameters, headers);
+//
+//        ResponseEntity<String> responseEntity = restTemplate.postForEntity(reqAccessTokenURL, requestEntity, String.class);
+//
+//        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+//            JsonObject jsonObject = JsonParser.parseString(Objects.requireNonNull(responseEntity.getBody())).getAsJsonObject();
+//            access_Token = jsonObject.get("access_token").getAsString();
+//        } else {
+//            throw new UnAuthorizedException("Failed to get access token!", ErrorCode.KAKAO_ACCESS_TOKEN_FAILED);
+//        }
+//
+//        return access_Token;
+//    }
+//
+//    public String getUserInfo(String accessToken) {
+//        String email;
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setBearerAuth(accessToken);
+//
+//        HttpEntity request = new HttpEntity(headers);
+//
+//        ResponseEntity<String> responseEntity = restTemplate.exchange(reqUserInfoURL, HttpMethod.GET, request, String.class);
+//
+//        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+//            JsonObject jsonObject = JsonParser.parseString(Objects.requireNonNull(responseEntity.getBody())).getAsJsonObject();
+//            JsonObject kakaoAccount = jsonObject.getAsJsonObject("kakao_account");
+//            email = kakaoAccount.getAsJsonObject().get("email").getAsString();
+//        } else {
+//            throw new UnAuthorizedException("Failed to get user info!", ErrorCode.KAKAO_USER_INFO_FAILED);
+//        }
+//
+//        return email;
+//    }
+//
+//    private String selectRedirectUri(HttpServletRequest request) {
+//        // origin 또는 referer 헤더를 확인
+//        String originHeader = request.getHeader("origin");
+//        String refererHeader = request.getHeader("referer");
+//
+//        // origin 또는 referer가 localhost를 포함하는지 확인
+//        if ((originHeader != null && originHeader.contains("localhost")) ||
+//                (refererHeader != null && refererHeader.contains("localhost"))) {
+//            return "http://localhost:8080/login/oauth2/code/kakao";
+//        }
+//
+//        // origin이나 referer가 null일 경우 ServerName을 체크하여 localhost인지 확인
+//        if ("localhost".equals(request.getServerName())) {
+//            return "http://localhost:8080/login/oauth2/code/kakao";
+//        }
+//
+//        // 외부 URI라면 kakaoLocalRedirectUri 반환
+//        return kakaoLocalRedirectUri;
+//    }
+//
+//}
