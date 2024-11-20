@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import solo.project.dto.User.kakao.UserKakaoResponseDto;
+import solo.project.dto.kakao.UserKakaoResponseDto;
 import solo.project.dto.User.request.UserCancel;
 import solo.project.dto.User.request.UserLoginRequestDto;
 import solo.project.dto.User.response.UserProfileResponseDto;
