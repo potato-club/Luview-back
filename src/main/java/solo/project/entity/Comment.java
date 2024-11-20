@@ -14,8 +14,10 @@ import java.util.List;
 public class Comment extends BaseTimeEntity{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
   private Long id;
 
+  @Column
   private String content;
 
   @ManyToOne(fetch = FetchType.LAZY)

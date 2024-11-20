@@ -17,6 +17,7 @@ public class Place {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
   private Long id;
 
   @Column(unique = true, nullable = false)

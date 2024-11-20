@@ -15,6 +15,7 @@ public class ReviewPlace {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
   private Long id;
 
   @Column(nullable = false)

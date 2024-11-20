@@ -12,6 +12,7 @@ public class Like {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)  // Like n ~ 1 User

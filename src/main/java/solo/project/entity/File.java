@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class File {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
   private Long id;
 
   @Column(nullable = false, length = 512)
