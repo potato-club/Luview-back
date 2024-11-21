@@ -2,6 +2,7 @@ package solo.project.service.Impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import solo.project.dto.Place.request.PlaceRequestDto;
 import solo.project.entity.Place;
 import solo.project.entity.Review;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReviewPlaceServiceImpl implements ReviewPlaceService {
   private ReviewPlaceRepository reviewPlaceRepository;

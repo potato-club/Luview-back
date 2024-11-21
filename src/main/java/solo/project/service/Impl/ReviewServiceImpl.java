@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import solo.project.dto.Place.request.PlaceRequestDto;
 import solo.project.dto.Review.request.ReviewRequestDto;
 import solo.project.dto.Review.response.MainReviewResponseDto;
@@ -16,8 +17,6 @@ import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.TokenCreationException;
 import solo.project.error.exception.UnAuthorizedException;
-import solo.project.repository.PlaceRepository;
-import solo.project.repository.ReviewPlaceRepository;
 import solo.project.repository.ReviewRepository;
 import org.springframework.data.domain.Pageable;
 import solo.project.service.PlaceService;
@@ -30,14 +29,13 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
   private final UserService userService;
   private final ReviewRepository reviewRepository;
   private final PlaceService placeService;
-  private final PlaceRepository placeRepository;
   private final ReviewPlaceService reviewPlaceService;
-  private final ReviewPlaceRepository reviewPlaceRepository;
 
 
   @Override
@@ -82,7 +80,7 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   @Override
-  public ReviewResponseDto getReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
+  public Review getReview(Long id) {
     return null;
   }
 

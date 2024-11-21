@@ -73,11 +73,11 @@ public class Review extends BaseTimeEntity {
     this.deleted = deleted;
   }
 
-  public void upPostLikeCount() {
+  public void upReviewLikeCount() {
     this.likeCount += 1;
   }
 
-  public void downPostLikeCount() {
+  public void downReviewLikeCount() {
     this.likeCount -= 1;
   }
 
@@ -85,4 +85,11 @@ public class Review extends BaseTimeEntity {
     this.viewCount += 1;
   }
 
+  public void upCommentCount() {
+    this.commentCount += 1;
+  }
+
+  public void downCommentCount() {
+    this.commentCount -= 1;
+  }
 }

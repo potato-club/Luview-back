@@ -2,6 +2,7 @@ package solo.project.service.Impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import solo.project.dto.Place.request.PlaceRequestDto;
 import solo.project.entity.Place;
 import solo.project.repository.PlaceRepository;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PlaceServiceImpl implements PlaceService {
   private final PlaceRepository placeRepository;

@@ -7,6 +7,6 @@ import solo.project.entity.Comment;
 import java.util.List;
 
 @Repository
-public interface CommentRepository extends JpaRepository<Comment, Integer> {
+public interface CommentRepository extends JpaRepository<Comment, Long> {
   List<Comment> findByReviewId(Long reviewId);
 }

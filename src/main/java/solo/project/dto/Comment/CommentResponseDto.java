@@ -17,7 +17,6 @@ public class CommentResponseDto {
   private Long parent_id;
   private Long id;
   private String content;
-  private int likeCount;
   private List<CommentResponseDto> children = new ArrayList<>();
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
   private LocalDateTime createdDate;
