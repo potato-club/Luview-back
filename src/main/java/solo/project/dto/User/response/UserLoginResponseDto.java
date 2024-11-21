@@ -1,4 +1,4 @@
-package solo.project.dto.user.response;
+package solo.project.dto.User.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

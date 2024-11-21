@@ -3,11 +3,11 @@ package solo.project.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
-import solo.project.dto.user.kakao.UserKakaoResponseDto;
-import solo.project.dto.user.request.UserLoginRequestDto;
-import solo.project.dto.user.response.UserLoginResponseDto;
-import solo.project.dto.user.response.UserProfileResponseDto;
-import solo.project.dto.user.request.UserSignUpRequestDto;
+import solo.project.dto.User.kakao.UserKakaoResponseDto;
+import solo.project.dto.User.request.UserLoginRequestDto;
+import solo.project.dto.User.response.UserLoginResponseDto;
+import solo.project.dto.User.response.UserProfileResponseDto;
+import solo.project.dto.User.request.UserSignUpRequestDto;
 import solo.project.entity.User;
 
 @Service
