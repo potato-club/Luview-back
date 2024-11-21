@@ -100,12 +100,12 @@ public class JwtTokenProvider {
 
     //소셜로그인 토큰 헤더 설정 액세스
     public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
-        response.setHeader("authorization", "Bearer" + accessToken);
+        response.setHeader("authorization", "Bearer " + accessToken);
     }
 
     //토큰 헤더 설정
     public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
-        response.setHeader("refreshToken", "Bearer" + refreshToken);
+        response.setHeader("refreshToken", "Bearer " + refreshToken);
     }
     //AES를 사용하여 암호화
     private String encrypt(String plainToken) throws Exception {
@@ -203,7 +203,7 @@ public class JwtTokenProvider {
 
     //요청을 받으면 AT반환 없다면 null
     public String resolveAccessToken(HttpServletRequest request) {
-        String accessToken = request.getHeader("authorization");
+        String accessToken = request.getHeader("authorization").substring(7);
         String refreshToken = request.getHeader("refreshToken");
         if (accessToken != null && refreshToken == null) {
             return accessToken;

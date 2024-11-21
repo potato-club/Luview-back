@@ -47,7 +47,7 @@ public class CommentController {
   }
 
   @Operation(summary = "댓글 수정")
-  @GetMapping("/{comment_id}")
+  @PutMapping("/{comment_id}")
   public ResponseEntity<String> updateComment(@PathVariable Long comment_id,
                                                               @RequestBody CommentRequestDto commentRequestDto,
                                                               HttpServletRequest request) {
@@ -56,7 +56,7 @@ public class CommentController {
   }
 
   @Operation(summary = "댓글 삭제")
-  @GetMapping("/{comment_id}")
+  @DeleteMapping("/{comment_id}")
   public ResponseEntity<String> deleteComment(@PathVariable Long comment_id, HttpServletRequest request){
     commentService.deleteComment(comment_id, request);
     return ResponseEntity.ok("댓글 삭제 완료");
