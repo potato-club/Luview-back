@@ -7,9 +7,9 @@ import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import solo.project.dto.jwt.JwtTokenProvider;
 import solo.project.dto.kakao.UserKakaoResponseDto;
 import solo.project.kakao.KakaoApi;
-import solo.project.dto.jwt.JwtTokenProvider;
 import solo.project.dto.User.request.UserLoginRequestDto;
 import solo.project.dto.User.response.UserProfileResponseDto;
 import solo.project.dto.User.response.UserLoginResponseDto;
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserKakaoResponseDto kakaoLogin(String code,  HttpServletRequest request, HttpServletResponse response){
+    public UserKakaoResponseDto kakaoLogin(String code, HttpServletRequest request, HttpServletResponse response){
         String access_token= kakaoApi.getAccessToken(code, request);
         Map<String, String> userInfo = kakaoApi.getUserInfo(access_token);
         String email = userInfo.get("email");
