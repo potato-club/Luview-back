@@ -1,4 +1,4 @@
-package solo.project.Config;
+package solo.project.config;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;

@@ -1,4 +1,4 @@
-package solo.project.Config;
+package solo.project.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

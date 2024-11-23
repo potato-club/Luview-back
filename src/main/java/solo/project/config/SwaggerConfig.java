@@ -1,4 +1,4 @@
-package solo.project.Config;
+package solo.project.config;
 
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
