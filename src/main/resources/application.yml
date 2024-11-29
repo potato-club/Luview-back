@@ -1,12 +1,9 @@
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/soloproject
+    url: jdbc:mysql://my-db:3306/mydb
     username: root
-    password: 1234
-
-  profiles:
-    active: local
+    password: pwd1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   security:
     oauth2:
@@ -51,7 +48,7 @@ spring:
     suffix: .html
   data:
     redis:
-      host: localhost
+      host: my-cache-server
       port: 6379
 
 jwt:

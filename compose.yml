@@ -1,6 +1,39 @@
 services:
-  my-web-server:
-    container_name: webserver
-    image: nginx
+  my-server:
+    build: .
     ports:
-      - 80:80
+      - 8080:8080
+    depends_on:
+      my-db:
+        condition: service_healthy
+      my-cache-server:
+        condition: service_healthy
+    environment:
+      JASYPT_ENCRYPTOR_PASSWORD: "@!Secr3tP@ssw0rd$2024"
+
+    # 필요한 것들 로컬에 있던거 추가해줘야함
+
+      #mysql
+  my-db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: pwd1234
+      MYSQL_DATABASE: mydb
+    volumes:
+      - ./mysql_data:/vcr/lib/mysql
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping" ]
+      interval: 5s
+      retries: 10
+
+      # redis
+  my-cache-server:
+    image: redis
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      retries: 10
