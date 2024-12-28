@@ -1,9 +1,10 @@
-package solo.project.service;
+package solo.project.service.Impl;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import solo.project.dto.Place.request.PlaceRequestDto;
 import solo.project.dto.Review.request.ReviewRequestDto;
 import solo.project.dto.Review.response.MainReviewResponseDto;
@@ -16,26 +17,27 @@ import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.TokenCreationException;
 import solo.project.error.exception.UnAuthorizedException;
-import solo.project.repository.PlaceRepository;
-import solo.project.repository.ReviewPlaceRepository;
 import solo.project.repository.ReviewRepository;
 import org.springframework.data.domain.Pageable;
+import solo.project.service.PlaceService;
+import solo.project.service.ReviewPlaceService;
+import solo.project.service.ReviewService;
+import solo.project.service.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
   private final UserService userService;
   private final ReviewRepository reviewRepository;
   private final PlaceService placeService;
-  private final PlaceRepository placeRepository;
   private final ReviewPlaceService reviewPlaceService;
-  private final ReviewPlaceRepository reviewPlaceRepository;
 
-
+  @Transactional
   @Override
   public void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
     // 사용자 인증 및 식별 request에서 토큰 값을 받아서 유저 찾기
@@ -54,14 +56,10 @@ public class ReviewServiceImpl implements ReviewService {
     Review savedReview = reviewRepository.save(review);
 
     //장소 저장 후 그 장소들 반환
-    List<PlaceRequestDto> placeRequestDtos = reviewRequestDto.getPlaces();
-    List<Place> places = placeService.createPlace(placeRequestDtos);
-
-
+    List<Place> places = placeService.createPlace(reviewRequestDto.getPlaces());
 
     // 장소랑 리뷰 받아서 리뷰랑 장소 중간 테이블 생성
-    reviewPlaceService.createReviewPlace(savedReview, places, reviewRequestDto.getRating());
-
+    reviewPlaceService.createReviewPlaces(savedReview, places, reviewRequestDto.getPlaces());
   }
 
   @Override
@@ -82,7 +80,7 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   @Override
-  public ReviewResponseDto getReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
+  public Review getReview(Long id) {
     return null;
   }
 
@@ -94,7 +92,6 @@ public class ReviewServiceImpl implements ReviewService {
   @Override
   public void updateReview(Long id, ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
     User user = userService.findUserByToken(request);
-
     Review review = reviewRepository.findById(id).orElse(null);
     if (review == null)
       throw new NotFoundException("수정할 수 없는 리뷰글입니다", ErrorCode.NOT_FOUND_EXCEPTION);
@@ -106,7 +103,6 @@ public class ReviewServiceImpl implements ReviewService {
     for(PlaceRequestDto placeRequestDto : reviewRequestDto.getPlaces()) {
 
     }
-
   }
 
   @Override
@@ -119,11 +115,15 @@ public class ReviewServiceImpl implements ReviewService {
     if(category == null || category.isEmpty()){
       place = review.getReviewPlaces().get(0).getPlace();
     } else {
-      for (ReviewPlace reviewPlacetemp : review.getReviewPlaces()) {
-        if (reviewPlacetemp.getPlace().getCategory().equals(category)) {
-          place = reviewPlacetemp.getPlace();
+      for (ReviewPlace reviewPlace : review.getReviewPlaces()) {
+        if (reviewPlace.getPlace().getCategory().equals(category)) {
+          place = reviewPlace.getPlace();
         }
       }
+    }
+
+    if(place == null) {
+      throw new IllegalArgumentException("No Place found for the given category or review.");
     }
 
     return MainReviewResponseDto.builder()

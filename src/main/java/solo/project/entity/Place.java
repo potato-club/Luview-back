@@ -17,6 +17,7 @@ public class Place {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
   private Long id;
 
   @Column(unique = true, nullable = false)
@@ -39,6 +40,8 @@ public class Place {
 
   @Column
   private Double longitude;
+
+
 
   @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ReviewPlace> reviewPlaces = new ArrayList<>();

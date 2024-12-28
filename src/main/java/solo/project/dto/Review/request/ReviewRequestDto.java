@@ -9,8 +9,6 @@ import solo.project.dto.Place.request.PlaceRequestDto;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class ReviewRequestDto {
   @Schema(description = "제목")
   private String title;
@@ -18,6 +16,4 @@ public class ReviewRequestDto {
   private String content;
   @Schema(description = "장소")
   private List<PlaceRequestDto> places;
-  @Schema(description = "장소 별점")
-  private int rating;
 }

@@ -7,6 +7,6 @@ import solo.project.entity.Review;
 import java.util.List;
 
 public interface ReviewPlaceService {
-  void createReviewPlace(Review review, List<Place> places, int rating);
-  void updateReviewPlace(Review review, PlaceRequestDto placeRequestDto);
+  void createReviewPlaces(Review review, List<Place> places, List<PlaceRequestDto> placeRequestDtos);
+
 }

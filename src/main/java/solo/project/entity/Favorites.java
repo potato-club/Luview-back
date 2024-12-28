@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class Favorites {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)  // Favorites n ~ 1 User

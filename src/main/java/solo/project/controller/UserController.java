@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import solo.project.dto.User.kakao.UserKakaoResponseDto;
+import solo.project.dto.kakao.UserKakaoResponseDto;
 import solo.project.dto.User.request.UserCancel;
 import solo.project.dto.User.request.UserLoginRequestDto;
 import solo.project.dto.User.response.UserProfileResponseDto;
@@ -23,8 +23,8 @@ public class UserController {
     private final UserService userService;
     @Operation(summary = "카카오 로그인API")
     @GetMapping("/login/kakao")
-    public UserKakaoResponseDto kakaoLogin(@RequestParam(required = false) String code, HttpServletRequest request, HttpServletResponse response) {
-        return userService.kakaoLogin(code, request, response);
+    public UserKakaoResponseDto kakaoLogin(@RequestParam("code") String authorizeCode, HttpServletRequest request, HttpServletResponse response) {
+        return userService.kakaoLogin(authorizeCode, request, response);
     }
 
     //회원가입

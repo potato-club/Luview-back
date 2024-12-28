@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/review")
-@Tag(name="Review CRUD", description = "리뷰글 CRUD")
+@Tag(name="Review Controller", description = "리뷰글 API")
 public class ReviewController {
   private final ReviewService reviewService;
 
@@ -30,7 +30,7 @@ public class ReviewController {
     return ResponseEntity.ok("리뷰글 작성 완료");
   }
 
-  @Operation(summary = "메인 리뷰글 조회")
+  @Operation(summary = "메인 리뷰글 목록 조회")
   @GetMapping("/main")
   public ResponseEntity<List<MainReviewResponseDto>> getMainReview(@ParameterObject
                                                                      @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)
@@ -39,7 +39,7 @@ public class ReviewController {
     return ResponseEntity.ok(mainReviews);
   }
 
-  @Operation(summary = "카테고리 정렬 조회")
+  @Operation(summary = "카테고리 정렬 목록 조회")
   @GetMapping("/{category}")
   public ResponseEntity<List<MainReviewResponseDto>> getMainReviewByCategory(@PathVariable String category,
                                                                              @ParameterObject

@@ -17,6 +17,7 @@ public class Review extends BaseTimeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
   private Long id;
 
   @Column(nullable = false)
@@ -54,6 +55,13 @@ public class Review extends BaseTimeEntity {
   @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Comment> comments = new ArrayList<>();
 
+  @Builder
+  public Review(Long id, String title, String content, boolean deleted) {
+    this.id = id;
+    this.title = title;
+    this.content = content;
+    this.deleted = deleted;
+  }
 
 
   public void update(ReviewRequestDto reviewRequestDto) {
@@ -65,11 +73,11 @@ public class Review extends BaseTimeEntity {
     this.deleted = deleted;
   }
 
-  public void upPostLikeCount() {
+  public void upReviewLikeCount() {
     this.likeCount += 1;
   }
 
-  public void downPostLikeCount() {
+  public void downReviewLikeCount() {
     this.likeCount -= 1;
   }
 
@@ -77,4 +85,11 @@ public class Review extends BaseTimeEntity {
     this.viewCount += 1;
   }
 
+  public void upCommentCount() {
+    this.commentCount += 1;
+  }
+
+  public void downCommentCount() {
+    this.commentCount -= 1;
+  }
 }

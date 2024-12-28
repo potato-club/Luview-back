@@ -5,6 +5,7 @@ import lombok.*;
 
 @Entity
 @Getter
+@Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Table(name = "likes")
@@ -12,7 +13,11 @@ public class Like {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
   private Long id;
+
+  @Column(columnDefinition = "TINYINT(1)")
+  private boolean isLiked;
 
   @ManyToOne(fetch = FetchType.LAZY)  // Like n ~ 1 User
   @JoinColumn(name = "user_id")
