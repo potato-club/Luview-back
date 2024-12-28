@@ -44,7 +44,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     likeRepository.delete(like);
-    review.upReviewLikeCount();
+    review.downReviewLikeCount();
     return "해당 리뷰글에 좋아요가 취소되었습니다.";
   }
 }

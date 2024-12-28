@@ -26,10 +26,12 @@ import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.UserRepository;
 
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Optional;
 
@@ -153,7 +155,7 @@ public class JwtTokenProvider {
         String email = extractEmail(token);
         String role = extractRole(token); // 토큰에서 역할 추출
 
-        if ("1".equals(role)) {
+        if ("0".equals(role)) {
             Optional<User> userOptional = userRepository.findByEmail(email); // 이메일로 사용자 찾기
             if (userOptional.isEmpty()) {
                 throw new NotFoundException("사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION);

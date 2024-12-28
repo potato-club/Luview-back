@@ -37,7 +37,7 @@ public class ReviewServiceImpl implements ReviewService {
   private final PlaceService placeService;
   private final ReviewPlaceService reviewPlaceService;
 
-
+  @Transactional
   @Override
   public void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
     // 사용자 인증 및 식별 request에서 토큰 값을 받아서 유저 찾기
@@ -92,7 +92,6 @@ public class ReviewServiceImpl implements ReviewService {
   @Override
   public void updateReview(Long id, ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
     User user = userService.findUserByToken(request);
-
     Review review = reviewRepository.findById(id).orElse(null);
     if (review == null)
       throw new NotFoundException("수정할 수 없는 리뷰글입니다", ErrorCode.NOT_FOUND_EXCEPTION);

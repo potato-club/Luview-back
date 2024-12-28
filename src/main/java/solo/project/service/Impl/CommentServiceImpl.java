@@ -38,7 +38,7 @@ public class CommentServiceImpl implements CommentService {
     if(user == null){
       throw new NotFoundException("로그인 후 댓글 작성 가능합니다.",ErrorCode.NOT_FOUND_EXCEPTION);
     }
-    Review review = reviewService.getReview(review_id);
+    Review review = reviewRepository.findById(review_id).orElse(null);
     if (review == null) {
       throw new NotFoundException("찾을 수 없는 리뷰글입니다.", ErrorCode.NOT_FOUND_EXCEPTION);
     }
@@ -49,16 +49,17 @@ public class CommentServiceImpl implements CommentService {
         .content(commentRequestDto.getContent())
         .build();
 
+    review.upCommentCount();
     commentRepository.save(comment);
   }
 
   @Override
-  public void createReply(Long reviewId, Long comment_id, CommentRequestDto commentRequestDto, HttpServletRequest request) {
+  public void createReply(Long review_Id, Long comment_id, CommentRequestDto commentRequestDto, HttpServletRequest request) {
     User user = userService.findUserByToken(request);
     if(user == null){
       throw new NotFoundException("로그인 후 댓글 작성 가능합니다.",ErrorCode.NOT_FOUND_EXCEPTION);
     }
-    Review review = reviewService.getReview(reviewId);
+    Review review = reviewRepository.findById(review_Id).orElse(null);
     if (review == null) {
       throw new NotFoundException("찾을 수 없는 리뷰글입니다.", ErrorCode.NOT_FOUND_EXCEPTION);
     }
@@ -77,6 +78,7 @@ public class CommentServiceImpl implements CommentService {
         .content(commentRequestDto.getContent())
         .build();
 
+    review.upCommentCount();
     commentRepository.save(comment);
   }
 
