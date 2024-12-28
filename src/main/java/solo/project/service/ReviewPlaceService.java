@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface ReviewPlaceService {
   void createReviewPlaces(Review review, List<Place> places, List<PlaceRequestDto> placeRequestDtos);
-
+  List<Place> findPlacesByReview(Review review);
+  void deleteReviewPlaces(Review review);
 }

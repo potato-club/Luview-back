@@ -24,7 +24,7 @@ public interface ReviewService {
   //리뷰 수정
   void updateReview(Long id, ReviewRequestDto reviewRequestDto, HttpServletRequest request);
   //리뷰 삭제
-  void deleteReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request);
+  void deleteReview(Long id, HttpServletRequest request);
 
 
 }

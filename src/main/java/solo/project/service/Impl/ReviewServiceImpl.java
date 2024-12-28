@@ -15,7 +15,6 @@ import solo.project.entity.ReviewPlace;
 import solo.project.entity.User;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
-import solo.project.error.exception.TokenCreationException;
 import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.ReviewRepository;
 import org.springframework.data.domain.Pageable;
@@ -37,20 +36,25 @@ public class ReviewServiceImpl implements ReviewService {
   private final PlaceService placeService;
   private final ReviewPlaceService reviewPlaceService;
 
-  @Transactional
   @Override
   public void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
     // 사용자 인증 및 식별 request에서 토큰 값을 받아서 유저 찾기
     User user = userService.findUserByToken(request);
+    if(user == null)
+      throw new UnAuthorizedException("로그인 후 리뷰글 작성 가능", ErrorCode.UNAUTHORIZED_EXCEPTION);
+
     // 장소를 한개 이상 받기 위한 검사 코드 (장소가 없거나 비어있는 리스트일 경우 에러)
     if(reviewRequestDto.getPlaces() == null || reviewRequestDto.getPlaces().isEmpty())
-      throw new TokenCreationException("장소를 등록해주세요!", ErrorCode.REVIEW_PLACE_NULL);
+      throw new NotFoundException("장소를 등록해주세요!", ErrorCode.NOT_FOUND_EXCEPTION);
 
     // 리뷰 엔티티 생성 (한 번만 생성)
     Review review = Review.builder()
         .user(user)
         .title(reviewRequestDto.getTitle())
         .content(reviewRequestDto.getContent())
+        .viewCount(0)
+        .likeCount(0)
+        .commentCount(0)
         .build();
     // 리뷰를 저장하고, 리뷰 ID를 받아옴
     Review savedReview = reviewRepository.save(review);
@@ -92,22 +96,42 @@ public class ReviewServiceImpl implements ReviewService {
   @Override
   public void updateReview(Long id, ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
     User user = userService.findUserByToken(request);
+    if(user == null)
+      throw new UnAuthorizedException("리뷰글 수정 권한이 없습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
     Review review = reviewRepository.findById(id).orElse(null);
     if (review == null)
       throw new NotFoundException("수정할 수 없는 리뷰글입니다", ErrorCode.NOT_FOUND_EXCEPTION);
     if (review.getUser() != user)
-      throw new UnAuthorizedException("게시글 수정 권한이 없습니다", ErrorCode.UNAUTHORIZED_EXCEPTION);
+      throw new UnAuthorizedException("리뷰글 수정 권한이 없습니다", ErrorCode.UNAUTHORIZED_EXCEPTION);
 
     review.update(reviewRequestDto);  // 제목, 내용 수정
 
-    for(PlaceRequestDto placeRequestDto : reviewRequestDto.getPlaces()) {
+    List<Place> existingPlace = reviewPlaceService.findPlacesByReview(review); // 기존 장소
+    List<PlaceRequestDto> newPlace = reviewRequestDto.getPlaces();  // 새로 받은 장소
 
+    // 기존 장소와 새로 받은 장소의 변경 여부를 판단
+    if(hasPlaceChanges(existingPlace, newPlace)){
+      // 기존 리뷰-장소 관계 삭제
+      reviewPlaceService.deleteReviewPlaces(review);
+      // 새로운 장소 저장 및 리뷰-장소 관계 생성
+      List<Place> places = placeService.createPlace(newPlace);
+      reviewPlaceService.createReviewPlaces(review, places, reviewRequestDto.getPlaces());
     }
   }
 
   @Override
-  public void deleteReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
+  public void deleteReview(Long id, HttpServletRequest request) {
+    User user = userService.findUserByToken(request);
+    if(user == null)
+      throw new UnAuthorizedException("리뷰글 삭제 권한이 없습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
 
+    Review review = reviewRepository.findById(id).orElse(null);
+    if(review == null)
+      throw new NotFoundException("삭제할 리뷰글이 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION);
+    if(review.getUser() != user)
+      throw new UnAuthorizedException("리뷰글 삭제 권한이 없습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
+
+    reviewRepository.delete(review);
   }
 
   private MainReviewResponseDto createMainReviewDto(Review review, String category) {
@@ -123,7 +147,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     if(place == null) {
-      throw new IllegalArgumentException("No Place found for the given category or review.");
+      throw new IllegalArgumentException("해당 카테고리 또는 리뷰에 대한 장소를 찾을 수 없습니다.");
     }
 
     return MainReviewResponseDto.builder()
@@ -131,11 +155,31 @@ public class ReviewServiceImpl implements ReviewService {
                                 .category(place.getCategory())
                                 .placeName(place.getPlaceName())
                                 .title(review.getTitle())
-                                .likeCount(0) // like 증감 코드 구현후 수정 해야함
-                                .commentCount(0)  // comment 코드 구현후 수정해야함
+                                .likeCount(review.getLikeCount())
+                                .commentCount(review.getCommentCount())
                                 .userNickName(review.getUser().getNickname())
                                 .firstFileUrl("review.getFiles().get(0).getFileUrl()")  // file 구현후 수정해야함
                                 .build();
+  }
+
+  // 기존 장소와 새로 입력된 장소의 변경 여부를 판단
+  private boolean hasPlaceChanges(List<Place> existingPlaces, List<PlaceRequestDto> newPlaces) {
+    // 1. 장소 개수 비교
+    if (existingPlaces.size() != newPlaces.size()) {
+      return true;
+    }
+
+    // 2. 각 장소 순서 비교
+    for (int i = 0; i < existingPlaces.size(); i++) {
+      Place existingPlace = existingPlaces.get(i);
+      PlaceRequestDto newPlace = newPlaces.get(i);
+
+      // 장소의 고유 식별자(ID) 순서 변경
+      if (!existingPlace.getKakaoPlaceId().equals(newPlace.getKakaoPlaceId())) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }
