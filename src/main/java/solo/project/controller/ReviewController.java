@@ -49,4 +49,21 @@ public class ReviewController {
     return ResponseEntity.ok(categoryReviews);
   }
 
+  @Operation(summary = "리뷰글 수정")
+  @PutMapping("/{id}")
+  public ResponseEntity<String> updateReview(@PathVariable Long id,
+                                             @RequestBody ReviewRequestDto reviewRequestDto,
+                                             HttpServletRequest request) {
+    reviewService.updateReview(id, reviewRequestDto, request);
+    return ResponseEntity.ok("리뷰글 수정 완료");
+  }
+
+  @Operation(summary = "리뷰글 삭제")
+  @DeleteMapping("/{id}")
+  public ResponseEntity<String> deleteReview(@PathVariable Long id,
+                                             @RequestBody ReviewRequestDto reviewRequestDto,
+                                             HttpServletRequest request) {
+    reviewService.deleteReview(id, request);
+    return ResponseEntity.ok("리뷰글 삭제 완료");
+  }
 }
