@@ -16,6 +16,7 @@ import solo.project.entity.User;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
+import solo.project.repository.ReviewPlaceRepository;
 import solo.project.repository.ReviewRepository;
 import org.springframework.data.domain.Pageable;
 import solo.project.service.PlaceService;
@@ -35,6 +36,7 @@ public class ReviewServiceImpl implements ReviewService {
   private final ReviewRepository reviewRepository;
   private final PlaceService placeService;
   private final ReviewPlaceService reviewPlaceService;
+  private final ReviewPlaceRepository reviewPlaceRepository;
 
   @Override
   public void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request) {
@@ -106,16 +108,16 @@ public class ReviewServiceImpl implements ReviewService {
 
     review.update(reviewRequestDto);  // 제목, 내용 수정
 
-    List<Place> existingPlace = reviewPlaceService.findPlacesByReview(review); // 기존 장소
+    List<ReviewPlace> oldPlace = reviewPlaceRepository.findByReview(review); // 기존 리뷰장소(장소와 별점)
     List<PlaceRequestDto> newPlace = reviewRequestDto.getPlaces();  // 새로 받은 장소
 
     // 기존 장소와 새로 받은 장소의 변경 여부를 판단
-    if(hasPlaceChanges(existingPlace, newPlace)){
+    if(hasChanges(oldPlace, newPlace)){
       // 기존 리뷰-장소 관계 삭제
       reviewPlaceService.deleteReviewPlaces(review);
       // 새로운 장소 저장 및 리뷰-장소 관계 생성
       List<Place> places = placeService.createPlace(newPlace);
-      reviewPlaceService.createReviewPlaces(review, places, reviewRequestDto.getPlaces());
+      reviewPlaceService.createReviewPlaces(review, places, newPlace);
     }
   }
 
@@ -163,7 +165,10 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   // 기존 장소와 새로 입력된 장소의 변경 여부를 판단
-  private boolean hasPlaceChanges(List<Place> existingPlaces, List<PlaceRequestDto> newPlaces) {
+  private boolean hasChanges(List<ReviewPlace> oldPlace, List<PlaceRequestDto> newPlaces) {
+    // 리뷰장소에서 장소 가져오기
+    List<Place> existingPlaces = oldPlace.stream().map(ReviewPlace::getPlace).toList();
+    List<Integer> ratings = oldPlace.stream().map(ReviewPlace::getRating).toList();
     // 1. 장소 개수 비교
     if (existingPlaces.size() != newPlaces.size()) {
       return true;
@@ -175,11 +180,11 @@ public class ReviewServiceImpl implements ReviewService {
       PlaceRequestDto newPlace = newPlaces.get(i);
 
       // 장소의 고유 식별자(ID) 순서 변경
-      if (!existingPlace.getKakaoPlaceId().equals(newPlace.getKakaoPlaceId())) {
+      if (!existingPlace.getKakaoPlaceId().equals(newPlace.getKakaoPlaceId()) ||
+          !ratings.get(i).equals(newPlace.getRating())) {
         return true;
       }
     }
     return false;
   }
-
 }
