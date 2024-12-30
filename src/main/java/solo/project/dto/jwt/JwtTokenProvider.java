@@ -26,10 +26,12 @@ import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.UserRepository;
 
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Optional;
 
@@ -100,12 +102,12 @@ public class JwtTokenProvider {
 
     //소셜로그인 토큰 헤더 설정 액세스
     public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
-        response.setHeader("authorization", "Bearer" + accessToken);
+        response.setHeader("authorization", "Bearer " + accessToken);
     }
 
     //토큰 헤더 설정
     public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
-        response.setHeader("refreshToken", "Bearer" + refreshToken);
+        response.setHeader("refreshToken", "Bearer " + refreshToken);
     }
     //AES를 사용하여 암호화
     private String encrypt(String plainToken) throws Exception {
@@ -153,7 +155,7 @@ public class JwtTokenProvider {
         String email = extractEmail(token);
         String role = extractRole(token); // 토큰에서 역할 추출
 
-        if ("1".equals(role)) {
+        if ("0".equals(role)) {
             Optional<User> userOptional = userRepository.findByEmail(email); // 이메일로 사용자 찾기
             if (userOptional.isEmpty()) {
                 throw new NotFoundException("사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION);
@@ -203,7 +205,7 @@ public class JwtTokenProvider {
 
     //요청을 받으면 AT반환 없다면 null
     public String resolveAccessToken(HttpServletRequest request) {
-        String accessToken = request.getHeader("authorization");
+        String accessToken = request.getHeader("authorization").substring(7);
         String refreshToken = request.getHeader("refreshToken");
         if (accessToken != null && refreshToken == null) {
             return accessToken;

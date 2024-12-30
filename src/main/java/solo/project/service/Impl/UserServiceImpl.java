@@ -1,7 +1,8 @@
-package solo.project.service;
+package solo.project.service.Impl;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,13 +22,16 @@ import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.UserRepository;
+import solo.project.service.RedisJwtService;
+import solo.project.service.UserService;
 
 import java.util.Map;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RedisJwtService redisJwtService;

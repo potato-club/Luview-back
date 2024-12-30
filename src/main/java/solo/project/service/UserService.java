@@ -10,6 +10,7 @@ import solo.project.dto.User.response.UserProfileResponseDto;
 import solo.project.dto.User.request.UserSignUpRequestDto;
 import solo.project.entity.User;
 
+
 @Service
 public interface UserService {
     UserKakaoResponseDto kakaoLogin(String code,  HttpServletRequest request, HttpServletResponse response);

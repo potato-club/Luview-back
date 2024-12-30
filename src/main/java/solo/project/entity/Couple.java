@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class Couple extends BaseTimeEntity{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
   private Long id;
 
   @Column(columnDefinition = "TINYINT(1)")
