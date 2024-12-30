@@ -92,4 +92,8 @@ public class Review extends BaseTimeEntity {
   public void downCommentCount() {
     this.commentCount -= 1;
   }
+
+  public void downCommentCount(int childCommentCount){
+    this.commentCount -= 1+childCommentCount;
+  }
 }

@@ -148,6 +148,10 @@ public class CommentServiceImpl implements CommentService {
       throw new UnAuthorizedException("댓글 삭제 권한이 없습니다", ErrorCode.UNAUTHORIZED_EXCEPTION);
 
     Review review = comment.getReview();
+    if(comment.getChildren() != null){
+      int childrensCount = comment.getChildren().size();
+      review.downCommentCount(childrensCount);
+    }
     review.downCommentCount();
     commentRepository.delete(comment);
   }
