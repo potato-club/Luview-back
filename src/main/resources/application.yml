@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/soloproject
-    username: root
-    password: 1234
+    url: jdbc:mysql://localhost:3306/Test
+    username: ENC(eiR6Ob23EnJdbYzxlEB7Aw==)
+    password: ENC(3sRnlrAW+hwfRtZTgCDYAVpk9AObDlih)
 
   profiles:
     active: local
@@ -13,8 +13,8 @@ spring:
       client:
         registration:
           kakao:
-            client-id: b87964884ee98b23696ab1fcceef3dd1
-            client-secret: uJqn60AcgVDkKtxkwu62L6vbT6zCV0Yg
+            client-id: ENC(GJibhPvU2RYRxO0iHcRX/OBAgdt5ZSfG9ppUeU9QJ72+VKDHQPfq/monNTavk1Qk)
+            client-secret: ENC(ZWZ9PZ0ptV3+SusNg0hN3h1wkPIgX1YGspOiVCDvfiHNfhXPUVnrhTlf77sUIkSc)
             scope:
               - account_email
               - profile_nickname
@@ -56,12 +56,12 @@ spring:
 
 jwt:
   secret: ENC(L0SMyiS9QqgWuSakyPSc7J0aM6HezOpYLiwrwmJ6rRav+9WC6sReujEAPST1h3eFqp89YJsmkZ5FSyav/4oXNA==)
-  accessExpiration: 3600000
-  refreshExpiration: 604800000
+  accessExpiration: ENC(I4Ww2z4i+bjPwXfKQvRsVg==)
+  refreshExpiration: ENC(zPDwVOqtOLE+f9qymBV84oD0W5QiCQ6g)
   aesKey: ENC(mbqqJa4wFXb8ye5EY5i8Ieizoy/vfRhcmbRtJbe4weQ=)
 
 jasypt:
   encryptor:
-    password: "@!Secr3tP@ssw0rd$2024"
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}
 
 
