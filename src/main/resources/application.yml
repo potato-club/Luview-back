@@ -63,6 +63,6 @@ jwt:
 
 jasypt:
   encryptor:
-    password: "@!Secr3tP@ssw0rd$2024"
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}
 
 
