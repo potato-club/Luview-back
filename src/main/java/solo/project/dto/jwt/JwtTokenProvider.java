@@ -26,10 +26,12 @@ import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.UserRepository;
 
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Optional;
 

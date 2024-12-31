@@ -52,18 +52,21 @@ public class User extends BaseTimeEntity{
     @Column(columnDefinition = "TINYINT(1)")
     private boolean emailOtp;
 
-    // 아래 필드는 유저에 대한 모든 "사진, 즐겨찾기"들을 저장하는 리스트입니다.
+    // 아래 필드는 유저에 대한 모든 "사진, 즐겨찾기, 리뷰"들을 저장하는 리스트입니다.
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Favorites> favorites = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+
     @Builder
-    public User(Long id, String nickname, String name, String email, String password, UserRole userRole, LocalDate birthDate, LoginType loginType, boolean deleted, boolean emailOtp) {
-        this.id = id;
-        this.nickname = nickname; // 닉네임이 없을 경우 기본값 설정
-        this.name = name != null ? name : "default_name"; // 이름이 없을 경우 기본값 설정
+    public User(Long id,String name, String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
+        this.id=id;
+        this.name=name;
+        this.nickname = nickname;
         this.email = email;
         this.password = password != null ? password : ""; // 비밀번호가 없을 경우 빈 문자열로 설정
         this.userRole = userRole != null ? userRole : UserRole.USER; // 기본 역할을 USER로 설정
@@ -72,7 +75,6 @@ public class User extends BaseTimeEntity{
         this.deleted = deleted;
         this.emailOtp = emailOtp;
     }
-
 
     public void update(UserUpdateRequestDto userDto){
         this.nickname = userDto.getNickname();

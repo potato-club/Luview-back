@@ -45,4 +45,14 @@ public class SwaggerConfig {
                 .addOpenApiCustomizer(createOpenApiCustomizer("유저 관련 API", "v0.4"))
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi reviewApi() {
+        return GroupedOpenApi.builder()
+            .group("review")
+            .pathsToMatch("/review/**")
+            .displayName("review's API")
+            .addOpenApiCustomizer(createOpenApiCustomizer("리뷰글 API", "v0.4"))
+            .build();
+    }
 }
