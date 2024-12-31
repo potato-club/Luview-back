@@ -76,7 +76,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .tokenUri("https://kauth.kakao.com/oauth/token")
                 .userInfoUri("https://kapi.kakao.com/v2/user/me")
                 .clientName("Kakao")
-                .redirectUri("http://localhost:8080/callback")
+                .redirectUri("http://43.203.47.170:8080/callback")
                 .scope("account_email","profile_nickname")
                 .userNameAttributeName("id")
                 .authorizationGrantType(org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE)

@@ -20,7 +20,7 @@ spring:
               - account_email
               - profile_nickname
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/callback
+            redirect-uri: http://43.203.47.170:8080/callback
             client-name: Kakao
             client-authentication-method: client_secret_post
         provider:
