@@ -1,0 +1,66 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/Test
+    username: ENC(eiR6Ob23EnJdbYzxlEB7Aw==)
+    password: ENC(3sRnlrAW+hwfRtZTgCDYAVpk9AObDlih)
+
+  profiles:
+    active: local
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ENC(GJibhPvU2RYRxO0iHcRX/OBAgdt5ZSfG9ppUeU9QJ72+VKDHQPfq/monNTavk1Qk)
+            client-secret: ENC(ZWZ9PZ0ptV3+SusNg0hN3h1wkPIgX1YGspOiVCDvfiHNfhXPUVnrhTlf77sUIkSc)
+            scope:
+              - account_email
+              - profile_nickname
+            authorization-grant-type: authorization_code
+            redirect-uri: http://43.203.47.170:8080/callback
+            client-name: Kakao
+            client-authentication-method: client_secret_post
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-info-authentication-method: header
+            user-name-attribute: id
+
+  h2:
+    console:
+      enabled: true
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
+    open-in-view: true
+    show-sql: true
+    generate-ddl: true
+  sql:
+    init:
+      mode: always
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+jwt:
+  secret: ENC(L0SMyiS9QqgWuSakyPSc7J0aM6HezOpYLiwrwmJ6rRav+9WC6sReujEAPST1h3eFqp89YJsmkZ5FSyav/4oXNA==)
+  accessExpiration: ENC(I4Ww2z4i+bjPwXfKQvRsVg==)
+  refreshExpiration: ENC(zPDwVOqtOLE+f9qymBV84oD0W5QiCQ6g)
+  aesKey: ENC(mbqqJa4wFXb8ye5EY5i8Ieizoy/vfRhcmbRtJbe4weQ=)
+
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}
+
