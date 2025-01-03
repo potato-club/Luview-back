@@ -1,11 +1,13 @@
 package solo.project.dto.User.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Getter;
 import solo.project.enums.LoginType;
 import solo.project.enums.UserRole;
 
 @Getter
+@Builder
 public class UserProfileResponseDto {
   @Schema(description = "닉네임")
   private final String nickname;
@@ -16,18 +18,12 @@ public class UserProfileResponseDto {
   @Schema(description = "유저 역할", example = "USER / MANAGER")
   private final UserRole userRole;
 
-  @Schema(description = "사진 이름")
-  private final String fileName;
-
-  @Schema(description = "사진 URL")
-  private final String fileUrl;
 
 
-  public UserProfileResponseDto(String nickname, LoginType loginType, UserRole userRole,  String fileName, String fileUrl) {
+  public UserProfileResponseDto(String nickname, LoginType loginType, UserRole userRole) {
     this.nickname = nickname;
     this.loginType = loginType;
     this.userRole = userRole;
-    this.fileName = fileName;
-    this.fileUrl = fileUrl;
+
   }
 }

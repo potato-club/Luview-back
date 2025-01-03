@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import solo.project.dto.User.request.UserProfileRequestDto;
 import solo.project.dto.kakao.UserKakaoResponseDto;
 import solo.project.dto.User.request.UserCancel;
 import solo.project.dto.User.request.UserLoginRequestDto;
@@ -45,8 +46,8 @@ public class UserController {
     // 프로필 조회 아직 구현 덜했삼
     @Operation(summary = "내 정보 확인 API")
     @GetMapping("/profile")
-    public UserProfileResponseDto viewProfile(HttpServletRequest request) {
-        return userService.viewProfile(request);
+    public UserProfileResponseDto viewProfile(@RequestParam String email) {
+        return userService.viewProfile(email);
     }
 
     // 로그아웃

@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import solo.project.dto.User.request.UserProfileRequestDto;
 import solo.project.dto.kakao.UserKakaoResponseDto;
 import solo.project.kakao.KakaoApi;
 import solo.project.dto.jwt.JwtTokenProvider;
@@ -231,8 +232,13 @@ public class UserServiceImpl implements UserService {
 
     //유저 정보 추후 추가
     @Override
-    public UserProfileResponseDto viewProfile(HttpServletRequest request) {
-        return null;
+    public UserProfileResponseDto viewProfile(String email) {
+        User user = findByEmailOrThrow(email);
+        return UserProfileResponseDto.builder()
+                .nickname(user.getNickname())
+                .loginType(user.getLoginType())
+                .userRole(user.getUserRole())
+                .build();
     }
 
     //토큰 발급
