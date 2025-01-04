@@ -2,13 +2,11 @@ package solo.project.service.Impl;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import solo.project.dto.User.request.UserProfileRequestDto;
 import solo.project.dto.kakao.UserKakaoResponseDto;
 import solo.project.kakao.KakaoApi;
 import solo.project.dto.jwt.JwtTokenProvider;
@@ -18,7 +16,6 @@ import solo.project.dto.User.response.UserLoginResponseDto;
 import solo.project.dto.User.request.UserSignUpRequestDto;
 import solo.project.entity.User;
 import solo.project.enums.LoginType;
-import solo.project.enums.UserRole;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
@@ -205,7 +202,6 @@ public class UserServiceImpl implements UserService {
         return UserProfileResponseDto.builder()
                 .nickname(user.getNickname())
                 .loginType(user.getLoginType())
-                .userRole(user.getUserRole())
                 .build();
     }
 
@@ -217,10 +213,8 @@ public class UserServiceImpl implements UserService {
             throw new UnAuthorizedException("NOT FOUND USER", ErrorCode.ACCESS_DENIED_EXCEPTION);
         } //유저를 찾을수 없을 때
 
-        UserRole userRole = user.get().getUserRole();
-
-        String accessToken= jwtTokenProvider.createAccessToken(email,userRole);
-        String refreshToken = jwtTokenProvider.createRefreshToken(email,userRole);
+        String accessToken= jwtTokenProvider.createAccessToken(email);
+        String refreshToken = jwtTokenProvider.createRefreshToken(email);
 
         jwtTokenProvider.setHeaderAccessToken(response,accessToken);
         jwtTokenProvider.setHeaderRefreshToken(response,refreshToken);

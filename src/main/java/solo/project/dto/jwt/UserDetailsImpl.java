@@ -9,6 +9,7 @@ import solo.project.entity.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -53,14 +54,6 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     @Transactional
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<String> userRole = new ArrayList<>();
-        userRole.add(user.getUserRole().toString());
-        String authority = userRole.get(0);
-
-        SimpleGrantedAuthority simpleAuthority = new SimpleGrantedAuthority(authority);
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(simpleAuthority);
-
-        return authorities;
+        return Collections.singletonList(new SimpleGrantedAuthority("USER"));
     }
 }

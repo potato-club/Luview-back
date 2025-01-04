@@ -15,15 +15,8 @@ public class UserProfileResponseDto {
   @Schema(description = "로그인 타입", example = "NORMAL / KAKAO")
   private final LoginType loginType;
 
-  @Schema(description = "유저 역할", example = "USER / MANAGER")
-  private final UserRole userRole;
-
-
-
-  public UserProfileResponseDto(String nickname, LoginType loginType, UserRole userRole) {
+  public UserProfileResponseDto(String nickname, LoginType loginType) {
     this.nickname = nickname;
     this.loginType = loginType;
-    this.userRole = userRole;
-
   }
 }
