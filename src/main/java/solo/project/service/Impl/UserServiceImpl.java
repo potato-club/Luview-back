@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
                 .nickname(nickname)
                 .responseCode("201, 회원가입 후 로그인 되었습니다.")
                 .build();
-    }
+    } //signup으로 가는거 빼고 다시 생각해봐야할듯
 
     //이메일 , 탈퇴 회원
 
@@ -113,38 +113,6 @@ public class UserServiceImpl implements UserService {
                 .responseCode("로그인 되었습니다.")
                 .build();
     }
-
-//    @Override
-//    public UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response) {
-//        if(!userRepository.existsByEmailAndDeletedAndEmailOtp(requestDto.getEmail(),false, true)) {
-//            if (!userRepository.existsByEmail(requestDto.getEmail())) {
-//                return UserLoginResponseDto.builder()
-//                        .responseCode("2001") //회원이 아닐 경우 코드
-//                        .build();
-//            } else if (userRepository.existsByEmailAndDeletedIsTrue(requestDto.getEmail())) {
-//                return UserLoginResponseDto.builder()
-//                        .responseCode("2002") //탈퇴를 한 경우
-//                        .build();
-//            }else if (userRepository.existsByEmailAndDeletedIsFalse(requestDto.getEmail())) {
-//                userRepository.delete(userRepository.findByEmail(requestDto.getEmail()).orElseThrow());
-//                return UserLoginResponseDto.builder()
-//                        .responseCode("2003") //2차인증이 제대로 되지 않은 경우
-//                        .build();
-//            }
-//        }
-//        User user =findByEmailOrThrow(requestDto.getEmail());
-//
-//        //패스워드가 일치하지 않을경우 에러코드 발생
-//        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
-//            throw new UnAuthorizedException("401", ErrorCode.ACCESS_DENIED_EXCEPTION);
-//        }
-//
-//        this.setJwtTokenInHeader(requestDto.getEmail(), response);
-//
-//        return UserLoginResponseDto.builder()
-//                .responseCode("200")
-//                .build();
-//}
 
     @Override
     @Transactional

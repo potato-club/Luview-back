@@ -65,7 +65,7 @@ public class User extends BaseTimeEntity{
     @Builder
     public User(Long id,String name, String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
         this.id=id;
-        this.name=name;
+        this.name = (name != null) ? name : nickname;
         this.nickname = nickname;
         this.email = email;
         this.password = password != null ? password : ""; // 비밀번호가 없을 경우 빈 문자열로 설정
@@ -74,7 +74,7 @@ public class User extends BaseTimeEntity{
         this.loginType = loginType != null ? loginType : LoginType.KAKAO;
         this.deleted = deleted;
         this.emailOtp = emailOtp;
-    }
+    } //나중에 추가 정보를 받게 된다면 코드 수정 예정
 
     public void update(UserUpdateRequestDto userDto){
         this.nickname = userDto.getNickname();
