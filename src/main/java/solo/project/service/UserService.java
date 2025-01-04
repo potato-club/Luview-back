@@ -3,6 +3,7 @@ package solo.project.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
+import solo.project.dto.User.request.UserProfileRequestDto;
 import solo.project.dto.kakao.UserKakaoResponseDto;
 import solo.project.dto.User.request.UserLoginRequestDto;
 import solo.project.dto.User.response.UserLoginResponseDto;
@@ -17,7 +18,7 @@ public interface UserService {
     UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response);
     void signUp(UserSignUpRequestDto requestDto, HttpServletResponse response);
     boolean isNicknameDuplicated(String nickname);
-    UserProfileResponseDto viewProfile(HttpServletRequest request);
+    UserProfileResponseDto viewProfile(String email);
     void logout(HttpServletRequest request);
     User findUserByToken(HttpServletRequest request);
     void reissueToken(HttpServletRequest request, HttpServletResponse response);

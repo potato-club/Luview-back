@@ -30,9 +30,6 @@ public class UserSignUpRequestDto {
     @Schema(description = "생년월일")
     private LocalDate birthDate;
 
-    @Schema(description = "USER / MANAGER", example = "USER / MANAGER")
-    private UserRole userRole;
-
     @Schema(description = "NORMAL / KAKAO", example = "NORMAL / KAKAO")
     private LoginType loginType;
 
@@ -43,7 +40,6 @@ public class UserSignUpRequestDto {
                 .password(password)
                 .nickname(nickname)
                 .birthDate(birthDate)
-                .userRole(userRole)
                 .loginType(loginType)
                 .build();
     }

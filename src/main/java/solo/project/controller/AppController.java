@@ -11,7 +11,7 @@ public class AppController {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    @GetMapping("/")
+//    @GetMapping("/")
     public String home() {
         redisTemplate.opsForValue().set("abc", "def");
         return "Hello, World!";
