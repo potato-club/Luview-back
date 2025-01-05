@@ -2,9 +2,10 @@ package solo.project.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
-import solo.project.dto.User.request.UserProfileRequestDto;
-import solo.project.dto.kakao.UserKakaoResponseDto;
+import solo.project.dto.kakao.AdditionalInfoRequest;
+import solo.project.dto.kakao.response.UserKakaoResponseDto;
 import solo.project.dto.User.request.UserLoginRequestDto;
 import solo.project.dto.User.response.UserLoginResponseDto;
 import solo.project.dto.User.response.UserProfileResponseDto;
@@ -24,4 +25,5 @@ public interface UserService {
     void reissueToken(HttpServletRequest request, HttpServletResponse response);
     void withdrawalMembership(HttpServletRequest request);
     void cancelWithdrawal(String email, boolean agreement);
+    User updateAdditionalInfo(Long id, @Valid AdditionalInfoRequest request);
 }

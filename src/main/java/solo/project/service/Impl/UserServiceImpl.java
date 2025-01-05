@@ -7,7 +7,8 @@ import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import solo.project.dto.kakao.UserKakaoResponseDto;
+import solo.project.dto.kakao.AdditionalInfoRequest;
+import solo.project.dto.kakao.response.UserKakaoResponseDto;
 import solo.project.kakao.KakaoApi;
 import solo.project.dto.jwt.JwtTokenProvider;
 import solo.project.dto.User.request.UserLoginRequestDto;
@@ -50,9 +51,13 @@ public class UserServiceImpl implements UserService {
 
         //토큰으로 상대방의 이메일정보 확인
         if(userRepository.existsByEmailAndDeleted(email,false)){
+            User existingUser=userRepository.findByEmail(email).orElseThrow();
             this.setJwtTokenInHeader(email,response);
 
             return UserKakaoResponseDto.builder()
+                    .id(existingUser.getId()) //이메일로 조회 후 아이디 값 찾아서 반환
+                    .email(email)
+                    .nickname(nickname)
                     .responseCode("200, 로그인 되었습니다.")
                     .build();
         }
@@ -60,28 +65,41 @@ public class UserServiceImpl implements UserService {
         if(userRepository.existsByEmailAndDeletedIsTrue(email)){
             User user=userRepository.findByEmail(email).orElseThrow();
             user.setDeleted(false);
+            userRepository.save(user); //탈퇴 취소 고객은 취소 후 변경 사항 저장
             this.setJwtTokenInHeader(email,response);
 
             return UserKakaoResponseDto.builder()
+                    .id(user.getId())
+                    .email(email)
+                    .nickname(nickname)
                     .responseCode("2000")
                     .build();
         }
 
-        UserSignUpRequestDto requestDto = UserSignUpRequestDto.builder()
+        User newUser = User.builder()
                 .email(email)
                 .nickname(nickname)
                 .loginType(LoginType.KAKAO) // 카카오 로그인 타입으로 설정
                 .build();
 
-        // signUp 메서드를 호출하여 회원가입 처리
-        signUp(requestDto, response);
+        userRepository.save(newUser); //회원이 아닐경우 신규 회원으로 입력 받고 레포에 저장 그리고 리턴
 
         return UserKakaoResponseDto.builder()
+                .id(newUser.getId())
                 .email(email)
                 .nickname(nickname)
-                .responseCode("201, 회원가입 후 로그인 되었습니다.")
+                .responseCode("201, 회원가입 후 추가 정보를 입력해주세요.")
                 .build();
-    } //signup으로 가는거 빼고 다시 생각해봐야할듯
+    }
+
+    @Transactional
+    public User updateAdditionalInfo(Long id , AdditionalInfoRequest request){
+        User user=userRepository.findById(id).orElseThrow(()->new NotFoundException("사용자를 찾을 수 없습니다 : "+id ,ErrorCode.NOT_FOUND_EXCEPTION));
+        user.setName(request.getName());
+        user.setBirthDate(request.getBirthDate());
+
+        return userRepository.save(user);
+    }
 
     //이메일 , 탈퇴 회원
 
@@ -110,6 +128,8 @@ public class UserServiceImpl implements UserService {
                 .responseCode("로그인 되었습니다.")
                 .build();
     }
+
+
 
     @Override
     @Transactional
