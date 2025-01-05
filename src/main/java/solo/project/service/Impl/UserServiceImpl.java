@@ -64,6 +64,7 @@ public class UserServiceImpl implements UserService {
             }
 
             return UserKakaoResponseDto.builder()
+                    .id(existingUser.getId())
                     .email(email)
                     .nickname(nickname)
                     .responseCode("201, 추가 정보를 아직 입력하지않았습니다.")
@@ -143,17 +144,15 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void signUp(UserSignUpRequestDto requestDto, HttpServletResponse response) {
+        if(requestDto.getName() == null || requestDto.getBirthDate() == null){
+            throw new IllegalArgumentException("로컬 가입시 이름과 생년월일이 필수입니다.");
+        }
+
         if(userRepository.existsByEmail(requestDto.getEmail())) {
             throw new UnAuthorizedException("401", ErrorCode.ACCESS_DENIED_EXCEPTION);
         }//이메일 존재 여부 확인
 
-        if(requestDto.getLoginType().equals(LoginType.KAKAO)){
-            User user =requestDto.toEntity();
-//            user.setEmailOtp(true);
-
-            userRepository.save(user);
-            this.setJwtTokenInHeader(requestDto.getEmail(), response);
-        }else if(requestDto.getLoginType().equals(LoginType.NORMAL)){ //로컬은 2차 인증 후 토큰 발급
+        if(requestDto.getLoginType().equals(LoginType.NORMAL)){ //로컬은 2차 인증 후 토큰 발급
             requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
             User user = requestDto.toEntity();

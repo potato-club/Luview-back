@@ -6,9 +6,9 @@ spring:
 #    password: ENC(3sRnlrAW+hwfRtZTgCDYAVpk9AObDlih)
 
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://my-db:3306/mydb
-    username: root
-    password: pwd1234
+    url: ENC(ePPe6owYSLOVoInPKH4JZMlsBjqvDkCtyeoMadc6rz3cwNdhe5h7nQ==)
+    username: ENC(0OGquVQTWY7NQmkmZuyExQ==)
+    password: ENC(XfPH5vgfMlhvvCh5ANFx+Q==)
 
   profiles:
     active: local
@@ -57,7 +57,7 @@ spring:
   data:
     redis:
 #      host: localhost
-      host: my-cache-server
+      host: ENC(gCNuEzhc+B6HcBGGCvx2Fa/McLEji/zY)
       port: 6379
 
 jwt:
