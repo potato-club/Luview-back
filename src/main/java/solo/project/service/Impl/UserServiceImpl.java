@@ -52,14 +52,23 @@ public class UserServiceImpl implements UserService {
         //토큰으로 상대방의 이메일정보 확인
         if(userRepository.existsByEmailAndDeleted(email,false)){
             User existingUser=userRepository.findByEmail(email).orElseThrow();
-            this.setJwtTokenInHeader(email,response);
+
+            if(existingUser.hasAdditionalInfo()){
+                this.setJwtTokenInHeader(email,response);
+                return UserKakaoResponseDto.builder()
+                        .id(existingUser.getId()) //이메일로 조회 후 아이디 값 찾아서 반환
+                        .email(email)
+                        .nickname(nickname)
+                        .responseCode("200, 로그인 되었습니다.")
+                        .build();
+            }
 
             return UserKakaoResponseDto.builder()
-                    .id(existingUser.getId()) //이메일로 조회 후 아이디 값 찾아서 반환
                     .email(email)
                     .nickname(nickname)
-                    .responseCode("200, 로그인 되었습니다.")
+                    .responseCode("201, 추가 정보를 아직 입력하지않았습니다.")
                     .build();
+
         }
         //탈퇴한 회원인지 확인후에 탈퇴취소 회원인경우에는 다시 회원가입
         if(userRepository.existsByEmailAndDeletedIsTrue(email)){

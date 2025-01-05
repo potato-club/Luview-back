@@ -61,11 +61,11 @@ public class User extends BaseTimeEntity{
     @Builder
     public User(Long id,String name, String nickname, String email, String password,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
         this.id=id;
-        this.name = (name != null) ? name : nickname;
+        this.name = name;
         this.nickname = nickname;
         this.email = email;
         this.password = password != null ? password : ""; // 비밀번호가 없을 경우 빈 문자열로 설정
-        this.birthDate = birthDate != null ? birthDate : LocalDate.of(2000, 1, 1); // 카카오에서 생년월일 지급되지 않을 경우 기본값 설정
+        this.birthDate = birthDate ; // 카카오에서 생년월일 지급되지 않을 경우 기본값 설정
         this.loginType = loginType != null ? loginType : LoginType.KAKAO;
         this.deleted = deleted;
         this.emailOtp = emailOtp;
@@ -89,5 +89,9 @@ public class User extends BaseTimeEntity{
 
     public void setBirthDate(LocalDate birthDate){
         this.birthDate = birthDate;
+    }
+
+    public boolean hasAdditionalInfo(){
+        return (this.name !=null && this.birthDate != null);
     }
 }
