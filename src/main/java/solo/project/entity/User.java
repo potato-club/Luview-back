@@ -82,4 +82,12 @@ public class User extends BaseTimeEntity{
     public void setEmailOtp(boolean emailOtp){
         this.emailOtp = emailOtp;
     }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public void setBirthDate(LocalDate birthDate){
+        this.birthDate = birthDate;
+    }
 }
