@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import solo.project.dto.kakao.AdditionalInfoRequest;
 import solo.project.dto.kakao.response.UserKakaoResponseDto;
+import solo.project.error.exception.ForbiddenException;
 import solo.project.kakao.KakaoApi;
 import solo.project.dto.jwt.JwtTokenProvider;
 import solo.project.dto.User.request.UserLoginRequestDto;
@@ -51,7 +52,8 @@ public class UserServiceImpl implements UserService {
 
         //토큰으로 상대방의 이메일정보 확인
         if(userRepository.existsByEmailAndDeleted(email,false)){
-            User existingUser=userRepository.findByEmail(email).orElseThrow();
+            User existingUser = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new NotFoundException("401, 이메일을 찾을 수 없습니다",ErrorCode.NOT_FOUND_EMAIL_EXCEPTION));
 
             if(existingUser.hasAdditionalInfo()){
                 this.setJwtTokenInHeader(email,response);
@@ -73,7 +75,7 @@ public class UserServiceImpl implements UserService {
         }
         //탈퇴한 회원인지 확인후에 탈퇴취소 회원인경우에는 다시 회원가입
         if(userRepository.existsByEmailAndDeletedIsTrue(email)){
-            User user=userRepository.findByEmail(email).orElseThrow();
+            User user=userRepository.findByEmail(email).orElseThrow(()->new NotFoundException("401, 이메일을 찾을 수 없습니다",ErrorCode.NOT_FOUND_EMAIL_EXCEPTION));
             user.setDeleted(false);
             userRepository.save(user); //탈퇴 취소 고객은 취소 후 변경 사항 저장
             this.setJwtTokenInHeader(email,response);
@@ -117,11 +119,11 @@ public class UserServiceImpl implements UserService {
     public UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response) {
         // 회원이 아닌 경우
         if (!userRepository.existsByEmail(requestDto.getEmail())) {
-            throw new UnAuthorizedException("2001, 회원이 아닙니다",ErrorCode.UNAUTHORIZED_EXCEPTION);
+            throw new NotFoundException("2001, 회원이 아닙니다",ErrorCode.NOT_FOUND_EXCEPTION); //404
         }
         // 탈퇴한 회원인 경우
         if (userRepository.existsByEmailAndDeletedIsTrue(requestDto.getEmail())) {
-            throw  new UnAuthorizedException("2002, 탈퇴계정입니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
+            throw  new ForbiddenException("2002, 탈퇴계정입니다.", ErrorCode.FORBIDDEN_EXCEPTION); //403
         }
         // 회원 정보 조회
         User user = findByEmailOrThrow(requestDto.getEmail());
