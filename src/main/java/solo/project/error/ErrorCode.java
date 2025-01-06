@@ -25,7 +25,7 @@ public enum ErrorCode {
     EXPIRED_ACCESS_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR,"1007","Failed to expired access token!"),
     REFRESH_TOKEN_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"2004","Failed to create refresh token!"),
     ACCESS_TOKEN_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"2005","Failed to create access token!"),
-    UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "3001", "UnAuthorized User");
+    UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "401", "UnAuthorized User");
 
 
 

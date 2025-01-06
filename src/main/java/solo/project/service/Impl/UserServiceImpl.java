@@ -117,15 +117,11 @@ public class UserServiceImpl implements UserService {
     public UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response) {
         // 회원이 아닌 경우
         if (!userRepository.existsByEmail(requestDto.getEmail())) {
-            return UserLoginResponseDto.builder()
-                    .responseCode("2001, 회원이 아닙니다.") // 회원이 아닐 경우 코드
-                    .build();
+            throw new UnAuthorizedException("2001, 회원이 아닙니다",ErrorCode.UNAUTHORIZED_EXCEPTION);
         }
         // 탈퇴한 회원인 경우
         if (userRepository.existsByEmailAndDeletedIsTrue(requestDto.getEmail())) {
-            return UserLoginResponseDto.builder()
-                    .responseCode("2002, 탈퇴하셨습니다.") // 탈퇴한 경우
-                    .build();
+            throw  new UnAuthorizedException("2002, 탈퇴계정입니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
         }
         // 회원 정보 조회
         User user = findByEmailOrThrow(requestDto.getEmail());
