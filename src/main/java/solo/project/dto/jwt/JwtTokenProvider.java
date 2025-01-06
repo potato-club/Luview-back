@@ -66,27 +66,26 @@ public class JwtTokenProvider {
         log.error(message, e); // 예외와 메시지를 로그에 기록
     }
 
-    public String createAccessToken(String email, UserRole role) {
+    public String createAccessToken(String email) {
         try {
-            return this.createToken(email, role, accessTokenValidTime, "access");
+            return this.createToken(email, accessTokenValidTime, "access");
         } catch (Exception e) {
             logError(e, "액세스 토큰 생성 실패");
             throw new TokenCreationException("액세스 토큰 생성 실패", ErrorCode.ACCESS_TOKEN_CREATION_FAILED);
         }
     }
 
-    public String createRefreshToken(String email, UserRole role) {
+    public String createRefreshToken(String email) {
         try {
-            return this.createToken(email, role, refreshTokenValidTime, "refresh");
+            return this.createToken(email, refreshTokenValidTime, "refresh");
         } catch (Exception e) {
             throw new TokenCreationException("리프레쉬 토큰 생성 실패", ErrorCode.REFRESH_TOKEN_CREATION_FAILED);
         }
     }
 
-    public String createToken(String email, UserRole role, long tokenValid, String tokenType) throws Exception {
+    public String createToken(String email, long tokenValid, String tokenType) throws Exception {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("pk", email);
-        jsonObject.addProperty("role", role.ordinal());
         jsonObject.addProperty("tokenType", tokenType);
 
         Claims claims=Jwts.claims().subject(encrypt(jsonObject.toString())).build();
@@ -145,30 +144,21 @@ public class JwtTokenProvider {
     public String extractEmail(String token) throws Exception {
         return extractValueFromToken(token, "pk");
     }
-
-    public String extractRole(String token) throws Exception {
-        return extractValueFromToken(token, "role").toString();
-    }
+//
+//    public String extractRole(String token) throws Exception {
+//        return extractValueFromToken(token, "role").toString();
+//    }
 
     //토큰으로 역할 추출 , 우리는 유저 하나만 존재함 사용 x
     public String extractMemberId(String token) throws Exception {
         String email = extractEmail(token);
-        String role = extractRole(token); // 토큰에서 역할 추출
 
-        if ("0".equals(role)) {
-            Optional<User> userOptional = userRepository.findByEmail(email); // 이메일로 사용자 찾기
-            if (userOptional.isEmpty()) {
-                throw new NotFoundException("사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION);
-            }
-            return userOptional.get().getEmail(); // 사용자 이메일 반환
-        } else {
-            throw new UnAuthorizedException("권한이 없는 사용자입니다.", ErrorCode.ACCESS_DENIED_EXCEPTION);
+        Optional<User> userOptional = userRepository.findByEmail(email); // 이메일로 사용자 찾기
+        if (userOptional.isEmpty()) {
+            throw new NotFoundException("사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION);
         }
-    }
+        return userOptional.get().getEmail(); // 사용자 이메일 반환
 
-    public boolean isAdmin(String token) throws Exception {
-        String role = extractRole(token);
-        return role.equals("2");
     }
 
     private JsonObject extraValue(String token) throws Exception {
@@ -179,14 +169,6 @@ public class JwtTokenProvider {
 
     private Claims extraAllClaims(String token) throws Exception {
         return getParser()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
-
-    private Claims extractAllClaims(String token){
-        return Jwts.parser()
-                .verifyWith(this.getSigningKey())
-                .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
@@ -205,13 +187,14 @@ public class JwtTokenProvider {
 
     //요청을 받으면 AT반환 없다면 null
     public String resolveAccessToken(HttpServletRequest request) {
-        String accessToken = request.getHeader("authorization").substring(7);
+        String accessToken = request.getHeader("authorization");
         String refreshToken = request.getHeader("refreshToken");
         if (accessToken != null && refreshToken == null) {
-            return accessToken;
+            return accessToken.substring(7);
         }
         return null;
     }
+
 
     //7개로 정의 RT재발급
     public String resolveRefreshToken(HttpServletRequest request) {
@@ -270,8 +253,7 @@ public class JwtTokenProvider {
         try{
             this.validateRefreshToken(refreshToken);
             String email =findUserEmailByToken(refreshToken);
-            Optional<User> user=userRepository.findByEmail(email);
-            return createAccessToken(email, user.get().getUserRole());
+            return createAccessToken(email);
         }catch (ExpiredJwtException e){
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return ErrorCode.EXPIRED_ACCESS_TOKEN.getMessage();
@@ -294,10 +276,5 @@ public class JwtTokenProvider {
                 .orElseThrow(() -> new NotFoundException("토큰에 해당되는 사용자 이메일을 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION)).getEmail();
     }
 
-    public Optional<User> extractEmailByRequest(HttpServletRequest request) throws Exception{
-        String userToken= resolveAccessToken(request);
-        String tokenId=extractEmail(userToken);
-        return userRepository.findByEmail(tokenId);
-    }
 }
 

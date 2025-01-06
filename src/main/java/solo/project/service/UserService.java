@@ -2,8 +2,10 @@ package solo.project.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
-import solo.project.dto.kakao.UserKakaoResponseDto;
+import solo.project.dto.kakao.AdditionalInfoRequest;
+import solo.project.dto.kakao.response.UserKakaoResponseDto;
 import solo.project.dto.User.request.UserLoginRequestDto;
 import solo.project.dto.User.response.UserLoginResponseDto;
 import solo.project.dto.User.response.UserProfileResponseDto;
@@ -17,10 +19,11 @@ public interface UserService {
     UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response);
     void signUp(UserSignUpRequestDto requestDto, HttpServletResponse response);
     boolean isNicknameDuplicated(String nickname);
-    UserProfileResponseDto viewProfile(HttpServletRequest request);
+    UserProfileResponseDto viewProfile(String email);
     void logout(HttpServletRequest request);
     User findUserByToken(HttpServletRequest request);
     void reissueToken(HttpServletRequest request, HttpServletResponse response);
     void withdrawalMembership(HttpServletRequest request);
     void cancelWithdrawal(String email, boolean agreement);
+    User updateAdditionalInfo(Long id, @Valid AdditionalInfoRequest request);
 }

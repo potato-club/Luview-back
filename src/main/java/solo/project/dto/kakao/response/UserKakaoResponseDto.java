@@ -1,4 +1,4 @@
-package solo.project.dto.kakao;
+package solo.project.dto.kakao.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -7,6 +7,9 @@ import lombok.Getter;
 @Getter
 @Builder
 public class UserKakaoResponseDto {
+
+    @Schema(description = "Id")
+    private Long id;
 
     @Schema(description = "Email")
     private String email;

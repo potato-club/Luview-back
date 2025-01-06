@@ -23,7 +23,7 @@ public class User extends BaseTimeEntity{
     @Column
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String name;
 
     @Column(unique=true, nullable = false)
@@ -35,12 +35,8 @@ public class User extends BaseTimeEntity{
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate birthDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole userRole;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50)
@@ -63,22 +59,20 @@ public class User extends BaseTimeEntity{
     private List<Review> reviews = new ArrayList<>();
 
     @Builder
-    public User(Long id,String name, String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
+    public User(Long id,String name, String nickname, String email, String password,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
         this.id=id;
-        this.name=name;
+        this.name = name;
         this.nickname = nickname;
         this.email = email;
         this.password = password != null ? password : ""; // 비밀번호가 없을 경우 빈 문자열로 설정
-        this.userRole = userRole != null ? userRole : UserRole.USER; // 기본 역할을 USER로 설정
-        this.birthDate = birthDate != null ? birthDate : LocalDate.of(2000, 1, 1); // 카카오에서 생년월일 지급되지 않을 경우 기본값 설정
+        this.birthDate = birthDate ; // 카카오에서 생년월일 지급되지 않을 경우 기본값 설정
         this.loginType = loginType != null ? loginType : LoginType.KAKAO;
         this.deleted = deleted;
         this.emailOtp = emailOtp;
-    }
+    } //나중에 추가 정보를 받게 된다면 코드 수정 예정
 
     public void update(UserUpdateRequestDto userDto){
         this.nickname = userDto.getNickname();
-        this.userRole = userDto.getUserRole();
     }
 
     public void setDeleted(boolean deleted){
@@ -87,5 +81,17 @@ public class User extends BaseTimeEntity{
 
     public void setEmailOtp(boolean emailOtp){
         this.emailOtp = emailOtp;
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public void setBirthDate(LocalDate birthDate){
+        this.birthDate = birthDate;
+    }
+
+    public boolean hasAdditionalInfo(){
+        return (this.name !=null && this.birthDate != null);
     }
 }

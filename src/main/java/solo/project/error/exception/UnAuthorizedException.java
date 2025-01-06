@@ -4,7 +4,7 @@ import solo.project.error.ErrorCode;
 
 public class UnAuthorizedException extends BusinessException{
 
-    public UnAuthorizedException(String massage, ErrorCode errorCode) {
-        super(massage, errorCode);
+    public UnAuthorizedException(String message, ErrorCode errorCode) {
+        super(message, errorCode);
     }
 }

@@ -4,15 +4,19 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import solo.project.dto.kakao.UserKakaoResponseDto;
+import solo.project.dto.kakao.AdditionalInfoRequest;
+import solo.project.dto.kakao.response.UserKakaoResponseDto;
 import solo.project.dto.User.request.UserCancel;
 import solo.project.dto.User.request.UserLoginRequestDto;
 import solo.project.dto.User.response.UserProfileResponseDto;
 import solo.project.dto.User.response.UserLoginResponseDto;
 import solo.project.dto.User.request.UserSignUpRequestDto;
+import solo.project.entity.User;
 import solo.project.service.UserService;
 
 @RestController
@@ -25,6 +29,18 @@ public class UserController {
     @GetMapping("/login/kakao")
     public UserKakaoResponseDto kakaoLogin(@RequestParam("code") String authorizeCode, HttpServletRequest request, HttpServletResponse response) {
         return userService.kakaoLogin(authorizeCode, request, response);
+    }
+
+    @Operation(summary = "카카오 추가정보 입력API")
+    @PutMapping("/{id}/addInfo")
+    public ResponseEntity<UserKakaoResponseDto> updateUserInfo(@PathVariable Long id, @Valid @RequestBody AdditionalInfoRequest request){
+        User updateUser=userService.updateAdditionalInfo(id, request);
+        return ResponseEntity.ok(UserKakaoResponseDto.builder()
+                .id(updateUser.getId())
+                .email(updateUser.getEmail())
+                .nickname(updateUser.getNickname())
+                .responseCode("200, 정보가 업데이트 되었습니다.")
+                .build());
     }
 
     //회원가입
@@ -45,8 +61,8 @@ public class UserController {
     // 프로필 조회 아직 구현 덜했삼
     @Operation(summary = "내 정보 확인 API")
     @GetMapping("/profile")
-    public UserProfileResponseDto viewProfile(HttpServletRequest request) {
-        return userService.viewProfile(request);
+    public UserProfileResponseDto viewProfile(@RequestParam String email) {
+        return userService.viewProfile(email);
     }
 
     // 로그아웃
@@ -82,8 +98,8 @@ public class UserController {
         return ResponseEntity.ok("회원탈퇴가 취소 되었습니다.");
     }
 
-    @Operation(summary = "토큰 재발급 API")
-    @GetMapping("/reissue")
+//    @Operation(summary = "토큰 재발급 API")
+//    @GetMapping("/reissue")
     public ResponseEntity<String> reissueToken(HttpServletRequest request, HttpServletResponse response) {
         userService.reissueToken(request, response);
         return ResponseEntity.ok("토큰 재발급이 완료되었습니다.");
