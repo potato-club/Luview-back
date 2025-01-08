@@ -12,6 +12,7 @@ import solo.project.enums.UserRole;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -42,6 +43,9 @@ public class User extends BaseTimeEntity{
     @Column(length = 50)
     private LoginType loginType;
 
+    @Column(nullable = false, unique = true, length = 12)
+    private String uniqueCode;
+
     @Column(columnDefinition = "TINYINT(1)")
     private boolean deleted;
 
@@ -59,7 +63,7 @@ public class User extends BaseTimeEntity{
     private List<Review> reviews = new ArrayList<>();
 
     @Builder
-    public User(Long id,String name, String nickname, String email, String password,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
+    public User(Long id, String name, String nickname, String email, String password, LocalDate birthDate, LoginType loginType, boolean deleted, boolean emailOtp) {
         this.id=id;
         this.name = name;
         this.nickname = nickname;
@@ -67,6 +71,7 @@ public class User extends BaseTimeEntity{
         this.password = password != null ? password : ""; // 비밀번호가 없을 경우 빈 문자열로 설정
         this.birthDate = birthDate ; // 카카오에서 생년월일 지급되지 않을 경우 기본값 설정
         this.loginType = loginType != null ? loginType : LoginType.KAKAO;
+        this.uniqueCode = generateUniqueCode();
         this.deleted = deleted;
         this.emailOtp = emailOtp;
     } //나중에 추가 정보를 받게 된다면 코드 수정 예정
@@ -93,5 +98,9 @@ public class User extends BaseTimeEntity{
 
     public boolean hasAdditionalInfo(){
         return (this.name !=null && this.birthDate != null);
+    }
+
+    private String generateUniqueCode() {
+        return UUID.randomUUID().toString().substring(0, 12).toUpperCase();
     }
 }
