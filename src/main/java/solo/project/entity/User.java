@@ -12,6 +12,7 @@ import solo.project.enums.UserRole;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -46,6 +47,9 @@ public class User extends BaseTimeEntity{
     @Column(length = 50)
     private LoginType loginType;
 
+    @Column(nullable = false, unique = true, length = 12)
+    private String uniqueCode;
+
     @Column(columnDefinition = "TINYINT(1)")
     private boolean deleted;
 
@@ -63,7 +67,7 @@ public class User extends BaseTimeEntity{
     private List<Review> reviews = new ArrayList<>();
 
     @Builder
-    public User(Long id,String name, String nickname, String email, String password, UserRole userRole,LocalDate birthDate,LoginType loginType ,boolean deleted , boolean emailOtp) {
+    public User(Long id, String name, String nickname, String email, String password, UserRole userRole, LocalDate birthDate, LoginType loginType, boolean deleted, boolean emailOtp) {
         this.id=id;
         this.name=name;
         this.nickname = nickname;
@@ -72,6 +76,7 @@ public class User extends BaseTimeEntity{
         this.userRole = userRole != null ? userRole : UserRole.USER; // 기본 역할을 USER로 설정
         this.birthDate = birthDate != null ? birthDate : LocalDate.of(2000, 1, 1); // 카카오에서 생년월일 지급되지 않을 경우 기본값 설정
         this.loginType = loginType != null ? loginType : LoginType.KAKAO;
+        this.uniqueCode = generateUniqueCode();
         this.deleted = deleted;
         this.emailOtp = emailOtp;
     }
@@ -87,5 +92,9 @@ public class User extends BaseTimeEntity{
 
     public void setEmailOtp(boolean emailOtp){
         this.emailOtp = emailOtp;
+    }
+
+    private String generateUniqueCode() {
+        return UUID.randomUUID().toString().substring(0, 12).toUpperCase();
     }
 }
