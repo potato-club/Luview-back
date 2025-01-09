@@ -4,11 +4,11 @@ spring:
 #    url: jdbc:mysql://localhost:3306/Test
 #    username: ENC(eiR6Ob23EnJdbYzxlEB7Aw==)
 #    password: ENC(3sRnlrAW+hwfRtZTgCDYAVpk9AObDlih)
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/soloproject
+      username: root
+      password: 1234
 
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ENC(ePPe6owYSLOVoInPKH4JZMlsBjqvDkCtyeoMadc6rz3cwNdhe5h7nQ==)
-    username: ENC(0OGquVQTWY7NQmkmZuyExQ==)
-    password: ENC(XfPH5vgfMlhvvCh5ANFx+Q==)
 
   profiles:
     active: local
@@ -57,7 +57,7 @@ spring:
   data:
     redis:
 #      host: localhost
-      host: ENC(gCNuEzhc+B6HcBGGCvx2Fa/McLEji/zY)
+      host: localhost
       port: 6379
 
 jwt:
@@ -68,6 +68,7 @@ jwt:
 
 jasypt:
   encryptor:
-    password: ${JASYPT_ENCRYPTOR_PASSWORD}
+    password: "@!Secr3tP@ssw0rd$2024"
+
 
 

@@ -1,6 +1,7 @@
 package solo.project.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import solo.project.service.FavoritesService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("favorites")
+@Tag(name="favorites Controller", description = "즐겨찾기 API")
 public class FavoritesController {
   private final FavoritesService favoritesService;
 

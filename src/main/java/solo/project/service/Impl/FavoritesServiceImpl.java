@@ -34,6 +34,10 @@ public class FavoritesServiceImpl implements FavoritesService {
     Review review = reviewRepository.findById(review_id)
         .orElseThrow(() -> new NotFoundException("찾을 수 없는 리뷰글 입니다.", ErrorCode.NOT_FOUND_EXCEPTION));
 
+    if(favoritesRepository.existsByUserAndReview(user, review)) {
+      throw new IllegalArgumentException("이미 즐겨찾기 했습니다.");
+    }
+
     Favorites favorites =Favorites.builder()
         .user(user)
         .review(review)
