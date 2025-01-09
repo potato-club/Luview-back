@@ -8,6 +8,7 @@ import solo.project.entity.Couple;
 import solo.project.entity.User;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
+import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.CoupleRepository;
 import solo.project.repository.UserRepository;
 import solo.project.service.CoupleService;
@@ -26,7 +27,7 @@ public class CoupleServiceImpl implements CoupleService {
   public void createCouple(String partnerCode, HttpServletRequest request) {
     User user = userService.findUserByToken(request);
     if (user == null) {
-      throw new NotFoundException("로그인 후 커플 연동 가능합니다.", ErrorCode.NOT_FOUND_EXCEPTION);
+      throw new UnAuthorizedException("로그인 후 커플 연동 가능합니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
     }
     User partner  = userRepository.findByUniqueCode(partnerCode).
         orElseThrow(() -> new IllegalArgumentException("유효하지 않는 코드입니다."));

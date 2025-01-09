@@ -91,6 +91,11 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   @Override
+  public List<MainReviewResponseDto> getReviewByFavorites(Pageable pageable) {
+    return List.of();
+  }
+
+  @Override
   public List<ReviewResponseDto> getUserReviews(HttpServletRequest request) {
     return List.of();
   }
