@@ -1,13 +1,14 @@
 package solo.project.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "files")
 public class File {
   @Id
@@ -21,7 +22,7 @@ public class File {
   @Column(nullable = false)
   private String fileName;
 
-  @ManyToOne(fetch = FetchType.LAZY)  // File n ~ 1 User
+  @ManyToOne(fetch = FetchType.LAZY)  //한명의 사람은 하나의 프로필
   @JoinColumn(name = "user_id")
   private User user;
 
@@ -35,4 +36,11 @@ public class File {
     this.fileName = fileName;
   }
 
+  public void setUser(User user) {
+    this.user = user;
+  }
+
+  public void setReview(Review review) {
+    this.review = review;
+  }
 }

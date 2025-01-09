@@ -21,6 +21,7 @@ import solo.project.enums.LoginType;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
+import solo.project.repository.File.FileRepository;
 import solo.project.repository.UserRepository;
 import solo.project.service.RedisJwtService;
 import solo.project.service.UserService;
@@ -37,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final RedisJwtService redisJwtService;
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaoApi kakaoApi;
+    private final FileRepository fileRepository;
 
     private User findByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
@@ -223,12 +225,9 @@ public class UserServiceImpl implements UserService {
 
     //유저 정보 추후 추가
     @Override
-    public UserProfileResponseDto viewProfile(String email) {
-        User user = findByEmailOrThrow(email);
-        return UserProfileResponseDto.builder()
-                .nickname(user.getNickname())
-                .loginType(user.getLoginType())
-                .build();
+    public UserProfileResponseDto viewProfile(HttpServletRequest request) {
+        User user =this.findUserByToken(request);
+        return fileRepository.getUserProfile(user);
     }
 
     //토큰 발급

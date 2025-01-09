@@ -58,11 +58,11 @@ public class UserController {
         return userService.login(requestDto, response);
     }
 
-    // 프로필 조회 아직 구현 덜했삼
+    // 내 프로필 확인
     @Operation(summary = "내 정보 확인 API")
     @GetMapping("/profile")
-    public UserProfileResponseDto viewProfile(@RequestParam String email) {
-        return userService.viewProfile(email);
+    public UserProfileResponseDto viewProfile(HttpServletRequest request) {
+        return userService.viewProfile(request);
     }
 
     // 로그아웃
