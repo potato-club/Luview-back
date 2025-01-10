@@ -13,14 +13,15 @@ import lombok.NoArgsConstructor;
 public class File {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column
-  private Long id;
+  private Long fileId;
 
   @Column(nullable = false, length = 512)
   private String fileUrl;
 
   @Column(nullable = false)
   private String fileName;
+
+  private boolean isThumbnail; //썸네일 여부 (리뷰 썸네일)
 
   @ManyToOne(fetch = FetchType.LAZY)  //한명의 사람은 하나의 프로필
   @JoinColumn(name = "user_id")

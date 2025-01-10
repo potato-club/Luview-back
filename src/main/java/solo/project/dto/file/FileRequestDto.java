@@ -4,12 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import solo.project.entity.File;
 
 @Data
 @Builder
 @Schema(description = "파일 업로드 요청")
 @AllArgsConstructor
+@NoArgsConstructor
 public class FileRequestDto {
 
     @Schema(description = "파일 이름")

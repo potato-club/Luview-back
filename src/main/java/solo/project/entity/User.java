@@ -103,4 +103,9 @@ public class User extends BaseTimeEntity{
     private String generateUniqueCode() {
         return UUID.randomUUID().toString().substring(0, 12).toUpperCase();
     }
+
+    private void addFile(File file){
+        files.add(file);
+        file.setUser(this);
+    }
 }

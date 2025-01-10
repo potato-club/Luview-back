@@ -14,7 +14,7 @@ import solo.project.entity.User;
 public class FileRepositoryImpl implements FileRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
-
+    //유저가 가진 첫번째 파일을 가져옴다
     @Override
     public UserProfileResponseDto getUserProfile(User user) {
         return jpaQueryFactory
@@ -23,6 +23,8 @@ public class FileRepositoryImpl implements FileRepositoryCustom {
                                 UserProfileResponseDto.class,
                                 QUser.user.nickname,
                                 QUser.user.loginType,
+                                QUser.user.uniqueCode,
+                                QUser.user.birthDate,
                                 QFile.file.fileName,
                                 QFile.file.fileUrl
                         )
