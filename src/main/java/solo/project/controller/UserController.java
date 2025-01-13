@@ -31,6 +31,7 @@ public class UserController {
         return userService.kakaoLogin(authorizeCode, request, response);
     }
 
+    //임시토큰을 사용해야하나..?
     @Operation(summary = "카카오 추가정보 입력API")
     @PutMapping("/{id}/addInfo")
     public ResponseEntity<UserKakaoResponseDto> updateUserInfo(@PathVariable Long id, @Valid @RequestBody AdditionalInfoRequest request){
