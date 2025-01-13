@@ -58,6 +58,16 @@ public class SwaggerConfig {
     }
 
     @Bean
+    public GroupedOpenApi uploadApi() {
+        return GroupedOpenApi.builder()
+                .group("upload")
+                .pathsToMatch("/upload/**")
+                .displayName("upload's API")
+                .addOpenApiCustomizer(createOpenApiCustomizer("프로필, 리뷰글, 썸네일 관련 API", "v0.4"))
+                .build();
+    }
+
+    @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))

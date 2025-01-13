@@ -1,19 +1,22 @@
 package solo.project.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import solo.project.enums.FileType;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "files")
 public class File {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long fileId;
+
+  @Enumerated(EnumType.STRING)
+  private FileType fileType;
 
   @Column(nullable = false, length = 512)
   private String fileUrl;

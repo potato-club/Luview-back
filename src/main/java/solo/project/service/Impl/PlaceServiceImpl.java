@@ -32,7 +32,4 @@ public class PlaceServiceImpl implements PlaceService {
 
     return placeRepository.saveAll(places);
   }
-
-
-
 }
