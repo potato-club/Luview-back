@@ -1,14 +1,14 @@
 spring:
   datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/Test2
-#    username: ENC(eiR6Ob23EnJdbYzxlEB7Aw==)
-#    password: ENC(3sRnlrAW+hwfRtZTgCDYAVpk9AObDlih)
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/soloproject
-      username: root
-      password: 1234
+    #    driver-class-name: com.mysql.cj.jdbc.Driver
+    #    url: jdbc:mysql://localhost:3306/Test2
+    #    username: ENC(eiR6Ob23EnJdbYzxlEB7Aw==)
+    #    password: ENC(3sRnlrAW+hwfRtZTgCDYAVpk9AObDlih)
 
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ENC(ePPe6owYSLOVoInPKH4JZMlsBjqvDkCtyeoMadc6rz3cwNdhe5h7nQ==)
+    username: ENC(0OGquVQTWY7NQmkmZuyExQ==)
+    password: ENC(XfPH5vgfMlhvvCh5ANFx+Q==)
 
   profiles:
     active: local
@@ -56,8 +56,8 @@ spring:
     suffix: .html
   data:
     redis:
-#      host: localhost
-      host: localhost
+      #      host: localhost
+      host: ENC(gCNuEzhc+B6HcBGGCvx2Fa/McLEji/zY)
       port: 6379
 
   servlet:
@@ -87,7 +87,4 @@ jwt:
 
 jasypt:
   encryptor:
-    password: "@!Secr3tP@ssw0rd$2024"
-
-
-
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}
