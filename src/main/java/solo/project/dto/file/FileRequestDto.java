@@ -14,24 +14,27 @@ import solo.project.entity.File;
 @NoArgsConstructor
 public class FileRequestDto {
 
+    @Schema(description = "파일 식별")
+    private Long fileId;
+
     @Schema(description = "파일 이름")
     private String fileName;
 
     @Schema(description = "파일 Url")
     private String fileUrl;
 
+    @Schema(description = "메인 사진, 썸네일")
+    private boolean isThumbnail;
+
     @Schema(description = "파일 삭제/교체 여부")
     private boolean deleted;
 
     public FileRequestDto(File file) {
+        this.fileId = file.getFileId();              // ★파일 PK
         this.fileName = file.getFileName();
         this.fileUrl = file.getFileUrl();
-        this.deleted = true;
+        this.isThumbnail = file.isThumbnail();
+        this.deleted = false;
     }
 
-    public FileRequestDto(FileResponseDto dto, boolean deleted) {
-        this.fileName = dto.getFileName();
-        this.fileUrl = dto.getFileUrl();
-        this.deleted = deleted;
-    }
 }

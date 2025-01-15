@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import solo.project.dto.Comment.CommentResponseDto;
+import solo.project.dto.ReviewPlace.response.ReviewPlaceResponseDto;
+import solo.project.dto.file.FileResponseDto;
 import solo.project.entity.ReviewPlace;
-import solo.project.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,21 +18,41 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewResponseDto {
-  @Schema(description = "id")
-  private Long id;
+
+  @Schema(description = "리뷰 id")
+  private Long reviewId;
+
   @Schema(description = "제목")
   private String title;
+
   @Schema(description = "내용")
   private String content;
+
   @Schema(description = "조회수")
   private int viewCount;
+
   @Schema(description = "좋아요수")
   private int likeCount;
+
   @Schema(description = "작성일")
   private LocalDateTime createdAt;
-  @Schema(description = "작성자")
-  private String userName;
-  @Schema(description = "리뷰글에 등록한 장소들")
-  private List<ReviewPlace> reviewPlaces;
 
+  @Schema(description = "작성자 닉네임")
+  private String nickname;
+
+  @Schema(description = "댓글 수")
+  private int commentCount;
+
+  @Schema(description = "방문한 장소들")
+  private List<ReviewPlaceResponseDto> reviewPlaces;  // 필요한 필드만 DTO로 변환
+
+  @Schema(description = "첨부된 이미지 정보")
+  private List<FileResponseDto> files;        // 여러 이미지 목록
+
+  @Schema(description = "대표 이미지(썸네일)")
+  private String thumbnailUrl;               // 첫 번째 파일의 URL을 썸네일로
+
+  @Schema(description = "댓글 목록")
+  private List<CommentResponseDto> comments; // 댓글 목록
 }
+

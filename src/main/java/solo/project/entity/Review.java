@@ -5,7 +5,9 @@ import lombok.*;
 import solo.project.dto.Review.request.ReviewRequestDto;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -17,7 +19,7 @@ public class Review extends BaseTimeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column
+  @Column(name = "review_id")
   private Long id;
 
   @Column(nullable = false)
@@ -50,14 +52,14 @@ public class Review extends BaseTimeEntity {
   private List<Like> likes = new ArrayList<>();
 
   @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<File> files = new ArrayList<>();
+  private Set<File> files = new HashSet<>();
 
   @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Comment> comments = new ArrayList<>();
+  private Set<Comment> comments = new HashSet<>();
 
   @Builder
   public Review(Long id, String title, String content, boolean deleted) {
-    this.id = id;
+    this.id= id;
     this.title = title;
     this.content = content;
     this.deleted = deleted;
@@ -95,5 +97,19 @@ public class Review extends BaseTimeEntity {
 
   public void downCommentCount(int childCommentCount){
     this.commentCount -= 1+childCommentCount;
+  }
+
+
+  public void setComments(Set<Comment> comments) {
+    this.comments = comments;
+  }
+
+  public void setFiles(Set<File> files) {
+    this.files = files;
+  }
+
+  public void addFile(File file) {
+    files.add(file);
+    file.setReview(this);
   }
 }

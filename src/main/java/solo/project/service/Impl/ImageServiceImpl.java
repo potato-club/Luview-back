@@ -93,7 +93,7 @@ public class ImageServiceImpl implements ImageService {
         return newFileList;
     }
 
-    /** 수정 + 삭제 로직 (주로 리뷰, 프로필) */
+    /** 수정 + 삭제 로직 (주로 리뷰, 썸네일) */
     @Override
     @Transactional
     public List<File> updateImages(Object entity, List<MultipartFile> files, List<FileRequestDto> requestDto)

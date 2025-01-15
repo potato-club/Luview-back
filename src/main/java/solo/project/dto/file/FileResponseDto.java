@@ -12,11 +12,18 @@ import java.util.Objects;
 @Builder
 @AllArgsConstructor
 public class FileResponseDto {
+
+    @Schema(description = "파일 Id")
+    private Long fileId;
+
     @Schema(description = "이미지 파일 이름")
     private String fileName;
 
     @Schema(description = "이미지 Url")
     private String fileUrl;
+
+    @Schema(description = "메인 사진, 썸네일")
+    private boolean isThumbnail;
 
     public FileResponseDto(File file) {
         this.fileName=file.getFileName();
