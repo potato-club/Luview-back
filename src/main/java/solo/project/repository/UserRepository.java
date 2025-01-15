@@ -13,7 +13,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUniqueCode(String uniqueCode);
     boolean existsByEmail(String email);
     boolean existsByEmailAndDeleted(String email, boolean deleted);
-    boolean existsByEmailAndDeletedAndEmailOtp(String email, boolean deleted, boolean otp);
     boolean existsByEmailAndDeletedIsTrue(String email);
-    boolean existsByEmailAndDeletedIsFalse(String email);
 }

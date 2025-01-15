@@ -1,16 +1,33 @@
 package solo.project.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Bean
+    @Autowired
+    private OctetStreamReadMsgConverter octetStreamReadMsgConverter;
+
+    @Autowired
+    public WebConfig(OctetStreamReadMsgConverter octetStreamReadMsgConverter) {
+        this.octetStreamReadMsgConverter = octetStreamReadMsgConverter;
+    }
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(octetStreamReadMsgConverter);
+    }
+
+@Bean
     public RestTemplateBuilder restTemplateBuilder() {
         return new RestTemplateBuilder();
     }

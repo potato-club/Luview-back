@@ -1,19 +1,22 @@
 package solo.project.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import solo.project.enums.FileType;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "files")
 public class File {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column
-  private Long id;
+  private Long fileId;
+
+  @Enumerated(EnumType.STRING)
+  private FileType fileType;
 
   @Column(nullable = false, length = 512)
   private String fileUrl;
@@ -21,7 +24,9 @@ public class File {
   @Column(nullable = false)
   private String fileName;
 
-  @ManyToOne(fetch = FetchType.LAZY)  // File n ~ 1 User
+  private boolean isThumbnail; //썸네일 여부 (리뷰 썸네일)
+
+  @ManyToOne(fetch = FetchType.LAZY)  //한명의 사람은 하나의 프로필
   @JoinColumn(name = "user_id")
   private User user;
 
@@ -35,4 +40,11 @@ public class File {
     this.fileName = fileName;
   }
 
+  public void setUser(User user) {
+    this.user = user;
+  }
+
+  public void setReview(Review review) {
+    this.review = review;
+  }
 }

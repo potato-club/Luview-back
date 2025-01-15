@@ -19,7 +19,7 @@ public interface UserService {
     UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response);
     void signUp(UserSignUpRequestDto requestDto, HttpServletResponse response);
     boolean isNicknameDuplicated(String nickname);
-    UserProfileResponseDto viewProfile(String email);
+    UserProfileResponseDto viewProfile(HttpServletRequest request);
     void logout(HttpServletRequest request);
     User findUserByToken(HttpServletRequest request);
     void reissueToken(HttpServletRequest request, HttpServletResponse response);

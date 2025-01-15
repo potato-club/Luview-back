@@ -31,6 +31,7 @@ public class UserController {
         return userService.kakaoLogin(authorizeCode, request, response);
     }
 
+    //임시토큰을 사용해야하나..?
     @Operation(summary = "카카오 추가정보 입력API")
     @PutMapping("/{id}/addInfo")
     public ResponseEntity<UserKakaoResponseDto> updateUserInfo(@PathVariable Long id, @Valid @RequestBody AdditionalInfoRequest request){
@@ -58,11 +59,11 @@ public class UserController {
         return userService.login(requestDto, response);
     }
 
-    // 프로필 조회 아직 구현 덜했삼
+    // 내 프로필 확인
     @Operation(summary = "내 정보 확인 API")
     @GetMapping("/profile")
-    public UserProfileResponseDto viewProfile(@RequestParam String email) {
-        return userService.viewProfile(email);
+    public UserProfileResponseDto viewProfile(HttpServletRequest request) {
+        return userService.viewProfile(request);
     }
 
     // 로그아웃

@@ -10,7 +10,7 @@ import solo.project.entity.User;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.repository.LikeRepository;
-import solo.project.repository.ReviewRepository;
+import solo.project.repository.review.ReviewRepository;
 import solo.project.service.LikeService;
 import solo.project.service.UserService;
 

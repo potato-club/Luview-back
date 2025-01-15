@@ -8,10 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
-import solo.project.error.exception.BadRequestException;
-import solo.project.error.exception.DuplicateException;
-import solo.project.error.exception.NotFoundException;
-import solo.project.error.exception.UnAuthorizedException;
+import solo.project.error.exception.*;
 
 
 @RequiredArgsConstructor
@@ -80,5 +77,14 @@ public class ErrorExceptionControllerAdvice {
                         .build());
     }
 
+    @ExceptionHandler({S3Exception.class})
+    public ResponseEntity<ErrorEntity> exceptionHandler(final S3Exception e) {
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(ErrorEntity.builder()
+                        .errorCode(e.getErrorCode().getCode())
+                        .errorMessage(e.getMessage())
+                        .build());
+    }
 }
 

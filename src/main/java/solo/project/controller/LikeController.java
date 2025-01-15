@@ -23,6 +23,4 @@ public class LikeController {
   public ResponseEntity<String> like(@PathVariable Long review_id, HttpServletRequest request) {
     return ResponseEntity.ok(likeService.likeReview(review_id, request));
   }
-
-
 }

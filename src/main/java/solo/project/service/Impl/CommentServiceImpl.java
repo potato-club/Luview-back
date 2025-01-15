@@ -13,13 +13,13 @@ import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.CommentRepository;
-import solo.project.repository.ReviewRepository;
+import solo.project.repository.review.ReviewRepository;
 import solo.project.service.CommentService;
 import solo.project.service.ReviewService;
 import solo.project.service.UserService;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -89,7 +89,7 @@ public class CommentServiceImpl implements CommentService {
       throw new NotFoundException("리뷰글을 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION);
     }
 
-    List<Comment> comments = review.getComments();
+    Set<Comment> comments = review.getComments();
     return comments.stream()
         .filter(comment -> comment.getParent() == null)
         .map(comment -> CommentResponseDto.builder()

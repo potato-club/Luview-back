@@ -1,7 +1,7 @@
 spring:
   datasource:
 #    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/Test
+#    url: jdbc:mysql://localhost:3306/Test2
 #    username: ENC(eiR6Ob23EnJdbYzxlEB7Aw==)
 #    password: ENC(3sRnlrAW+hwfRtZTgCDYAVpk9AObDlih)
       driver-class-name: com.mysql.cj.jdbc.Driver
@@ -24,7 +24,7 @@ spring:
               - account_email
               - profile_nickname
             authorization-grant-type: authorization_code
-            redirect-uri: http://43.203.47.170:8080/callback
+            redirect-uri: ENC(BEdoSxKuWVR6/oAkhxjlZTGCtSvUQUAjlkT8Emaexc7pibTXWbahsHzaZzSQpPYv)
             client-name: Kakao
             client-authentication-method: client_secret_post
         provider:
@@ -59,6 +59,25 @@ spring:
 #      host: localhost
       host: localhost
       port: 6379
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+
+cloud:
+  aws:
+    credentials:
+      access-key: ENC(uv4pp8Sriti3y7aImT+YmPhU5P/TGxJG5qrhsQ17nrk=)
+      secret-key: ENC(ZMbj3b/znDTyu/+V0JF5ZRnxqfaz1wHdZ/j67wAsL/qYnKUZ9s501oePzfb9+F2JiUhba9Yl08w=)
+    region:
+      static: ENC(eRthPWGi4DI+uOUGET6swxc8p1iPJJb6)
+    stack:
+      auto: false
+    s3:
+      bucket: ENC(jWMsoU1CNySnX6LE5/cGuPqD1qf2EJI1)
 
 jwt:
   secret: ENC(L0SMyiS9QqgWuSakyPSc7J0aM6HezOpYLiwrwmJ6rRav+9WC6sReujEAPST1h3eFqp89YJsmkZ5FSyav/4oXNA==)

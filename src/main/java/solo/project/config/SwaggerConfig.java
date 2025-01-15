@@ -1,5 +1,6 @@
 package solo.project.config;
 
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -54,5 +55,28 @@ public class SwaggerConfig {
             .displayName("review's API")
             .addOpenApiCustomizer(createOpenApiCustomizer("리뷰글 API", "v0.4"))
             .build();
+    }
+
+    @Bean
+    public GroupedOpenApi uploadApi() {
+        return GroupedOpenApi.builder()
+                .group("upload")
+                .pathsToMatch("/upload/**")
+                .displayName("upload's API")
+                .addOpenApiCustomizer(createOpenApiCustomizer("프로필, 리뷰글, 썸네일 관련 API", "v0.4"))
+                .build();
+    }
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .schemaRequirement("bearerAuth", createBearerAuthScheme())
+                .info(new Info()
+                        .title("My API Documentation")
+                        .version("v0.4")
+                        .description("Swagger 설정을 통한 파일 업로드 API 문서"))
+                .components(new io.swagger.v3.oas.models.Components()
+                        .addSecuritySchemes("bearerAuth", createBearerAuthScheme()));
     }
 }

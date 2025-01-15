@@ -23,14 +23,13 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getEmail();
+        return user.getPassword(); // 실제 비밀번호 해시 반환
     }
 
     @Override
     public String getUsername() {
-        return user.getNickname();
+        return user.getEmail(); // 로그인 식별자로 이메일 사용
     }
-
     @Override
     public boolean isAccountNonExpired() {
         return true;
