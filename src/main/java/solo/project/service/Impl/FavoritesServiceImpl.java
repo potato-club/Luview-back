@@ -10,7 +10,7 @@ import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.FavoritesRepository;
-import solo.project.repository.ReviewRepository;
+import solo.project.repository.review.ReviewRepository;
 import solo.project.service.FavoritesService;
 import solo.project.service.UserService;
 

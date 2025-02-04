@@ -1,29 +1,46 @@
-package solo.project.service;
+package solo.project.service.Impl;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import solo.project.dto.mainpage.response.MainPageResponseDto;
 import solo.project.dto.mainpage.response.MyInfoResponseDto;
 import solo.project.dto.mainpage.response.PartnerInfoResponseDto;
 import solo.project.dto.mainpage.response.MainPageReviewResponseDto;
+import solo.project.entity.User;
+import solo.project.error.ErrorCode;
+import solo.project.error.exception.NotFoundException;
+import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.mainpage.MainPageRepository;
+import solo.project.service.UserService;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class MainPageService {
+public class MainPageServiceImpl {
 
     private final MainPageRepository mainPageRepository;
-    public MainPageResponseDto getMainPageData(Long userId, int reviewLimit) {
-        // 내 정보 조회
+    private final UserService userService; // UserService에서 findUserByToken 메서드 제공
+
+    public MainPageResponseDto getMainPageData(HttpServletRequest request, int reviewLimit) {
+        User user = userService.findUserByToken(request);
+        Long userId = user.getId();
+
+        if (userId == null) {
+            throw new UnAuthorizedException("유효한 사용자 ID가 제공되지 않았습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
+        }
+
         MyInfoResponseDto myInfo = mainPageRepository.getMyInfo(userId);
-        // 파트너 정보 조회
+        if (myInfo == null) {
+            throw new NotFoundException("내 정보가 조회되지 않습니다. userId=" + userId, ErrorCode.NOT_FOUND_EXCEPTION);
+        }
+
         PartnerInfoResponseDto partnerInfo = mainPageRepository.getPartnerInfo(userId);
-        // 커플 ID 및 커플 일수 조회 (커플이 존재하지 않으면 0으로 처리)
+
         Long coupleId = mainPageRepository.getCoupleIdByUserId(userId);
         Long coupleDays = (coupleId != null) ? mainPageRepository.getCoupleDays(coupleId) : 0L;
-        // 최신 리뷰 목록 조회
+
         List<MainPageReviewResponseDto> recentReviews = mainPageRepository.getCoupleRecentReviews(userId, reviewLimit);
 
         return MainPageResponseDto.builder()

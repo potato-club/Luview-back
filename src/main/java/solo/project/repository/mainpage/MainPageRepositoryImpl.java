@@ -87,7 +87,6 @@ public class MainPageRepositoryImpl implements MainPageRepository {
 
     @Override
     public Long getCoupleDays(Long coupleId) {
-        // 커플 생성일자 기준 현재까지 일 수 계산
         LocalDateTime createdDate = queryFactory
                 .select(couple.createdDate)
                 .from(couple)
@@ -99,13 +98,11 @@ public class MainPageRepositoryImpl implements MainPageRepository {
 
     @Override
     public List<MainPageReviewResponseDto> getCoupleRecentReviews(Long myUserId, int limit) {
-        // 1. 커플 ID 조회
         Long coupleId = getCoupleIdByUserId(myUserId);
         if (coupleId == null) {
             return Collections.emptyList();
         }
 
-        // 2. 커플 엔티티 조회 후 두 사용자의 ID를 구함
         Couple c = queryFactory
                 .selectFrom(couple)
                 .where(couple.id.eq(coupleId))
@@ -131,7 +128,6 @@ public class MainPageRepositoryImpl implements MainPageRepository {
                 .limit(limit)
                 .fetch();
 
-        // 4. Tuple을 DTO로 매핑
         List<MainPageReviewResponseDto> result = new ArrayList<>();
         for (Tuple tuple : tuples) {
             Review r = tuple.get(review);
