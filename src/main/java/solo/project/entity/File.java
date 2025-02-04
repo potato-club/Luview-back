@@ -47,4 +47,9 @@ public class File {
   public void setReview(Review review) {
     this.review = review;
   }
+
+  public void setIsThumbnail(boolean isThumbnail) {
+    this.isThumbnail = isThumbnail;
+  }
+
 }
