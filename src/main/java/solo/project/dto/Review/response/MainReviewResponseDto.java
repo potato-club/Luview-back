@@ -2,10 +2,7 @@ package solo.project.dto.Review.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Null;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import solo.project.entity.Place;
 import solo.project.entity.Review;
 import solo.project.entity.ReviewPlace;
@@ -18,6 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+//게시물 리스트들 쫙~~~~~
 public class MainReviewResponseDto {
   @Schema(description = "카테고리")
   private String category; // 첫 번째 장소의 카테고리
@@ -30,7 +28,9 @@ public class MainReviewResponseDto {
   @Schema(description = "댓글 수")
   private int commentCount; // 댓글 수
   @Schema(description = "작성자")
-  private String NickName; // 작성자
+  private String nickName; // 작성자
+  @Schema(description = "조회수")
+  private int viewCount; // 조회수 필드 추가
   @Schema(description = "썸네일")
   private String thumbnailUrl; //대표 이미지
 }

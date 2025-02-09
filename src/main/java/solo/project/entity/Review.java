@@ -112,4 +112,8 @@ public class Review extends BaseTimeEntity {
     files.add(file);
     file.setReview(this);
   }
+
+  public void setViewCount(int viewCount) {
+    this.viewCount = viewCount;
+  }
 }

@@ -3,6 +3,8 @@ package solo.project.service.Impl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,6 +13,7 @@ import solo.project.dto.Review.request.ReviewRequestDto;
 import solo.project.dto.Review.response.MainReviewResponseDto;
 import solo.project.dto.Review.response.ReviewResponseDto;
 import solo.project.dto.file.FileRequestDto;
+import solo.project.dto.jwt.JwtTokenProvider;
 import solo.project.entity.*;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
@@ -19,8 +22,11 @@ import solo.project.repository.ReviewPlaceRepository;
 import solo.project.repository.review.ReviewRepository;
 import org.springframework.data.domain.Pageable;
 import solo.project.service.*;
+import solo.project.service.redis.RedisReviewService;
+import solo.project.service.redis.RedisViewCountSyncService;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +41,15 @@ public class ReviewServiceImpl implements ReviewService {
   private final ReviewPlaceService reviewPlaceService;
   private final ReviewPlaceRepository reviewPlaceRepository;
   private final ImageService imageService;
+  private static final String REVIEW_VIEW_COUNT_KEY_PREFIX="review:view";
+  private final RedisTemplate<String,Object> redisTemplate;
+  private final JwtTokenProvider jwtTokenProvider;
+
+  //1시간 지정
+  private static final Duration POPULAR_REVIEWS_CACHE_DURATION = Duration.ofHours(1);
+  private final RedisReviewService redisReviewService;
+  private final RedisViewCountSyncService redisViewCountSyncService;
+
 
   @Override
   public void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request, List<MultipartFile> files) throws IOException {
@@ -93,7 +108,16 @@ public class ReviewServiceImpl implements ReviewService {
   @Override
   @Transactional(readOnly = true)
   public ReviewResponseDto getReviewDetail(Long reviewId) {
-    return reviewRepository.getReviewDetail(reviewId);
+    ReviewResponseDto reviewDetail= reviewRepository.getReviewDetail(reviewId);
+
+    //Redis 이용한 조회수 증가 - 멀티쓰레지 방지를 위해 사용
+    incrementViewCount(reviewId);
+
+    int redisViewCount= getViewCount(reviewId);
+    int totalViewCount = reviewDetail.getViewCount() + redisViewCount;
+    reviewDetail.setViewCount(totalViewCount);
+
+    return reviewDetail;
   }
 
   @Override
@@ -139,6 +163,7 @@ public class ReviewServiceImpl implements ReviewService {
     reviewRepository.delete(review);
   }
 
+
   // 아래 메서드는 간단한 메인 목록 DTO 변환용
   private MainReviewResponseDto createMainReviewDto(Review review, String category) {
     Place place = null;
@@ -166,7 +191,7 @@ public class ReviewServiceImpl implements ReviewService {
             .title(review.getTitle())
             .likeCount(review.getLikeCount())
             .commentCount(review.getCommentCount())
-            .NickName(review.getUser().getNickname())
+            .nickName(review.getUser().getNickname())
             .thumbnailUrl(thumbUrl)
             .build();
   }
@@ -187,6 +212,100 @@ public class ReviewServiceImpl implements ReviewService {
       }
     }
     return false;
+  }
+
+  /**
+   * 특정 리뷰 조회수 1증가
+   * @param
+   */
+  @Override
+  public void incrementViewCount(Long reviewId) {
+    String key = REVIEW_VIEW_COUNT_KEY_PREFIX + reviewId;
+    ValueOperations<String, Object> ops = redisTemplate.opsForValue();
+    ops.increment(key, 1);
+  }
+
+  /**
+   * redis에 저장 된 특정 리뷰의 조회수를 가져옴
+   * @param reviewId
+   * @return
+   */
+
+  @Override
+  public int getViewCount(Long reviewId) {
+    String key = REVIEW_VIEW_COUNT_KEY_PREFIX + reviewId;
+    ValueOperations<String, Object> ops = redisTemplate.opsForValue();
+    Object value = ops.get(key);
+
+    if (value == null) {
+      return 0;
+    }
+    if (value instanceof Number) {
+      return ((Number) value).intValue();
+    }
+    try {
+      return Integer.parseInt(value.toString());
+    } catch (NumberFormatException e) {
+      return 0;
+    }
+  } // 뷰 카운트 코드인데 가독성이 너무 좋지않아 나중에 수정 예정 RedisCode 수정해야함
+
+  @Override
+  public List<MainReviewResponseDto> getPopularReviews(HttpServletRequest request) {
+    String token = jwtTokenProvider.resolveAccessToken(request);
+    if (token == null) {
+      throw new UnAuthorizedException("토큰이 존재하지 않습니다.", ErrorCode.INVALID_TOKEN_EXCEPTION);
+    }
+    Object cached = redisReviewService.getPopularReviews();
+    if (cached instanceof List) {
+      return (List<MainReviewResponseDto>) cached;
+    }
+
+    List<Review> reviews = reviewRepository.findPopularReview();
+    // 각 리뷰에 대해 DB 조회수와 Redis 조회수를 합산한 후 DTO로 변환
+    List<MainReviewResponseDto> dtos = reviews.stream()
+            .map(review -> {
+              int redisViewCount = getViewCount(review.getId());
+              int totalViewCount = review.getViewCount() + redisViewCount;
+              return mapToMainReviewResponseDto(review, totalViewCount);
+            })
+            .sorted((firstReviewDto, secondReviewDto) ->
+                    Integer.compare(secondReviewDto.getViewCount(), firstReviewDto.getViewCount())
+            )
+            .collect(Collectors.toList());
+
+    redisReviewService.setPopularReview(dtos, POPULAR_REVIEWS_CACHE_DURATION);
+    return dtos;
+  }
+
+
+
+  private MainReviewResponseDto mapToMainReviewResponseDto(Review review, int totalViewCount) {
+    String category = null;
+    String placeName = null;
+    if (review.getReviewPlaces() != null && !review.getReviewPlaces().isEmpty()) {
+      ReviewPlace firstReviewPlace = review.getReviewPlaces().iterator().next();
+      Place place = firstReviewPlace.getPlace();
+      if (place != null) {
+        category = place.getCategory();
+        placeName = place.getPlaceName();
+      }
+    }
+    String nickName = review.getUser() != null ? review.getUser().getNickname() : null;
+    String thumbnailUrl = null;
+    if (review.getFiles() != null && !review.getFiles().isEmpty()) {
+      thumbnailUrl = review.getFiles().iterator().next().getFileUrl();
+    }
+    return MainReviewResponseDto.builder()
+            .category(category)
+            .placeName(placeName)
+            .title(review.getTitle())
+            .viewCount(totalViewCount)
+            .likeCount(review.getLikeCount())
+            .commentCount(review.getCommentCount())
+            .nickName(nickName)
+            .thumbnailUrl(thumbnailUrl)
+            .build();
   }
 }
 

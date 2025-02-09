@@ -18,4 +18,8 @@ public interface ReviewService {
   ReviewResponseDto getReviewDetail(Long reviewId);
   void updateReview(Long id, ReviewRequestDto reviewRequestDto, HttpServletRequest request, List<MultipartFile> newFiles, List<FileRequestDto> deleteFiles) throws IOException;
   void deleteReview(Long id, HttpServletRequest request);
+  void incrementViewCount(Long reviewId);
+  int getViewCount(Long reviewId);
+  List<MainReviewResponseDto> getPopularReviews(HttpServletRequest request);
+
 }

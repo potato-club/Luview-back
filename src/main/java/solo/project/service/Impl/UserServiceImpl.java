@@ -23,7 +23,7 @@ import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.File.FileRepository;
 import solo.project.repository.UserRepository;
-import solo.project.service.RedisJwtService;
+import solo.project.service.redis.RedisJwtService;
 import solo.project.service.UserService;
 
 import java.util.Map;

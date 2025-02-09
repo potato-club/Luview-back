@@ -93,5 +93,12 @@ public class ReviewController {
     reviewService.deleteReview(review_id, request);
     return ResponseEntity.ok("리뷰글 삭제 완료");
   }
+
+  @Operation(summary = "인기 리뷰 조회")
+  @GetMapping("/popular")
+  public ResponseEntity<List<MainReviewResponseDto>> getPopularReviews(HttpServletRequest request) {
+    List<MainReviewResponseDto> popularReviews = reviewService.getPopularReviews(request);
+    return ResponseEntity.ok(popularReviews);
+  }
 }
 

@@ -53,6 +53,16 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
         return mapToReviewResponseDto(review);
     }
 
+    @Override
+    public List<Review> findPopularReview() {
+        QReview qReview = QReview.review;
+        return jpaQueryFactory
+                .selectFrom(qReview)
+                .orderBy(qReview.viewCount.desc())
+                .limit(10)
+                .fetch();
+    }
+
     private ReviewResponseDto mapToReviewResponseDto(Review review) {
         // 1) File 목록을 Set에서 List로 변환
         Set<File> fileSet = review.getFiles();

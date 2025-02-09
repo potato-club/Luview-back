@@ -15,7 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import solo.project.error.ErrorJwtCode;
-import solo.project.service.RedisJwtService;
+import solo.project.service.redis.RedisJwtService;
 
 import java.io.IOException;
 

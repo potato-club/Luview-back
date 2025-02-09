@@ -8,10 +8,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import solo.project.entity.Review;
 
+import java.util.List;
+
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> ,ReviewRepositoryCustom {
   Page<Review> findAllByOrderByCreatedDateDesc(Pageable pageable);
 
   @Query("SELECT r FROM Review r JOIN r.reviewPlaces rp JOIN rp.place p WHERE p.category = :category")
   Page<Review> findByPlaceCategory(@Param("category") String Category, Pageable pageable);
+
 }

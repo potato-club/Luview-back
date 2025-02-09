@@ -1,4 +1,4 @@
-package solo.project.service;
+package solo.project.service.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
