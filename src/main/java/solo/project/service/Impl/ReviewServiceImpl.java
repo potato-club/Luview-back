@@ -46,7 +46,7 @@ public class ReviewServiceImpl implements ReviewService {
   private final JwtTokenProvider jwtTokenProvider;
 
   //1시간 지정
-  private static final Duration POPULAR_REVIEWS_CACHE_DURATION = Duration.ofHours(1);
+  private static final Duration POPULAR_REVIEWS_CACHE_DURATION = Duration.ofMinutes(5);
   private final RedisReviewService redisReviewService;
   private final RedisViewCountSyncService redisViewCountSyncService;
 
@@ -214,10 +214,8 @@ public class ReviewServiceImpl implements ReviewService {
     return false;
   }
 
-  /**
-   * 특정 리뷰 조회수 1증가
-   * @param
-   */
+  //리뷰 조회수 증가
+
   @Override
   public void incrementViewCount(Long reviewId) {
     String key = REVIEW_VIEW_COUNT_KEY_PREFIX + reviewId;
@@ -225,11 +223,7 @@ public class ReviewServiceImpl implements ReviewService {
     ops.increment(key, 1);
   }
 
-  /**
-   * redis에 저장 된 특정 리뷰의 조회수를 가져옴
-   * @param reviewId
-   * @return
-   */
+  //Redis저장된 조회수를 가져옴
 
   @Override
   public int getViewCount(Long reviewId) {
