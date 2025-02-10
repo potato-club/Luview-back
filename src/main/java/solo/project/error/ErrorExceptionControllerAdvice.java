@@ -67,6 +67,16 @@ public class ErrorExceptionControllerAdvice {
                         .build());
     }
 
+    @ExceptionHandler({LikeOperationException.class})
+    public ResponseEntity<ErrorEntity> exceptionHandler(final LikeOperationException e) {
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(ErrorEntity.builder()
+                        .errorCode(e.getErrorCode().getCode())
+                        .errorMessage(e.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<ErrorEntity> exceptionHandler(final MethodArgumentNotValidException e) {
         return ResponseEntity

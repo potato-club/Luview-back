@@ -4,7 +4,7 @@ spring:
     url: jdbc:mysql://localhost:3306/Test2
     username: ENC(eiR6Ob23EnJdbYzxlEB7Aw==)
     password: ENC(3sRnlrAW+hwfRtZTgCDYAVpk9AObDlih)
-
+#
 #    driver-class-name: com.mysql.cj.jdbc.Driver
 #    url: ENC(ePPe6owYSLOVoInPKH4JZMlsBjqvDkCtyeoMadc6rz3cwNdhe5h7nQ==)
 #    username: ENC(0OGquVQTWY7NQmkmZuyExQ==)

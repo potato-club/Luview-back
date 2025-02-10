@@ -8,5 +8,6 @@ import java.util.List;
 public interface ReviewRepositoryCustom {
     ReviewResponseDto getReviewDetail(Long reviewId);
     List<Review> findPopularReview();
+    List<Review> findPopularByLikes();
 
 }

@@ -22,8 +22,8 @@ import solo.project.repository.ReviewPlaceRepository;
 import solo.project.repository.review.ReviewRepository;
 import org.springframework.data.domain.Pageable;
 import solo.project.service.*;
-import solo.project.service.redis.RedisReviewService;
-import solo.project.service.redis.RedisViewCountSyncService;
+import solo.project.service.redis.RedisReviewListService;
+import solo.project.service.redis.RedisCountSyncService;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -41,14 +41,14 @@ public class ReviewServiceImpl implements ReviewService {
   private final ReviewPlaceService reviewPlaceService;
   private final ReviewPlaceRepository reviewPlaceRepository;
   private final ImageService imageService;
-  private static final String REVIEW_VIEW_COUNT_KEY_PREFIX="review:view";
+  private static final String REVIEW_VIEW_COUNT_KEY_PREFIX="review:view:";
   private final RedisTemplate<String,Object> redisTemplate;
   private final JwtTokenProvider jwtTokenProvider;
 
   //1시간 지정
   private static final Duration POPULAR_REVIEWS_CACHE_DURATION = Duration.ofMinutes(5);
-  private final RedisReviewService redisReviewService;
-  private final RedisViewCountSyncService redisViewCountSyncService;
+  private final RedisReviewListService redisReviewService;
+  private final RedisCountSyncService redisViewCountSyncService;
 
 
   @Override
@@ -272,6 +272,32 @@ public class ReviewServiceImpl implements ReviewService {
     return dtos;
   }
 
+  //좋아요순 정렬
+  @Override
+  public List<MainReviewResponseDto> getPopularReviewsByLikes(HttpServletRequest request) {
+    String token = jwtTokenProvider.resolveAccessToken(request);
+    if (token == null) {
+      throw new UnAuthorizedException("토큰이 존재하지 않습니다." , ErrorCode.UNAUTHORIZED_EXCEPTION);
+    }
+    //Redis에서 조회
+    Object cached = redisReviewService.getPopularLikes();
+    if(cached instanceof List) {
+      return (List<MainReviewResponseDto>) cached;
+    }
+    //없으면 DB순
+    List<Review> reviews = reviewRepository.findPopularByLikes();
+    List<MainReviewResponseDto> LikeDtos = reviews.stream()
+            .map(review -> {
+              int redisViewCount = getViewCount(review.getId());
+              int totalViewCount = review.getViewCount() + redisViewCount;
+              return mapToMainReviewResponseDto(review, totalViewCount);
+            })
+            .collect(Collectors.toList());
+
+
+    redisReviewService.setPopularReviewByLikeKey(LikeDtos, POPULAR_REVIEWS_CACHE_DURATION);
+    return LikeDtos;
+  }
 
 
   private MainReviewResponseDto mapToMainReviewResponseDto(Review review, int totalViewCount) {

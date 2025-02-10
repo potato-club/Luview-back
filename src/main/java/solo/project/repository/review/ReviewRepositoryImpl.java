@@ -63,15 +63,22 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public List<Review> findPopularByLikes() {
+        QReview qReview = QReview.review;
+        return jpaQueryFactory
+                .selectFrom(qReview)
+                .orderBy(qReview.likeCount.desc())
+                .limit(10)
+                .fetch();
+    }
+
     private ReviewResponseDto mapToReviewResponseDto(Review review) {
-        // 1) File 목록을 Set에서 List로 변환
         Set<File> fileSet = review.getFiles();
         List<File> fileList = new ArrayList<>(fileSet);
 
-        // 첫 번째 파일의 URL을 썸네일로 설정
         String thumbnailUrl = fileList.isEmpty() ? null : fileList.get(0).getFileUrl(); // 첫 번째 파일 썸네일
 
-        // FileResponseDto 목록 생성
         List<FileResponseDto> fileDtos = fileList.stream()
                 .map(f -> FileResponseDto.builder()
                         .fileId(f.getFileId())
@@ -81,13 +88,11 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                         .build())
                 .collect(Collectors.toList());
 
-        // 첫 번째 FileResponseDto를 썸네일로 설정
         if (!fileList.isEmpty()) {
             fileDtos.get(0).setThumbnail(true);
         }
 
 
-        // 2) 리뷰장소 목록
         List<ReviewPlaceResponseDto> reviewPlaceDtos = review.getReviewPlaces().stream()
                 .map(rp -> ReviewPlaceResponseDto.builder()
                         .placeId(rp.getPlace().getId())
@@ -98,7 +103,6 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                         .build())
                 .collect(Collectors.toList());
 
-        // 3) 댓글
         List<CommentResponseDto> commentDtos = review.getComments().stream()
                 .map(c -> CommentResponseDto.builder()
                         .parent_id(c.getId())

@@ -94,11 +94,18 @@ public class ReviewController {
     return ResponseEntity.ok("리뷰글 삭제 완료");
   }
 
-  @Operation(summary = "인기 리뷰 조회")
-  @GetMapping("/popular")
+  @Operation(summary = "인기 리뷰 조회(조회순)")
+  @GetMapping("/popular_check")
   public ResponseEntity<List<MainReviewResponseDto>> getPopularReviews(HttpServletRequest request) {
-    List<MainReviewResponseDto> popularReviews = reviewService.getPopularReviews(request);
-    return ResponseEntity.ok(popularReviews);
+    List<MainReviewResponseDto> popularCheckReviews = reviewService.getPopularReviews(request);
+    return ResponseEntity.ok(popularCheckReviews);
+  }
+
+  @Operation(summary = "인기 리뷰 조회(좋아요순)")
+  @GetMapping("/popular_like")
+  public ResponseEntity<List<MainReviewResponseDto>> getPopularReviewsLike(HttpServletRequest request) {
+    List<MainReviewResponseDto> popularLikeReviews=reviewService.getPopularReviewsByLikes(request);
+    return ResponseEntity.ok(popularLikeReviews);
   }
 }
 

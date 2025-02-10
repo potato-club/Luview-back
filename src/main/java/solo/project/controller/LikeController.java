@@ -5,22 +5,28 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import solo.project.service.LikeService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/like")
-@Tag(name="Like Controller", description = "좋아요 API")
+@RequestMapping("/review")
+@Tag(name = "Like Controller", description = "리뷰 좋아요 관련 API")
 public class LikeController {
+
   private final LikeService likeService;
 
-  @Operation(summary = "좋아요 생성 및 삭제")
-  @PostMapping("/{review_id}")
-  public ResponseEntity<String> like(@PathVariable Long review_id, HttpServletRequest request) {
-    return ResponseEntity.ok(likeService.likeReview(review_id, request));
+  @Operation(summary = "리뷰 좋아요 추가")
+  @PostMapping("/like_add/{reviewId}")
+  public ResponseEntity<String> addLike(@PathVariable Long reviewId, HttpServletRequest request) {
+    likeService.addLike(reviewId, request);
+    return ResponseEntity.ok("좋아요가 추가되었습니다.");
+  }
+
+  @Operation(summary = "리뷰 좋아요 취소")
+  @DeleteMapping("/like_decr/{reviewId}")
+  public ResponseEntity<String> removeLike(@PathVariable Long reviewId, HttpServletRequest request){
+    likeService.removeLike(reviewId, request);
+    return ResponseEntity.ok("좋아요가 취소되었습니다.");
   }
 }

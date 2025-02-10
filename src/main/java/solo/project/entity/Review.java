@@ -116,4 +116,8 @@ public class Review extends BaseTimeEntity {
   public void setViewCount(int viewCount) {
     this.viewCount = viewCount;
   }
+
+  public void setLikeCount(int likeCount) {
+    this.likeCount = likeCount;
+  }
 }
