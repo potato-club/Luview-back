@@ -17,6 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 //게시물 리스트들 쫙~~~~~
 public class MainReviewResponseDto {
+  @Schema(description = "리뷰ID")
+  private Long reviewId;
   @Schema(description = "카테고리")
   private String category; // 첫 번째 장소의 카테고리
   @Schema(description = "상호명")

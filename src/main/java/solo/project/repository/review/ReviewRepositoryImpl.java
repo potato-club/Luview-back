@@ -1,10 +1,13 @@
 package solo.project.repository.review;
 
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import solo.project.dto.Comment.CommentResponseDto;
+import solo.project.dto.Review.response.MainReviewResponseDto;
 import solo.project.dto.Review.response.ReviewResponseDto;
 import solo.project.dto.ReviewPlace.response.ReviewPlaceResponseDto;
 import solo.project.dto.file.FileResponseDto;
@@ -24,17 +27,15 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    @Override
-    @Transactional
-    public ReviewResponseDto getReviewDetail(Long reviewId) {
-        QReview qReview = QReview.review;
-        QFile qFile = QFile.file;
-        QReviewPlace qReviewPlace = QReviewPlace.reviewPlace;
-        QPlace qPlace = QPlace.place;
-        QComment qComment = QComment.comment;
-        QUser qUser = QUser.user;
+    private final QReview qReview = QReview.review;
+    private final QFile qFile = QFile.file;
+    private final QReviewPlace qReviewPlace = QReviewPlace.reviewPlace;
+    private final QPlace qPlace = QPlace.place;
+    private final QComment qComment = QComment.comment;
+    private final QUser qUser = QUser.user;
 
-        // fetchJoin
+    @Override
+    public ReviewResponseDto getReviewDetail(Long reviewId) {
         Review review = jpaQueryFactory
                 .select(qReview).distinct()
                 .from(qReview)
@@ -49,13 +50,11 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
         if (review == null) {
             throw new NotFoundException("존재하지 않는 리뷰입니다.", ErrorCode.NOT_FOUND_EXCEPTION);
         }
-
         return mapToReviewResponseDto(review);
     }
 
     @Override
     public List<Review> findPopularReview() {
-        QReview qReview = QReview.review;
         return jpaQueryFactory
                 .selectFrom(qReview)
                 .orderBy(qReview.viewCount.desc())
@@ -65,7 +64,6 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 
     @Override
     public List<Review> findPopularByLikes() {
-        QReview qReview = QReview.review;
         return jpaQueryFactory
                 .selectFrom(qReview)
                 .orderBy(qReview.likeCount.desc())
@@ -73,12 +71,42 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public List<MainReviewResponseDto> searchReview(String keyword) {
+        // 검색 조건: 제목, 내용, 작성자 닉네임에 keyword가 포함되는 경우
+        BooleanExpression predicate = qReview.title.containsIgnoreCase(keyword)
+                .or(qReview.content.containsIgnoreCase(keyword))
+                .or(qReview.user.nickname.containsIgnoreCase(keyword));
+
+        // QueryDSL 프로젝션을 사용하여 MainReviewResponseDto로 직접 매핑
+        return jpaQueryFactory
+                .select(Projections.bean(MainReviewResponseDto.class,
+                        qReview.id.as("reviewId"),
+                        qReview.title,
+                        qReview.likeCount,
+                        qReview.commentCount,
+                        qReview.viewCount,
+                        qReview.user.nickname.as("nickName"),
+                        qReviewPlace.place.category.as("category"),
+                        qReviewPlace.place.placeName.as("placeName"),
+                        qFile.fileUrl.as("thumbnailUrl")
+                ))
+                .from(qReview)
+                .join(qReview.reviewPlaces, qReviewPlace)
+                .join(qReviewPlace.place, qPlace)
+                .leftJoin(qReview.files, qFile)
+                .where(predicate)
+                .orderBy(qReview.createdDate.desc())
+                .limit(10)
+                .fetch();
+    }
+
+    // 엔티티를 ReviewResponseDto로 변환하는 메서드
     private ReviewResponseDto mapToReviewResponseDto(Review review) {
+        // 파일 처리
         Set<File> fileSet = review.getFiles();
         List<File> fileList = new ArrayList<>(fileSet);
-
-        String thumbnailUrl = fileList.isEmpty() ? null : fileList.get(0).getFileUrl(); // 첫 번째 파일 썸네일
-
+        String thumbnailUrl = fileList.isEmpty() ? null : fileList.get(0).getFileUrl();
         List<FileResponseDto> fileDtos = fileList.stream()
                 .map(f -> FileResponseDto.builder()
                         .fileId(f.getFileId())
@@ -87,22 +115,22 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                         .isThumbnail(false)
                         .build())
                 .collect(Collectors.toList());
-
         if (!fileList.isEmpty()) {
             fileDtos.get(0).setThumbnail(true);
         }
 
-
+        // 리뷰 장소 처리
         List<ReviewPlaceResponseDto> reviewPlaceDtos = review.getReviewPlaces().stream()
                 .map(rp -> ReviewPlaceResponseDto.builder()
                         .placeId(rp.getPlace().getId())
                         .placeName(rp.getPlace().getPlaceName())
                         .addressName(rp.getPlace().getAddressName())
                         .category(rp.getPlace().getCategory())
-                        .rating(rp.getRating())  // 별점
+                        .rating(rp.getRating())
                         .build())
                 .collect(Collectors.toList());
 
+        // 댓글 처리
         List<CommentResponseDto> commentDtos = review.getComments().stream()
                 .map(c -> CommentResponseDto.builder()
                         .parent_id(c.getId())
@@ -112,7 +140,6 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                         .build())
                 .collect(Collectors.toList());
 
-        // 4) 리턴
         return ReviewResponseDto.builder()
                 .reviewId(review.getId())
                 .title(review.getTitle())
@@ -122,10 +149,10 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .commentCount(review.getCommentCount())
                 .createdAt(review.getCreatedDate())
                 .nickname(review.getUser().getNickname())
-                .reviewPlaces(reviewPlaceDtos)        // 장소
-                .files(fileDtos)                // 이미지
-                .comments(commentDtos)          // 댓글
-                .thumbnailUrl(thumbnailUrl)     // 첫 번째 이미지의 URL
+                .reviewPlaces(reviewPlaceDtos)
+                .files(fileDtos)
+                .comments(commentDtos)
+                .thumbnailUrl(thumbnailUrl)
                 .build();
     }
 }

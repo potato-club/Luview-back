@@ -13,56 +13,65 @@ import solo.project.dto.Review.request.ReviewRequestDto;
 import solo.project.dto.Review.response.MainReviewResponseDto;
 import solo.project.dto.Review.response.ReviewResponseDto;
 import solo.project.dto.file.FileRequestDto;
-import solo.project.dto.jwt.JwtTokenProvider;
-import solo.project.entity.*;
+import solo.project.entity.File;
+import solo.project.entity.Place;
+import solo.project.entity.Review;
+import solo.project.entity.ReviewPlace;
+import solo.project.entity.User;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
 import solo.project.repository.ReviewPlaceRepository;
 import solo.project.repository.review.ReviewRepository;
 import org.springframework.data.domain.Pageable;
-import solo.project.service.*;
+import solo.project.service.ImageService;
+import solo.project.service.PlaceService;
+import solo.project.service.ReviewPlaceService;
+import solo.project.service.ReviewService;
+import solo.project.service.UserService;
 import solo.project.service.redis.RedisReviewListService;
-import solo.project.service.redis.RedisCountSyncService;
+import solo.project.service.redis.RedisSearchService;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
   private final UserService userService;
-  private final ReviewRepository reviewRepository; // ★주의: reviewRepository가 Custom 구현도 갖고 있음
+  private final ReviewRepository reviewRepository;
   private final PlaceService placeService;
   private final ReviewPlaceService reviewPlaceService;
   private final ReviewPlaceRepository reviewPlaceRepository;
   private final ImageService imageService;
-  private static final String REVIEW_VIEW_COUNT_KEY_PREFIX="review:view:";
-  private final RedisTemplate<String,Object> redisTemplate;
-  private final JwtTokenProvider jwtTokenProvider;
+  private static final String REVIEW_VIEW_COUNT_KEY_PREFIX = "review:view:";
+  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisSearchService redisSearchService;
 
-  //1시간 지정
+  // 5분 지정
   private static final Duration POPULAR_REVIEWS_CACHE_DURATION = Duration.ofMinutes(5);
   private final RedisReviewListService redisReviewService;
-  private final RedisCountSyncService redisViewCountSyncService;
 
+  private User getValidatedUser(HttpServletRequest request) {
+    User user = userService.findUserByToken(request);
+    if (user == null) {
+      throw new UnAuthorizedException("로그인 후 이용 가능합니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
+    }
+    return user;
+  }
 
   @Override
   public void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request, List<MultipartFile> files) throws IOException {
-    // 1) 사용자 인증
-    User user = userService.findUserByToken(request);
-    if (user == null)
-      throw new UnAuthorizedException("로그인 후 리뷰글 작성 가능", ErrorCode.UNAUTHORIZED_EXCEPTION);
-
-    // 2) 장소 필수 검사
-    if (reviewRequestDto.getPlaces() == null || reviewRequestDto.getPlaces().isEmpty())
+    User user = getValidatedUser(request);
+    if (reviewRequestDto.getPlaces() == null || reviewRequestDto.getPlaces().isEmpty()) {
       throw new NotFoundException("장소를 등록해주세요!", ErrorCode.NOT_FOUND_EXCEPTION);
+    }
 
-    // 3) 리뷰 생성
     Review review = Review.builder()
             .user(user)
             .title(reviewRequestDto.getTitle())
@@ -73,11 +82,11 @@ public class ReviewServiceImpl implements ReviewService {
             .build();
     Review savedReview = reviewRepository.save(review);
 
-    // 4) 장소 생성 + 리뷰-장소 연결
+    // 장소 생성 + 리뷰-장소 연결
     List<Place> places = placeService.createPlace(reviewRequestDto.getPlaces());
     reviewPlaceService.createReviewPlaces(savedReview, places, reviewRequestDto.getPlaces());
 
-    // 5) 이미지 업로드
+    // 이미지 업로드
     if (files != null && !files.isEmpty()) {
       imageService.uploadImages(files, savedReview);
     }
@@ -85,7 +94,7 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   public List<MainReviewResponseDto> getMainReviews(Pageable pageable) {
-    // 단순 최신순 목록
+    // 최신순 목록
     Page<Review> reviews = reviewRepository.findAllByOrderByCreatedDateDesc(pageable);
     String category = "";
     return reviews.stream()
@@ -101,19 +110,15 @@ public class ReviewServiceImpl implements ReviewService {
             .collect(Collectors.toList());
   }
 
-  /**
-   * 리뷰 상세 조회
-   *  -> ReviewRepositoryCustom.getReviewDetail(reviewId) 호출
-   */
   @Override
   @Transactional(readOnly = true)
   public ReviewResponseDto getReviewDetail(Long reviewId) {
-    ReviewResponseDto reviewDetail= reviewRepository.getReviewDetail(reviewId);
+    ReviewResponseDto reviewDetail = reviewRepository.getReviewDetail(reviewId);
 
-    //Redis 이용한 조회수 증가 - 멀티쓰레지 방지를 위해 사용
+    // Redis를 이용해 조회수 증가 (멀티쓰레드 방지)
     incrementViewCount(reviewId);
 
-    int redisViewCount= getViewCount(reviewId);
+    int redisViewCount = getViewCount(reviewId);
     int totalViewCount = reviewDetail.getViewCount() + redisViewCount;
     reviewDetail.setViewCount(totalViewCount);
 
@@ -122,26 +127,26 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   public void updateReview(Long id, ReviewRequestDto reviewRequestDto, HttpServletRequest request, List<MultipartFile> newFiles, List<FileRequestDto> deleteFiles) throws IOException {
-    User user = userService.findUserByToken(request);
-    if(user == null)
-      throw new UnAuthorizedException("리뷰글 수정 권한이 없습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
+    User user = getValidatedUser(request);
 
     Review review = reviewRepository.findById(id).orElse(null);
-    if (review == null)
+    if (review == null) {
       throw new NotFoundException("수정할 수 없는 리뷰글입니다", ErrorCode.NOT_FOUND_EXCEPTION);
-    if (review.getUser() != user)
+    }
+    if (review.getUser() != user) {
       throw new UnAuthorizedException("리뷰글 수정 권한이 없습니다", ErrorCode.UNAUTHORIZED_EXCEPTION);
+    }
 
     // 제목/내용 수정
     review.update(reviewRequestDto);
 
     // 장소 수정
     List<ReviewPlace> oldPlace = reviewPlaceRepository.findByReview(review);
-    List<PlaceRequestDto> newPlace = reviewRequestDto.getPlaces();
-    if(hasChanges(oldPlace, newPlace)) {
+    List<PlaceRequestDto> newPlaces = reviewRequestDto.getPlaces();
+    if (hasChanges(oldPlace, newPlaces)) {
       reviewPlaceService.deleteReviewPlaces(review);
-      List<Place> places = placeService.createPlace(newPlace);
-      reviewPlaceService.createReviewPlaces(review, places, newPlace);
+      List<Place> places = placeService.createPlace(newPlaces);
+      reviewPlaceService.createReviewPlaces(review, places, newPlaces);
     }
 
     // 이미지 업데이트
@@ -150,21 +155,20 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   public void deleteReview(Long id, HttpServletRequest request) {
-    User user = userService.findUserByToken(request);
-    if(user == null)
-      throw new UnAuthorizedException("리뷰글 삭제 권한이 없습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
+    User user = getValidatedUser(request);
 
     Review review = reviewRepository.findById(id).orElse(null);
-    if(review == null)
+    if (review == null) {
       throw new NotFoundException("삭제할 리뷰글이 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION);
-    if(review.getUser() != user)
+    }
+    if (review.getUser() != user) {
       throw new UnAuthorizedException("리뷰글 삭제 권한이 없습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
+    }
 
     reviewRepository.delete(review);
   }
 
-
-  // 아래 메서드는 간단한 메인 목록 DTO 변환용
+  // 메인 목록 DTO 변환용
   private MainReviewResponseDto createMainReviewDto(Review review, String category) {
     Place place = null;
     if (category == null || category.isEmpty()) {
@@ -173,6 +177,7 @@ public class ReviewServiceImpl implements ReviewService {
       for (ReviewPlace rp : review.getReviewPlaces()) {
         if (rp.getPlace().getCategory().equals(category)) {
           place = rp.getPlace();
+          break;
         }
       }
     }
@@ -180,12 +185,12 @@ public class ReviewServiceImpl implements ReviewService {
       throw new IllegalArgumentException("해당 카테고리 또는 리뷰에 대한 장소를 찾을 수 없습니다.");
     }
 
-    // 첫 번째 이미지를 썸네일
+    // 첫 번째 이미지를 썸네일로 사용
     List<File> fileList = new ArrayList<>(review.getFiles());
     String thumbUrl = fileList.isEmpty() ? null : fileList.get(0).getFileUrl();
 
-
     return MainReviewResponseDto.builder()
+            .reviewId(review.getId())
             .category(place.getCategory())
             .placeName(place.getPlaceName())
             .title(review.getTitle())
@@ -214,8 +219,7 @@ public class ReviewServiceImpl implements ReviewService {
     return false;
   }
 
-  //리뷰 조회수 증가
-
+  // Redis를 이용한 리뷰 조회수 증가
   @Override
   public void incrementViewCount(Long reviewId) {
     String key = REVIEW_VIEW_COUNT_KEY_PREFIX + reviewId;
@@ -223,14 +227,12 @@ public class ReviewServiceImpl implements ReviewService {
     ops.increment(key, 1);
   }
 
-  //Redis저장된 조회수를 가져옴
-
+  // Redis에 저장된 조회수 가져오기
   @Override
   public int getViewCount(Long reviewId) {
     String key = REVIEW_VIEW_COUNT_KEY_PREFIX + reviewId;
     ValueOperations<String, Object> ops = redisTemplate.opsForValue();
     Object value = ops.get(key);
-
     if (value == null) {
       return 0;
     }
@@ -242,51 +244,44 @@ public class ReviewServiceImpl implements ReviewService {
     } catch (NumberFormatException e) {
       return 0;
     }
-  } // 뷰 카운트 코드인데 가독성이 너무 좋지않아 나중에 수정 예정 RedisCode 수정해야함
+  }
 
+  // 인기 리뷰 (조회수 기준)
   @Override
   public List<MainReviewResponseDto> getPopularReviews(HttpServletRequest request) {
-    String token = jwtTokenProvider.resolveAccessToken(request);
-    if (token == null) {
-      throw new UnAuthorizedException("토큰이 존재하지 않습니다.", ErrorCode.INVALID_TOKEN_EXCEPTION);
-    }
+    getValidatedUser(request); // 토큰 검증만 수행
+
     Object cached = redisReviewService.getPopularReviews();
     if (cached instanceof List) {
       return (List<MainReviewResponseDto>) cached;
     }
 
     List<Review> reviews = reviewRepository.findPopularReview();
-    // 각 리뷰에 대해 DB 조회수와 Redis 조회수를 합산한 후 DTO로 변환
     List<MainReviewResponseDto> dtos = reviews.stream()
             .map(review -> {
               int redisViewCount = getViewCount(review.getId());
               int totalViewCount = review.getViewCount() + redisViewCount;
               return mapToMainReviewResponseDto(review, totalViewCount);
             })
-            .sorted((firstReviewDto, secondReviewDto) ->
-                    Integer.compare(secondReviewDto.getViewCount(), firstReviewDto.getViewCount())
-            )
+            .sorted((first, second) -> Integer.compare(second.getViewCount(), first.getViewCount()))
             .collect(Collectors.toList());
 
     redisReviewService.setPopularReview(dtos, POPULAR_REVIEWS_CACHE_DURATION);
     return dtos;
   }
 
-  //좋아요순 정렬
+  // 인기 리뷰 (좋아요 순)
   @Override
   public List<MainReviewResponseDto> getPopularReviewsByLikes(HttpServletRequest request) {
-    String token = jwtTokenProvider.resolveAccessToken(request);
-    if (token == null) {
-      throw new UnAuthorizedException("토큰이 존재하지 않습니다." , ErrorCode.UNAUTHORIZED_EXCEPTION);
-    }
-    //Redis에서 조회
+    getValidatedUser(request); // 토큰 검증만 수행
+
     Object cached = redisReviewService.getPopularLikes();
-    if(cached instanceof List) {
+    if (cached instanceof List) {
       return (List<MainReviewResponseDto>) cached;
     }
-    //없으면 DB순
+
     List<Review> reviews = reviewRepository.findPopularByLikes();
-    List<MainReviewResponseDto> LikeDtos = reviews.stream()
+    List<MainReviewResponseDto> likeDtos = reviews.stream()
             .map(review -> {
               int redisViewCount = getViewCount(review.getId());
               int totalViewCount = review.getViewCount() + redisViewCount;
@@ -294,11 +289,17 @@ public class ReviewServiceImpl implements ReviewService {
             })
             .collect(Collectors.toList());
 
-
-    redisReviewService.setPopularReviewByLikeKey(LikeDtos, POPULAR_REVIEWS_CACHE_DURATION);
-    return LikeDtos;
+    redisReviewService.setPopularReviewByLikeKey(likeDtos, POPULAR_REVIEWS_CACHE_DURATION);
+    return likeDtos;
   }
 
+  // 리뷰 검색
+  @Override
+  public List<MainReviewResponseDto> searchReviews(HttpServletRequest request, String keyword) {
+    User user =getValidatedUser(request); // 토큰 검증만 수행
+    redisSearchService.addSearchTerm(user.getId().toString(), keyword);
+    return reviewRepository.searchReview(keyword);
+  }
 
   private MainReviewResponseDto mapToMainReviewResponseDto(Review review, int totalViewCount) {
     String category = null;
@@ -317,6 +318,7 @@ public class ReviewServiceImpl implements ReviewService {
       thumbnailUrl = review.getFiles().iterator().next().getFileUrl();
     }
     return MainReviewResponseDto.builder()
+            .reviewId(review.getId())
             .category(category)
             .placeName(placeName)
             .title(review.getTitle())
@@ -328,4 +330,3 @@ public class ReviewServiceImpl implements ReviewService {
             .build();
   }
 }
-

@@ -22,5 +22,5 @@ public interface ReviewService {
   int getViewCount(Long reviewId);
   List<MainReviewResponseDto> getPopularReviews(HttpServletRequest request);
   List<MainReviewResponseDto> getPopularReviewsByLikes(HttpServletRequest request);
-
+  List<MainReviewResponseDto> searchReviews(HttpServletRequest request,String keyword);
 }
