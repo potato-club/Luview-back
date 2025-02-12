@@ -78,7 +78,6 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .or(qReview.content.containsIgnoreCase(keyword))
                 .or(qReview.user.nickname.containsIgnoreCase(keyword));
 
-        // QueryDSL 프로젝션을 사용하여 MainReviewResponseDto로 직접 매핑
         return jpaQueryFactory
                 .select(Projections.bean(MainReviewResponseDto.class,
                         qReview.id.as("reviewId"),

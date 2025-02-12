@@ -50,8 +50,8 @@ public class ReviewSearchController {
 
     @Operation(summary = "리뷰글 상세 조회")
     @GetMapping("/detail/{review_id}")
-    public ResponseEntity<ReviewResponseDto> getReviewDetail(@PathVariable("review_id") Long reviewId) {
-        ReviewResponseDto dto = reviewService.getReviewDetail(reviewId);
+    public ResponseEntity<ReviewResponseDto> getReviewDetail(HttpServletRequest request,@PathVariable("review_id") Long reviewId) {
+        ReviewResponseDto dto = reviewService.getReviewDetail(request,reviewId);
         return ResponseEntity.ok(dto);
     }
 

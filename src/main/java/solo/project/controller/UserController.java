@@ -34,14 +34,9 @@ public class UserController {
     //임시토큰을 사용해야하나..?
     @Operation(summary = "카카오 추가정보 입력API")
     @PutMapping("/{id}/addInfo")
-    public ResponseEntity<UserKakaoResponseDto> updateUserInfo(@PathVariable Long id, @Valid @RequestBody AdditionalInfoRequest request){
-        User updateUser=userService.updateAdditionalInfo(id, request);
-        return ResponseEntity.ok(UserKakaoResponseDto.builder()
-                .id(updateUser.getId())
-                .email(updateUser.getEmail())
-                .nickname(updateUser.getNickname())
-                .responseCode("200, 정보가 업데이트 되었습니다.")
-                .build());
+    public ResponseEntity<String> updateUserInfo(@PathVariable Long id, @Valid @RequestBody AdditionalInfoRequest request){
+        userService.updateAdditionalInfo(id, request);
+        return ResponseEntity.ok(" 정보가 업데이트 되었습니다.");
     }
 
     //회원가입

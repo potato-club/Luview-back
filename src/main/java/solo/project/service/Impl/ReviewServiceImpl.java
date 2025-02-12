@@ -104,7 +104,8 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   @Transactional(readOnly = true)
-  public ReviewResponseDto getReviewDetail(Long reviewId) {
+  public ReviewResponseDto getReviewDetail(HttpServletRequest request,Long reviewId) {
+    userService.findUserByToken(request);
     ReviewResponseDto reviewDetail = reviewRepository.getReviewDetail(reviewId);
     // Redis를 이용해 조회수 증가 (멀티쓰레드 방지)
     incrementViewCount(reviewId);

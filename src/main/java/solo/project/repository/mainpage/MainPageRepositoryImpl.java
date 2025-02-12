@@ -52,7 +52,7 @@ public class MainPageRepositoryImpl implements MainPageRepository {
 
     @Override
     public PartnerInfoResponseDto getPartnerInfo(Long myUserId) {
-        // 개선: DB 접근 횟수를 줄이기 위해 한 번의 쿼리로 파트너 정보를 조회
+        // DB 접근 횟수를 줄이기 위해 한 번의 쿼리로 파트너 정보를 조회
         return queryFactory
                 .select(Projections.fields(
                         PartnerInfoResponseDto.class,

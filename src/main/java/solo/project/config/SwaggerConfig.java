@@ -37,46 +37,4 @@ public class SwaggerConfig {
                 .build();
     }
 
-    @Bean
-    public GroupedOpenApi userApi() {
-        return GroupedOpenApi.builder()
-                .group("user")
-                .pathsToMatch("/user/**")
-                .displayName("User's API")
-                .addOpenApiCustomizer(createOpenApiCustomizer("유저 관련 API", "v0.4"))
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi reviewApi() {
-        return GroupedOpenApi.builder()
-            .group("review")
-            .pathsToMatch("/review/**")
-            .displayName("review's API")
-            .addOpenApiCustomizer(createOpenApiCustomizer("리뷰글 API", "v0.4"))
-            .build();
-    }
-
-    @Bean
-    public GroupedOpenApi uploadApi() {
-        return GroupedOpenApi.builder()
-                .group("upload")
-                .pathsToMatch("/upload/**")
-                .displayName("upload's API")
-                .addOpenApiCustomizer(createOpenApiCustomizer("프로필, 리뷰글, 썸네일 관련 API", "v0.4"))
-                .build();
-    }
-
-    @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
-                .schemaRequirement("bearerAuth", createBearerAuthScheme())
-                .info(new Info()
-                        .title("My API Documentation")
-                        .version("v0.4")
-                        .description("Swagger 설정을 통한 파일 업로드 API 문서"))
-                .components(new io.swagger.v3.oas.models.Components()
-                        .addSecuritySchemes("bearerAuth", createBearerAuthScheme()));
-    }
 }

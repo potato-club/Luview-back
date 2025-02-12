@@ -108,7 +108,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public User updateAdditionalInfo(Long id , AdditionalInfoRequest request){
-        User user=userRepository.findById(id).orElseThrow(()->new NotFoundException("사용자를 찾을 수 없습니다 : "+id ,ErrorCode.NOT_FOUND_EXCEPTION));
+        User user=userRepository.findById(id).orElseThrow(()->new NotFoundException("사용자를 찾을 수 없습니다",ErrorCode.NOT_FOUND_EXCEPTION));
         user.setName(request.getName());
         user.setBirthDate(request.getBirthDate());
 
@@ -116,7 +116,6 @@ public class UserServiceImpl implements UserService {
     }
 
     //이메일 , 탈퇴 회원
-
     @Override
     public UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response) {
         if (!userRepository.existsByEmail(requestDto.getEmail())) {
@@ -169,6 +168,7 @@ public class UserServiceImpl implements UserService {
     // Refresh Token과 Access Token을 각각 확인하고 삭제
     @Override
     public void logout(HttpServletRequest request) {
+        findUserByToken(request);
         Optional.ofNullable(jwtTokenProvider.resolveRefreshToken(request))
                 .ifPresent(redisJwtService::delValues);
 

@@ -32,11 +32,7 @@ public class UploadController {
     private final ImageService imageService;
     private final FileRepository fileRepository; // QueryDSL 이용
 
-    /**
-     * [POST] 프로필 사진 업로드
-     * - 프로필이 없다면 새로 등록
-     * - 이미 있다면 에러 (혹은 자동으로 '수정' 로직을 태우고 싶다면 로직 변경)
-     */
+    //프로필 업로드 , 없으면 바로 올라가고 있으면 에러 ,,
     @Operation(summary = "프로필 사진 업로드")
     @PostMapping(
             value = "/profile-image",
@@ -54,10 +50,7 @@ public class UploadController {
         return ResponseEntity.ok("프로필 사진 업로드 성공");
     }
 
-    /**
-     * [PUT] 프로필 사진 수정
-     * - 이미 프로필이 있을 때, 기존 프로필을 삭제하고 새 파일로 교체
-     */
+    //프로필 수정, 기존 이미지 삭제 후 업데이트
     @Operation(summary = "프로필 사진 수정")
     @PutMapping(
             value = "/profile-image",
