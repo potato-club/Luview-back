@@ -85,8 +85,9 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   @Override
-  public List<MainReviewResponseDto> getMainReviews(Pageable pageable) {
+  public List<MainReviewResponseDto> getMainReviews(HttpServletRequest request,Pageable pageable) {
     // 최신순 목록
+    User user = userService.findUserByToken(request);
     Page<Review> reviews = reviewRepository.findAllByOrderByCreatedDateDesc(pageable);
     String category = "";
     return reviews.stream()
@@ -95,7 +96,8 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   @Override
-  public List<MainReviewResponseDto> getReviewsByCategory(String category, Pageable pageable) {
+  public List<MainReviewResponseDto> getReviewsByCategory(HttpServletRequest request,String category, Pageable pageable) {
+    userService.findUserByToken(request);
     Page<Review> reviews = reviewRepository.findByPlaceCategory(category, pageable);
     return reviews.stream()
             .map(review -> createMainReviewDto(review, category))
@@ -104,10 +106,10 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   @Transactional(readOnly = true)
+  // Redis를 이용해 조회수 증가 (멀티쓰레드 방지)
   public ReviewResponseDto getReviewDetail(HttpServletRequest request,Long reviewId) {
     userService.findUserByToken(request);
     ReviewResponseDto reviewDetail = reviewRepository.getReviewDetail(reviewId);
-    // Redis를 이용해 조회수 증가 (멀티쓰레드 방지)
     incrementViewCount(reviewId);
 
     int redisViewCount = getViewCount(reviewId);
@@ -230,7 +232,7 @@ public class ReviewServiceImpl implements ReviewService {
     } catch (NumberFormatException e) {
       return 0;
     }
-  }
+  } //이 코드는 진짜 뭐임?
 
   // 인기 리뷰 (조회수 기준)
   @Override

@@ -13,8 +13,8 @@ import java.util.List;
 
 public interface ReviewService {
   void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request, List<MultipartFile> files) throws IOException;
-  List<MainReviewResponseDto> getMainReviews(Pageable pageable);
-  List<MainReviewResponseDto> getReviewsByCategory(String category, Pageable pageable);
+  List<MainReviewResponseDto> getMainReviews(HttpServletRequest request,Pageable pageable);
+  List<MainReviewResponseDto> getReviewsByCategory(HttpServletRequest request,String category, Pageable pageable);
   ReviewResponseDto getReviewDetail(HttpServletRequest request,Long reviewId);
   void updateReview(Long id, ReviewRequestDto reviewRequestDto, HttpServletRequest request, List<MultipartFile> newFiles, List<FileRequestDto> deleteFiles) throws IOException;
   void deleteReview(Long id, HttpServletRequest request);

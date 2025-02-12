@@ -27,12 +27,8 @@ public class ReviewSearchController {
 
     @Operation(summary = "메인 리뷰글 목록 조회")
     @GetMapping("/main")
-    public ResponseEntity<List<MainReviewResponseDto>> getMainReview(
-            @ParameterObject
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)
-            Pageable pageable
-    ) {
-        List<MainReviewResponseDto> mainReviews = reviewService.getMainReviews(pageable);
+    public ResponseEntity<List<MainReviewResponseDto>> getMainReview(@ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,HttpServletRequest request) {
+        List<MainReviewResponseDto> mainReviews = reviewService.getMainReviews(request,pageable);
         return ResponseEntity.ok(mainReviews);
     }
 
@@ -42,9 +38,9 @@ public class ReviewSearchController {
             @PathVariable String category,
             @ParameterObject
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)
-            Pageable pageable
+            Pageable pageable,HttpServletRequest request
     ) {
-        List<MainReviewResponseDto> categoryReviews = reviewService.getReviewsByCategory(category, pageable);
+        List<MainReviewResponseDto> categoryReviews = reviewService.getReviewsByCategory(request,category, pageable);
         return ResponseEntity.ok(categoryReviews);
     }
 

@@ -87,7 +87,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     /**
-     * [리뷰/프로필 이미지 수정] 기존 파일 중 삭제 대상은 제거하고, 새 파일을 업로드 후 매핑합니다.
+     * [리뷰/프로필 이미지 수정] 기존 파일 중 삭제 대상은 제거하고, 새 파일을 업로드 후 매핑.
      */
     @Transactional
     @Override

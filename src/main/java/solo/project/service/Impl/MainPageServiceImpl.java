@@ -21,7 +21,7 @@ import java.util.List;
 public class MainPageServiceImpl {
 
     private final MainPageRepository mainPageRepository;
-    private final UserService userService; // UserService에서 findUserByToken 메서드 제공
+    private final UserService userService;
 
     public MainPageResponseDto getMainPageData(HttpServletRequest request, int reviewLimit) {
         User user = userService.findUserByToken(request);

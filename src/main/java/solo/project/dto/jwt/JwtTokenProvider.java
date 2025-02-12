@@ -144,10 +144,6 @@ public class JwtTokenProvider {
     public String extractEmail(String token) throws Exception {
         return extractValueFromToken(token, "pk");
     }
-//
-//    public String extractRole(String token) throws Exception {
-//        return extractValueFromToken(token, "role").toString();
-//    }
 
     //토큰으로 역할 추출 , 우리는 유저 하나만 존재함 사용 x
     public String extractMemberId(String token) throws Exception {
@@ -263,7 +259,6 @@ public class JwtTokenProvider {
     }
     //RefreshToken은 AccessToken의 유효기간이 짧아 따로 구현하지 않음 그냥 리프레쉬는 새로 발급
     //하는 방식으로 함
-
     //리프레쉬 토큰을 받아서 이메일 찾음, 아니라면 예외를 던지고 이메일을 던짐
     public String findUserEmailByToken(String token)throws Exception{
         String accessTokenType= extractTokenType(token);
