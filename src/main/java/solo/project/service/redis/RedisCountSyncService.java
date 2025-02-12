@@ -17,9 +17,7 @@ public class RedisCountSyncService {
     private final RedisTemplate<String, String> redisTemplate;
     private final ReviewRepository reviewRepository;
 
-    /**
-     * 5분단위 Redis 저장
-     */
+    //스케줄 5분 설정해둠 대부분 다 5분
     @Scheduled(fixedDelay = 300000)
     @Transactional
     public void syncViewCount() {

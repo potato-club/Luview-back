@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class RedisLikeService {
+    //Redis로 받아서 멀쓰방
     private static final String REVIEW_LIKE_COUNT_KEY_PREFIX = "review:like:";
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -20,7 +21,6 @@ public class RedisLikeService {
     public void decrementLikeCount(Long reviewId) {
         String decrkey = REVIEW_LIKE_COUNT_KEY_PREFIX + reviewId;
         ValueOperations<String, Object> ops = redisTemplate.opsForValue();
-        // 음수로 증가시켜 감소 효과를 냅니다.
         ops.increment(decrkey, -1L);
     }
 }

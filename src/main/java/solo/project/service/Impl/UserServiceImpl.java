@@ -119,17 +119,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserLoginResponseDto login(UserLoginRequestDto requestDto, HttpServletResponse response) {
-        // 회원이 아닌 경우
         if (!userRepository.existsByEmail(requestDto.getEmail())) {
             throw new NotFoundException("2001, 회원이 아닙니다",ErrorCode.NOT_FOUND_EXCEPTION); //404
         }
-        // 탈퇴한 회원인 경우
         if (userRepository.existsByEmailAndDeletedIsTrue(requestDto.getEmail())) {
             throw  new ForbiddenException("2002, 탈퇴계정입니다.", ErrorCode.FORBIDDEN_EXCEPTION); //403
         }
-        // 회원 정보 조회
         User user = findByEmailOrThrow(requestDto.getEmail());
-        // 패스워드가 일치하지 않을 경우 에러 코드 발생
         if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
             throw new UnAuthorizedException("401, 패스워드 불일치", ErrorCode.ACCESS_DENIED_EXCEPTION);
         }

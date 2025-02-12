@@ -35,9 +35,7 @@ public class RedisReviewListService {
         operations.set(POPULAR_REVIEW_BY_LIKE_KEY, reviews, duration);
     }
 
-
-
-
+    //인기게시물이기 때문에 삭제는 굳..이?
     public Object deletePopularReviews() {
         return redisTemplate.delete(POPULAR_REVIEW_KEY);
     }

@@ -6,8 +6,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import solo.project.entity.User;
-import solo.project.error.ErrorCode;
-import solo.project.error.exception.UnAuthorizedException;
 import solo.project.service.UserService;
 
 import java.time.Instant;
@@ -18,6 +16,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class RedisSearchService {
+    //최근검색어 서치에 대한 코드임
     private static final String KEY_PREFIX = "user:recentSearch:";
 
     private static final int MAX_SEARCH_TERMS = 10;
@@ -39,9 +38,6 @@ public class RedisSearchService {
 
     public List<String> getRecentSearchTerms(HttpServletRequest request) {
         User user = userService.findUserByToken(request);
-        if (user == null) {
-            throw new UnAuthorizedException("로그인 후 이용 가능합니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
-        }
         String key = KEY_PREFIX + user.getId();
         ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
         Set<String> terms = zSetOperations.reverseRange(key, 0, MAX_SEARCH_TERMS - 1);
@@ -49,12 +45,7 @@ public class RedisSearchService {
     }
 
     public String clearRecentSearchTerms(HttpServletRequest request) {
-        // 사용자 인증: userService.findUserByToken(request)가 User 객체를 반환한다고 가정
         User user = userService.findUserByToken(request);
-        if (user == null) {
-            throw new UnAuthorizedException("로그인 후 이용 가능합니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
-        }
-        // 사용자 ID를 사용하여 키 생성 (toString()으로 변환)
         String key = KEY_PREFIX + user.getId().toString();
         redisTemplate.delete(key);
         return "최근 검색어 목록이 삭제되었습니다.";

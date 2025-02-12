@@ -57,17 +57,9 @@ public class ReviewServiceImpl implements ReviewService {
   private static final Duration POPULAR_REVIEWS_CACHE_DURATION = Duration.ofMinutes(5);
   private final RedisReviewListService redisReviewService;
 
-  private User getValidatedUser(HttpServletRequest request) {
-    User user = userService.findUserByToken(request);
-    if (user == null) {
-      throw new UnAuthorizedException("로그인 후 이용 가능합니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
-    }
-    return user;
-  }
-
   @Override
   public void createReview(ReviewRequestDto reviewRequestDto, HttpServletRequest request, List<MultipartFile> files) throws IOException {
-    User user = getValidatedUser(request);
+    User user = userService.findUserByToken(request);
     if (reviewRequestDto.getPlaces() == null || reviewRequestDto.getPlaces().isEmpty()) {
       throw new NotFoundException("장소를 등록해주세요!", ErrorCode.NOT_FOUND_EXCEPTION);
     }
@@ -114,7 +106,6 @@ public class ReviewServiceImpl implements ReviewService {
   @Transactional(readOnly = true)
   public ReviewResponseDto getReviewDetail(Long reviewId) {
     ReviewResponseDto reviewDetail = reviewRepository.getReviewDetail(reviewId);
-
     // Redis를 이용해 조회수 증가 (멀티쓰레드 방지)
     incrementViewCount(reviewId);
 
@@ -127,8 +118,7 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   public void updateReview(Long id, ReviewRequestDto reviewRequestDto, HttpServletRequest request, List<MultipartFile> newFiles, List<FileRequestDto> deleteFiles) throws IOException {
-    User user = getValidatedUser(request);
-
+    User user = userService.findUserByToken(request);
     Review review = reviewRepository.findById(id).orElse(null);
     if (review == null) {
       throw new NotFoundException("수정할 수 없는 리뷰글입니다", ErrorCode.NOT_FOUND_EXCEPTION);
@@ -137,10 +127,7 @@ public class ReviewServiceImpl implements ReviewService {
       throw new UnAuthorizedException("리뷰글 수정 권한이 없습니다", ErrorCode.UNAUTHORIZED_EXCEPTION);
     }
 
-    // 제목/내용 수정
     review.update(reviewRequestDto);
-
-    // 장소 수정
     List<ReviewPlace> oldPlace = reviewPlaceRepository.findByReview(review);
     List<PlaceRequestDto> newPlaces = reviewRequestDto.getPlaces();
     if (hasChanges(oldPlace, newPlaces)) {
@@ -155,8 +142,7 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   public void deleteReview(Long id, HttpServletRequest request) {
-    User user = getValidatedUser(request);
-
+    User user = userService.findUserByToken(request);
     Review review = reviewRepository.findById(id).orElse(null);
     if (review == null) {
       throw new NotFoundException("삭제할 리뷰글이 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION);
@@ -164,7 +150,6 @@ public class ReviewServiceImpl implements ReviewService {
     if (review.getUser() != user) {
       throw new UnAuthorizedException("리뷰글 삭제 권한이 없습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
     }
-
     reviewRepository.delete(review);
   }
 
@@ -249,8 +234,7 @@ public class ReviewServiceImpl implements ReviewService {
   // 인기 리뷰 (조회수 기준)
   @Override
   public List<MainReviewResponseDto> getPopularReviews(HttpServletRequest request) {
-    getValidatedUser(request); // 토큰 검증만 수행
-
+    userService.findUserByToken(request);
     Object cached = redisReviewService.getPopularReviews();
     if (cached instanceof List) {
       return (List<MainReviewResponseDto>) cached;
@@ -273,8 +257,7 @@ public class ReviewServiceImpl implements ReviewService {
   // 인기 리뷰 (좋아요 순)
   @Override
   public List<MainReviewResponseDto> getPopularReviewsByLikes(HttpServletRequest request) {
-    getValidatedUser(request); // 토큰 검증만 수행
-
+    userService.findUserByToken(request);
     Object cached = redisReviewService.getPopularLikes();
     if (cached instanceof List) {
       return (List<MainReviewResponseDto>) cached;
@@ -296,7 +279,7 @@ public class ReviewServiceImpl implements ReviewService {
   // 리뷰 검색
   @Override
   public List<MainReviewResponseDto> searchReviews(HttpServletRequest request, String keyword) {
-    User user =getValidatedUser(request); // 토큰 검증만 수행
+    User user= userService.findUserByToken(request); // 토큰 검증만 수행
     redisSearchService.addSearchTerm(user.getId().toString(), keyword);
     return reviewRepository.searchReview(keyword);
   }
