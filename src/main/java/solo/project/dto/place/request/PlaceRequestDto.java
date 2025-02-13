@@ -1,4 +1,4 @@
-package solo.project.dto.Place.request;
+package solo.project.dto.place.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

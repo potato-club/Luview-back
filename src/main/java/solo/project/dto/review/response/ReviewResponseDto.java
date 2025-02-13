@@ -1,14 +1,13 @@
-package solo.project.dto.Review.response;
+package solo.project.dto.review.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import solo.project.dto.Comment.CommentResponseDto;
+import solo.project.dto.comment.CommentResponseDto;
 import solo.project.dto.ReviewPlace.response.ReviewPlaceResponseDto;
 import solo.project.dto.file.FileResponseDto;
-import solo.project.entity.ReviewPlace;
 
 import java.time.LocalDateTime;
 import java.util.List;

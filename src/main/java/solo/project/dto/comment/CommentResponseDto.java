@@ -1,4 +1,4 @@
-package solo.project.dto.Comment;
+package solo.project.dto.comment;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

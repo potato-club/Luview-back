@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import solo.project.dto.Place.request.PlaceRequestDto;
+import solo.project.dto.place.request.PlaceRequestDto;
 
 import java.util.ArrayList;
 import java.util.List;

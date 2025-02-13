@@ -9,6 +9,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.util.Map;
+
 @Configuration
 public class RedisConfig {
 
@@ -39,8 +41,14 @@ public class RedisConfig {
         redisTemplate.setHashKeySerializer(new StringRedisSerializer()); // HashKey는 문자열로 직렬화
         redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer()); // HashValue는 JSON으로 직렬화
         return redisTemplate;
-
-
+    }
+    @Bean
+    public RedisTemplate<String, Map<String, String>> redisEmailAuthenticationTemplate() {
+        RedisTemplate<String, Map<String, String>> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+        return redisTemplate;
     }
 
 }

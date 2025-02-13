@@ -3,13 +3,12 @@ package solo.project.service.Impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import solo.project.dto.Place.request.PlaceRequestDto;
+import solo.project.dto.place.request.PlaceRequestDto;
 import solo.project.entity.Place;
 import solo.project.entity.Review;
 import solo.project.entity.ReviewPlace;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
-import solo.project.repository.PlaceRepository;
 import solo.project.repository.ReviewPlaceRepository;
 import solo.project.service.ReviewPlaceService;
 

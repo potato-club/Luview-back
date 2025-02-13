@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import solo.project.dto.Comment.CommentRequestDto;
+import solo.project.dto.comment.CommentRequestDto;
 
 import java.util.ArrayList;
 import java.util.List;

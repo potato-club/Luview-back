@@ -1,10 +1,8 @@
-package solo.project.dto.Review.request;
+package solo.project.dto.review.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import solo.project.dto.Place.request.PlaceRequestDto;
+import solo.project.dto.place.request.PlaceRequestDto;
 
 import java.util.List;
 

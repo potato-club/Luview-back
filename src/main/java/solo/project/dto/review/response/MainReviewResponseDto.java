@@ -1,15 +1,7 @@
-package solo.project.dto.Review.response;
+package solo.project.dto.review.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Null;
 import lombok.*;
-import solo.project.entity.Place;
-import solo.project.entity.Review;
-import solo.project.entity.ReviewPlace;
-import solo.project.entity.User;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
