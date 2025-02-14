@@ -31,8 +31,6 @@ public class MailServiceImpl implements MailService {
     @Qualifier("gmail")
     private final JavaMailSender gmailSender;
     private final RedisEmailAuthentication redisEmailAuthentication;
-    private final UserRepository userRepository;
-    private final UserService userService;
 
     @Value("${spring.mail.username}")
     private String gmailUsername;
@@ -90,12 +88,30 @@ public class MailServiceImpl implements MailService {
 
         StringBuilder msgBuilder = new StringBuilder();
         msgBuilder.append("<html>")
-                .append("<body>")
-                .append("<h1>이메일 인증 요청</h1>")
-                .append("<p>회원가입을 완료하시려면 아래의 인증 코드를 입력해 주세요.</p>")
-                .append("<p style=\"font-size: 24px; font-weight: bold;\">")
+                .append("<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, sans-serif;\">")
+                .append("<table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" ")
+                .append("style=\"border-collapse: collapse; margin:50px auto; background-color:#ffffff; border-radius:8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);\">")
+                .append("<tr>")
+                .append("    <td align=\"center\" style=\"padding: 40px 0 30px 0;\">")
+                .append("        <h1 style=\"color: #333333; margin: 0;\">이메일 인증 요청</h1>")
+                .append("    </td>")
+                .append("</tr>")
+                .append("<tr>")
+                .append("    <td style=\"padding: 20px 30px 40px 30px;\">")
+                .append("        <p style=\"font-size: 16px; color: #555555; text-align: center; margin: 0;\">")
+                .append("            회원가입을 완료하시려면 아래의 인증 코드를 입력해 주세요.")
+                .append("        </p>")
+                .append("    </td>")
+                .append("</tr>")
+                .append("<tr>")
+                .append("    <td align=\"center\" style=\"padding: 20px;\">")
+                .append("        <span style=\"display: inline-block; font-size: 32px; font-weight: bold; color: #2a9d8f; ")
+                .append("                     padding: 10px 20px; border: 2px dashed #2a9d8f; border-radius: 8px;\">")
                 .append(secretKey)
-                .append("</p>")
+                .append("        </span>")
+                .append("    </td>")
+                .append("</tr>")
+                .append("</table>")
                 .append("</body>")
                 .append("</html>");
 
