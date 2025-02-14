@@ -26,4 +26,5 @@ public interface UserService {
     void withdrawalMembership(HttpServletRequest request);
     void cancelWithdrawal(String email, boolean agreement);
     User updateAdditionalInfo(Long id, @Valid AdditionalInfoRequest request);
+    void setJwtTokenInHeader(String email, HttpServletResponse response);
 }

@@ -1,5 +1,8 @@
 package solo.project.service;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 public interface MailService {
-    String sendSignUpEmail(String email);
+    void sendEmail(String toEmail);
+    void verifyEmail(String key, HttpServletResponse response);
 }

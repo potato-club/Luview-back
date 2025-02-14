@@ -19,7 +19,7 @@ public class RedisEmailAuthentication {
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         Object value = valueOperations.get(key);
         if (value == null) {
-            throw new NotFoundException("Email OTP not found for key: " + key, ErrorCode.NOT_FOUND_EXCEPTION);
+            throw new NotFoundException("이메일 OTP코드가 맞지않습니다! " + key, ErrorCode.NOT_FOUND_EXCEPTION);
         }
         return value;
     }
@@ -42,4 +42,20 @@ public class RedisEmailAuthentication {
             redisTemplate.delete(email);
         }
     }
+
+    public void setEmailVerified(String email, boolean verified, long duration) {
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        // 인증 플래그를 저장할 key 예: "verified:사용자이메일"
+        String verifiedKey = "verified:" + email;
+        Duration expireDuration = Duration.ofSeconds(duration);
+        valueOperations.set(verifiedKey, verified, expireDuration);
+    }
+
+    // 회원가입 시에 인증 여부를 확인
+    public boolean isEmailVerified(String email) {
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        Object value = valueOperations.get("verified:" + email);
+        return Boolean.TRUE.equals(value);
+    }
+
 }

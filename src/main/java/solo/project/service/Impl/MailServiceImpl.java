@@ -1,16 +1,19 @@
 package solo.project.service.Impl;
 
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import solo.project.entity.User;
+import solo.project.error.ErrorCode;
+import solo.project.error.exception.NotFoundException;
 import solo.project.repository.UserRepository;
 import solo.project.service.MailService;
 import solo.project.service.UserService;
@@ -25,87 +28,80 @@ import java.util.Random;
 @Transactional
 public class MailServiceImpl implements MailService {
 
+    @Qualifier("gmail")
     private final JavaMailSender gmailSender;
     private final RedisEmailAuthentication redisEmailAuthentication;
-    private int authNumber;
     private final UserRepository userRepository;
     private final UserService userService;
 
     @Value("${spring.mail.username}")
     private String gmailUsername;
 
-    @Autowired
-    public MailServiceImpl(@Qualifier("gmail") JavaMailSender gmailSender,
-                            RedisEmailAuthentication redisEmailAuthentication,
-                            UserRepository userRepository,
-                            UserServiceImpl userService) {
-        this.gmailSender = gmailSender;
-        this.redisEmailAuthentication= redisEmailAuthentication;
-        this.userRepository = userRepository;
-        this.userService = userService;
-    }
-
     public static String generateAuthCode() {
         StringBuilder secretKey = new StringBuilder();
         Random random = new Random();
-        for(int i = 0; i < 6; i++){
-            secretKey.append(random.nextInt(10)); //6자리로 설정
+        for (int i = 0; i < 6; i++) {
+            secretKey.append(random.nextInt(10)); // 6자리로 설정
         }
         return secretKey.toString();
     }
 
-    public String sendSignUpEmail(String email) {
-        generateAuthCode();
-        String fromEmail = "jihu65487@gmail.com"; // 발신자 이메일 (설정 파일에 등록된 이메일)
-        String title = "회원 가입 인증 이메일 입니다.";
-        String content = "Luview 이메일 인증번호입니다. 감사합니다." +
-                "<br><br>" +
-                "인증 번호는 " + authNumber + "입니다." +
-                "<br>" +
-                "인증번호를 제대로 입력해주세요";
-
-        return Integer.toString(authNumber);
-    }
-
-    public void sandEmail(String fromEmail) {
-        redisEmailAuthentication.deleteExistData(fromEmail);
+    @Override
+    public void sendEmail(String toEmail) {
+        // 기존 OTP 데이터 삭제
+        redisEmailAuthentication.deleteExistingOtp(toEmail);
         MimeMessage mimeMessage = gmailSender.createMimeMessage();
+        String emailKey = generateAuthCode();
 
-        String emailKey=generateAuthCode();
-        composeEmailMessage(fromEmail,mimeMessage,"gmail",emailKey);
+        try {
+            composeEmailMessage(toEmail, mimeMessage, emailKey);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            log.error("메일 전송 중 오류 발생", e);
+            throw new RuntimeException("메일 전송 실패", e);
+        }
 
-        redisEmailAuthentication.setDataExpire(emailKey,fromEmail,60*5);
-
+        // OTP 데이터 Redis에 저장 (5분 유효)
+        redisEmailAuthentication.setEmailOtpDataExpire(emailKey, toEmail, 60 * 5);
+        gmailSender.send(mimeMessage);
     }
 
-    public boolean checkAuthNum(String email, String authNum) {
-        log.info("입력 인증번호: {}", authNum);
-        log.info("입력 이메일: {}", email);
-        Object redisData = redisEmailAuthentication.getData(authNum);
-        return redisData != null && redisData.equals(email);
+    @Override
+    public void verifyEmail(String key, HttpServletResponse response) {
+        Object otpData = redisEmailAuthentication.getEmailOtpData(key);
+        if (otpData == null) {
+            throw new NotFoundException("인증 코드가 만료되었거나 존재하지 않습니다.", ErrorCode.NOT_FOUND_EXCEPTION);
+        }
+        // OTP에 저장된 이메일 가져오기
+        String email = otpData.toString();
+
+        // OTP 검증 후 사용한 OTP는 삭제
+        redisEmailAuthentication.deleteEmailOtpData(key);
+        redisEmailAuthentication.setEmailVerified(email, true, 60 * 5);
+
+        response.setHeader("Email-Verified", "true");
     }
 
-    private void composeEmailMessage(String fromEmail,MimeMessage mimeMessage,String secretKey) throws MessagingException, UnsupportedEncodingException {
-        mimeMessage.addRecipients(MimeMessage.RecipientType.TO, fromEmail);
+
+    private void composeEmailMessage(String toEmail, MimeMessage mimeMessage, String secretKey)
+            throws MessagingException, UnsupportedEncodingException {
+
+        mimeMessage.addRecipients(MimeMessage.RecipientType.TO, toEmail);
         mimeMessage.setSubject("Luview 인증 코드");
 
         StringBuilder msgBuilder = new StringBuilder();
-        msgBuilder.append("<div style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333;\">")
-                .append("<h1 style=\"font-size: 32px; text-align: center; padding: 20px 30px 10px; margin: 0;\">이메일 인증 요청</h1>")
-                .append("<p style=\"font-size: 18px; text-align: center; margin: 0 30px 30px;\">회원가입을 완료하시려면 아래의 인증 코드를 입력해 주세요.</p>")
-                .append("<div style=\"display: flex; justify-content: center; margin: 20px 30px;\">")
-                .append("<table style=\"border-collapse: collapse; background-color: #F4F4F4; border-radius: 8px;\">")
-                .append("<tr>")
-                .append("<td style=\"padding: 20px 40px; font-size: 36px; font-weight: bold; text-align: center;\">")
+        msgBuilder.append("<html>")
+                .append("<body>")
+                .append("<h1>이메일 인증 요청</h1>")
+                .append("<p>회원가입을 완료하시려면 아래의 인증 코드를 입력해 주세요.</p>")
+                .append("<p style=\"font-size: 24px; font-weight: bold;\">")
                 .append(secretKey)
-                .append("</td>")
-                .append("</tr>")
-                .append("</table>")
-                .append("</div>")
-                .append("</div>");
+                .append("</p>")
+                .append("</body>")
+                .append("</html>");
 
-        String msg = msgBuilder.toString();
-        mimeMessage.setText(msg,"utf-8","html");
 
+        mimeMessage.setText(msgBuilder.toString(), "utf-8", "html");
+
+        mimeMessage.setFrom(new InternetAddress(gmailUsername,"Luview"));
     }
 }

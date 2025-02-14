@@ -2,6 +2,7 @@ package solo.project.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,19 +24,15 @@ public class MailController {
 
     @Operation(summary = "Gmail 인증번호 발송")
     @PostMapping("/send")
-    public ResponseEntity<String> sendSignupVerificationEmail(@RequestBody @Valid EmailRequestDto emailRequestDto) {
-        mailService.sendSignUpEmail(emailRequestDto.getEmail());
+    public ResponseEntity<String> sendEmail(String ToEmail) {
+        mailService.sendEmail(ToEmail);
         return ResponseEntity.ok("입력하신 이메일로 인증번호가 전달되었습니다.");
     }
 
-    @Operation(summary = "Gmail 인증번호 확인")
-    @PostMapping("/check")
-    public ResponseEntity<String> verifyEmailAuth(@RequestBody @Valid EmailCheckDto emailCheckDto) {
-        boolean isValid = mailService.checkAuthNum(emailCheckDto.getEmail(), emailCheckDto.getAuthNum());
-        if (isValid) {
-            return ResponseEntity.ok("Email이 인증 되었습니다.");
-        } else {
-            throw new NotFoundException("인증번호 또는 이메일이 올바르지 않습니다.", ErrorCode.NOT_FOUND_EXCEPTION);
-        }
+    @Operation(summary = "인증 코드 확인 API")
+    @PostMapping("/verify")
+    public ResponseEntity<String> verifyEmail(String key, HttpServletResponse response) {
+        mailService.verifyEmail(key, response);
+        return ResponseEntity.ok("2차 인증이 정상적으로 처리되었습니다.");
     }
 }
