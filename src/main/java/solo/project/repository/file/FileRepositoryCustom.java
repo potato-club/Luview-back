@@ -1,6 +1,6 @@
-package solo.project.repository.File;
+package solo.project.repository.file;
 
-import solo.project.dto.User.response.UserProfileResponseDto;
+import solo.project.dto.user.response.UserProfileResponseDto;
 import solo.project.entity.User;
 
 public interface FileRepositoryCustom {

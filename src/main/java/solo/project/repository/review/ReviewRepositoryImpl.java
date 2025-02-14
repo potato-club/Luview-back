@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import solo.project.dto.comment.CommentResponseDto;
 import solo.project.dto.review.response.MainReviewResponseDto;
 import solo.project.dto.review.response.ReviewResponseDto;
-import solo.project.dto.ReviewPlace.response.ReviewPlaceResponseDto;
+import solo.project.dto.reviewPlace.response.ReviewPlaceResponseDto;
 import solo.project.dto.file.FileResponseDto;
 import solo.project.entity.*;
 import solo.project.error.ErrorCode;

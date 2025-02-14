@@ -1,4 +1,4 @@
-package solo.project.repository.File;
+package solo.project.repository.file;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import solo.project.entity.File;

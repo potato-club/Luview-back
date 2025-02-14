@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import solo.project.dto.comment.CommentResponseDto;
-import solo.project.dto.ReviewPlace.response.ReviewPlaceResponseDto;
+import solo.project.dto.reviewPlace.response.ReviewPlaceResponseDto;
 import solo.project.dto.file.FileResponseDto;
 
 import java.time.LocalDateTime;

@@ -1,11 +1,10 @@
-package solo.project.dto.User.request;
+package solo.project.dto.user.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
-import solo.project.enums.UserRole;
 
 import java.time.LocalDate;
 import java.util.List;

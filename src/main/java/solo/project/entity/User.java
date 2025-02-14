@@ -5,9 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import solo.project.dto.User.request.UserUpdateRequestDto;
+import solo.project.dto.user.request.UserUpdateRequestDto;
 import solo.project.enums.LoginType;
-import solo.project.enums.UserRole;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

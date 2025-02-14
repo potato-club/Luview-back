@@ -1,10 +1,10 @@
-package solo.project.repository.File;
+package solo.project.repository.file;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import solo.project.dto.User.response.UserProfileResponseDto;
+import solo.project.dto.user.response.UserProfileResponseDto;
 import solo.project.entity.QFile;
 import solo.project.entity.QUser;
 import solo.project.entity.User;

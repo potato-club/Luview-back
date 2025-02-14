@@ -17,7 +17,7 @@ import solo.project.entity.User;
 import solo.project.enums.FileType;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.S3Exception;
-import solo.project.repository.File.FileRepository;
+import solo.project.repository.file.FileRepository;
 import solo.project.service.ImageService;
 
 import java.io.IOException;

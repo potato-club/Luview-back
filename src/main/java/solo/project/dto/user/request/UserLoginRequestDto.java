@@ -1,17 +1,20 @@
-package solo.project.dto.User.request;
+package solo.project.dto.user.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
 @Builder
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-public class UserProfileRequestDto {
-
+@NoArgsConstructor
+public class UserLoginRequestDto {
     @Schema(description = "Email")
     private String email;
+
+    @Schema(description = "일반 로그인 패스워드")
+    private String password;
+
 }

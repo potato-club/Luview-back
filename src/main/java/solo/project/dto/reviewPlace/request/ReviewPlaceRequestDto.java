@@ -1,4 +1,4 @@
-package solo.project.dto.ReviewPlace.request;
+package solo.project.dto.reviewPlace.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

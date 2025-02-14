@@ -1,4 +1,4 @@
-package solo.project.dto.ReviewPlace.response;
+package solo.project.dto.reviewPlace.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
