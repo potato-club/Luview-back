@@ -95,6 +95,7 @@ public class CommentServiceImpl implements CommentService {
         .map(comment -> CommentResponseDto.builder()
             .id(comment.getId())
             .createdDate(comment.getCreatedDate())
+            .nickname(comment.getUser().getNickname())
             .content(comment.getContent())
             .children(getReplies(comment.getId()))
             .build())
