@@ -157,22 +157,18 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 
     //코드 큰일났다
     private List<CommentResponseDto> buildCommentTree(List<CommentResponseDto> flatComments) {
-        // 각 댓글을 id를 key로 하는 맵에 저장
         Map<Long, CommentResponseDto> commentMap = new HashMap<>();
         for (CommentResponseDto dto : flatComments) {
             commentMap.put(dto.getId(), dto);
         }
 
         List<CommentResponseDto> roots = new ArrayList<>();
-        // 각 댓글에 대해 부모를 찾아서 children에 추가
         for (CommentResponseDto dto : flatComments) {
             if (dto.getParent_id() == null) {
-                // 최상위 댓글이면 roots 리스트에 추가
                 roots.add(dto);
             } else {
                 CommentResponseDto parent = commentMap.get(dto.getParent_id());
                 if (parent != null) {
-                    // 부모의 children 리스트가 null이면 새 리스트 할당
                     if (parent.getChildren() == null) {
                         parent.setChildren(new ArrayList<>());
                     }
