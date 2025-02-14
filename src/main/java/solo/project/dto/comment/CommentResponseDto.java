@@ -13,9 +13,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class CommentResponseDto {
-
-  private Long parent_id;
   private Long id;
+  private Long parent_id;
   private String content;
   private String nickname;
   private List<CommentResponseDto> children = new ArrayList<>();

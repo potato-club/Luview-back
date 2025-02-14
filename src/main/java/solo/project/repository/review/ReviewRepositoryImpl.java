@@ -15,9 +15,7 @@ import solo.project.entity.*;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -130,14 +128,16 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .collect(Collectors.toList());
 
         // 댓글 처리
-        List<CommentResponseDto> commentDtos = review.getComments().stream()
+        List<CommentResponseDto> flatCommentDtos = review.getComments().stream()
                 .map(c -> CommentResponseDto.builder()
-                        .parent_id(c.getId())
+                        .id(c.getId())
+                        .parent_id(c.getParent() != null ? c.getParent().getId() : null)
                         .content(c.getContent())
                         .nickname(c.getUser().getNickname())
                         .createdDate(c.getCreatedDate())
                         .build())
                 .collect(Collectors.toList());
+        List<CommentResponseDto> commentDtos = buildCommentTree(flatCommentDtos);
 
         return ReviewResponseDto.builder()
                 .reviewId(review.getId())
@@ -153,6 +153,34 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .comments(commentDtos)
                 .thumbnailUrl(thumbnailUrl)
                 .build();
+    }
+
+    //코드 큰일났다
+    private List<CommentResponseDto> buildCommentTree(List<CommentResponseDto> flatComments) {
+        // 각 댓글을 id를 key로 하는 맵에 저장
+        Map<Long, CommentResponseDto> commentMap = new HashMap<>();
+        for (CommentResponseDto dto : flatComments) {
+            commentMap.put(dto.getId(), dto);
+        }
+
+        List<CommentResponseDto> roots = new ArrayList<>();
+        // 각 댓글에 대해 부모를 찾아서 children에 추가
+        for (CommentResponseDto dto : flatComments) {
+            if (dto.getParent_id() == null) {
+                // 최상위 댓글이면 roots 리스트에 추가
+                roots.add(dto);
+            } else {
+                CommentResponseDto parent = commentMap.get(dto.getParent_id());
+                if (parent != null) {
+                    // 부모의 children 리스트가 null이면 새 리스트 할당
+                    if (parent.getChildren() == null) {
+                        parent.setChildren(new ArrayList<>());
+                    }
+                    parent.getChildren().add(dto);
+                }
+            }
+        }
+        return roots;
     }
 }
 
