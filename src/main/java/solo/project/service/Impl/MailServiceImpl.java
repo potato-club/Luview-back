@@ -4,65 +4,108 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.MailException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import solo.project.repository.UserRepository;
+import solo.project.service.MailService;
+import solo.project.service.UserService;
+import solo.project.service.redis.RedisEmailAuthentication;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Random;
-
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MailServiceImpl {
-    private final JavaMailSender javaMailSender;
+@Transactional
+public class MailServiceImpl implements MailService {
 
-    private static final String senderEmail = "jihun65487@gmail.com";
+    private final JavaMailSender gmailSender;
+    private final RedisEmailAuthentication redisEmailAuthentication;
+    private int authNumber;
+    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public String createNumber() {
+    @Value("${spring.mail.username}")
+    private String gmailUsername;
+
+    @Autowired
+    public MailServiceImpl(@Qualifier("gmail") JavaMailSender gmailSender,
+                            RedisEmailAuthentication redisEmailAuthentication,
+                            UserRepository userRepository,
+                            UserServiceImpl userService) {
+        this.gmailSender = gmailSender;
+        this.redisEmailAuthentication= redisEmailAuthentication;
+        this.userRepository = userRepository;
+        this.userService = userService;
+    }
+
+    public static String generateAuthCode() {
+        StringBuilder secretKey = new StringBuilder();
         Random random = new Random();
-        StringBuilder key = new StringBuilder();
-
-        for (int i = 0; i < 8; i++) { // 인증 코드 8자리
-            int index = random.nextInt(3); // 0~2까지 랜덤, 랜덤값으로 switch문 실행
-
-            switch (index) {
-                case 0 -> key.append((char) (random.nextInt(26) + 97)); // 소문자
-                case 1 -> key.append((char) (random.nextInt(26) + 65)); // 대문자
-                case 2 -> key.append(random.nextInt(10)); // 숫자
-            }
+        for(int i = 0; i < 6; i++){
+            secretKey.append(random.nextInt(10)); //6자리로 설정
         }
-        return key.toString();
+        return secretKey.toString();
     }
 
-    public MimeMessage createMail(String mail, String number) throws MessagingException {
-        MimeMessage message = javaMailSender.createMimeMessage();
+    public String sendSignUpEmail(String email) {
+        generateAuthCode();
+        String fromEmail = "jihu65487@gmail.com"; // 발신자 이메일 (설정 파일에 등록된 이메일)
+        String title = "회원 가입 인증 이메일 입니다.";
+        String content = "Luview 이메일 인증번호입니다. 감사합니다." +
+                "<br><br>" +
+                "인증 번호는 " + authNumber + "입니다." +
+                "<br>" +
+                "인증번호를 제대로 입력해주세요";
 
-        message.setFrom(senderEmail);
-        message.setRecipients(MimeMessage.RecipientType.TO, mail);
-        message.setSubject("이메일 인증");
-        String body = "";
-        body += "<h3>요청하신 인증 번호입니다.</h3>";
-        body += "<h1>" + number + "</h1>";
-        body += "<h3>감사합니다.</h3>";
-        message.setText(body, "UTF-8", "html");
-
-        return message;
+        return Integer.toString(authNumber);
     }
 
-    // 메일 발송
-    public String sendSimpleMessage(String sendEmail) throws MessagingException {
-        String number = createNumber(); // 랜덤 인증번호 생성
+    public void sandEmail(String fromEmail) {
+        redisEmailAuthentication.deleteExistData(fromEmail);
+        MimeMessage mimeMessage = gmailSender.createMimeMessage();
 
-        MimeMessage message = createMail(sendEmail, number); // 메일 생성
-        try {
-            javaMailSender.send(message); // 메일 발송
-        } catch (MailException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("메일 발송 중 오류가 발생했습니다.");
-        }
+        String emailKey=generateAuthCode();
+        composeEmailMessage(fromEmail,mimeMessage,"gmail",emailKey);
 
-        return number; // 생성된 인증번호 반환
+        redisEmailAuthentication.setDataExpire(emailKey,fromEmail,60*5);
+
+    }
+
+    public boolean checkAuthNum(String email, String authNum) {
+        log.info("입력 인증번호: {}", authNum);
+        log.info("입력 이메일: {}", email);
+        Object redisData = redisEmailAuthentication.getData(authNum);
+        return redisData != null && redisData.equals(email);
+    }
+
+    private void composeEmailMessage(String fromEmail,MimeMessage mimeMessage,String secretKey) throws MessagingException, UnsupportedEncodingException {
+        mimeMessage.addRecipients(MimeMessage.RecipientType.TO, fromEmail);
+        mimeMessage.setSubject("Luview 인증 코드");
+
+        StringBuilder msgBuilder = new StringBuilder();
+        msgBuilder.append("<div style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333;\">")
+                .append("<h1 style=\"font-size: 32px; text-align: center; padding: 20px 30px 10px; margin: 0;\">이메일 인증 요청</h1>")
+                .append("<p style=\"font-size: 18px; text-align: center; margin: 0 30px 30px;\">회원가입을 완료하시려면 아래의 인증 코드를 입력해 주세요.</p>")
+                .append("<div style=\"display: flex; justify-content: center; margin: 20px 30px;\">")
+                .append("<table style=\"border-collapse: collapse; background-color: #F4F4F4; border-radius: 8px;\">")
+                .append("<tr>")
+                .append("<td style=\"padding: 20px 40px; font-size: 36px; font-weight: bold; text-align: center;\">")
+                .append(secretKey)
+                .append("</td>")
+                .append("</tr>")
+                .append("</table>")
+                .append("</div>")
+                .append("</div>");
+
+        String msg = msgBuilder.toString();
+        mimeMessage.setText(msg,"utf-8","html");
+
     }
 }
-

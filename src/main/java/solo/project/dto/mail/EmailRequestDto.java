@@ -7,6 +7,10 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Getter
-public class EmailDto {
+public class EmailRequestDto {
     private String email;
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

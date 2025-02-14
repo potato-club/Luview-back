@@ -1,46 +1,45 @@
 package solo.project.service.redis;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.HashOperations;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.stereotype.Service;
+import solo.project.error.ErrorCode;
+import solo.project.error.exception.NotFoundException;
 
 import java.time.Duration;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class RedisEmailAuthentication {
-    private final StringRedisTemplate redisTemplate;
+    private final RedisTemplate<String,Object> redisTemplate;
 
-    @Autowired
-    public RedisEmailAuthentication(StringRedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public Object getEmailOtpData(String key) {
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        Object value = valueOperations.get(key);
+        if (value == null) {
+            throw new NotFoundException("Email OTP not found for key: " + key, ErrorCode.NOT_FOUND_EXCEPTION);
+        }
+        return value;
     }
 
-    public String checkEmailAuthentication(String key) {
-        HashOperations<String, String, String> hashOperations = redisTemplate.opsForHash();
-        return hashOperations.get(key, "auth");
+    // 유효 시간 동안 Email OTP(key, value) 저장
+    public void setEmailOtpDataExpire(String key, String value, long duration) {
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        Duration expireDuration = Duration.ofSeconds(duration);
+        valueOperations.set(key, value, expireDuration);
     }
 
-    public String getEmailAuthenticationCode(String key) {
-        HashOperations<String, String, String> hashOperations = redisTemplate.opsForHash();
-        return hashOperations.get(key, "code");
+    // Email OTP 값 삭제
+    public void deleteEmailOtpData(String key) {
+        redisTemplate.delete(key);
     }
 
-    public void setEmailAuthenticationExpire(String email, String code, long duration) {
-        HashOperations<String, String, String> hashOperations = redisTemplate.opsForHash();
-        hashOperations.put(email, "code", code);
-        hashOperations.put(email, "auth", "N");
-        redisTemplate.expire(email, Duration.ofMinutes(duration));
-    }
-
-    public void setEmailAuthenticationComplete(String email) {
-        HashOperations<String, String, String> hashOperations = redisTemplate.opsForHash();
-        hashOperations.put(email, "auth", "Y");
-    }
-
-    public void deleteEmailAuthenticationHistory(String key) {
-        HashOperations<String, String, String> hashOperations = redisTemplate.opsForHash();
-        hashOperations.delete(key, "code");
-        hashOperations.delete(key, "auth");
+    // 기존의 OTP 코드가 있는지 확인하고 있다면 삭제
+    public void deleteExistingOtp(String email) {
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(email))) {
+            redisTemplate.delete(email);
+        }
     }
 }

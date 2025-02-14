@@ -19,7 +19,7 @@ public class MailConfig {
     @Value("${spring.mail.port}")
     private int port;
 
-    @Bean
+    @Bean(name = "gmail")
     public JavaMailSender javaMailService() {
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
         javaMailSender.setHost(host);
