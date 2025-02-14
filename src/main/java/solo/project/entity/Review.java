@@ -2,7 +2,7 @@ package solo.project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import solo.project.dto.Review.request.ReviewRequestDto;
+import solo.project.dto.review.request.ReviewRequestDto;
 
 import java.util.ArrayList;
 import java.util.HashSet;

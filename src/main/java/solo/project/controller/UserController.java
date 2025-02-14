@@ -6,17 +6,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import solo.project.dto.kakao.AdditionalInfoRequest;
 import solo.project.dto.kakao.response.UserKakaoResponseDto;
-import solo.project.dto.User.request.UserCancel;
-import solo.project.dto.User.request.UserLoginRequestDto;
-import solo.project.dto.User.response.UserProfileResponseDto;
-import solo.project.dto.User.response.UserLoginResponseDto;
-import solo.project.dto.User.request.UserSignUpRequestDto;
-import solo.project.entity.User;
+import solo.project.dto.user.request.UserCancel;
+import solo.project.dto.user.request.UserLoginRequestDto;
+import solo.project.dto.user.response.UserProfileResponseDto;
+import solo.project.dto.user.response.UserLoginResponseDto;
+import solo.project.dto.user.request.UserSignUpRequestDto;
 import solo.project.service.UserService;
 
 @RestController

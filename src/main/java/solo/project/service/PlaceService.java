@@ -1,6 +1,6 @@
 package solo.project.service;
 
-import solo.project.dto.Place.request.PlaceRequestDto;
+import solo.project.dto.place.request.PlaceRequestDto;
 import solo.project.entity.Place;
 
 import java.util.List;

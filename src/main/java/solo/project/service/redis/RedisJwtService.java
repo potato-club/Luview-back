@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
-import solo.project.error.ErrorCode;
-import solo.project.error.exception.NotFoundException;
 
 import java.time.Duration;
 import java.util.HashMap;

@@ -8,19 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import solo.project.dto.User.response.UserProfileResponseDto;
-import solo.project.dto.file.FileRequestDto;
 import solo.project.dto.jwt.UserDetailsImpl;
 import solo.project.entity.User;
-import solo.project.error.ErrorCode;
-import solo.project.error.exception.NotFoundException;
-import solo.project.repository.File.FileRepository;
-import solo.project.repository.UserRepository;
 import solo.project.service.ImageService;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

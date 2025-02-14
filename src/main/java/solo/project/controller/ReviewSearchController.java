@@ -10,8 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import solo.project.dto.Review.response.MainReviewResponseDto;
-import solo.project.dto.Review.response.ReviewResponseDto;
+import solo.project.dto.review.response.MainReviewResponseDto;
+import solo.project.dto.review.response.ReviewResponseDto;
 import solo.project.service.ReviewService;
 import solo.project.service.redis.RedisSearchService;
 

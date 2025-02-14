@@ -6,18 +6,16 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import solo.project.dto.Comment.CommentResponseDto;
-import solo.project.dto.Review.response.MainReviewResponseDto;
-import solo.project.dto.Review.response.ReviewResponseDto;
-import solo.project.dto.ReviewPlace.response.ReviewPlaceResponseDto;
+import solo.project.dto.comment.CommentResponseDto;
+import solo.project.dto.review.response.MainReviewResponseDto;
+import solo.project.dto.review.response.ReviewResponseDto;
+import solo.project.dto.reviewPlace.response.ReviewPlaceResponseDto;
 import solo.project.dto.file.FileResponseDto;
 import solo.project.entity.*;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -130,14 +128,16 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .collect(Collectors.toList());
 
         // 댓글 처리
-        List<CommentResponseDto> commentDtos = review.getComments().stream()
+        List<CommentResponseDto> flatCommentDtos = review.getComments().stream()
                 .map(c -> CommentResponseDto.builder()
-                        .parent_id(c.getId())
+                        .id(c.getId())
+                        .parent_id(c.getParent() != null ? c.getParent().getId() : null)
                         .content(c.getContent())
                         .nickname(c.getUser().getNickname())
                         .createdDate(c.getCreatedDate())
                         .build())
                 .collect(Collectors.toList());
+        List<CommentResponseDto> commentDtos = buildCommentTree(flatCommentDtos);
 
         return ReviewResponseDto.builder()
                 .reviewId(review.getId())
@@ -153,6 +153,30 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .comments(commentDtos)
                 .thumbnailUrl(thumbnailUrl)
                 .build();
+    }
+
+    //코드 큰일났다
+    private List<CommentResponseDto> buildCommentTree(List<CommentResponseDto> flatComments) {
+        Map<Long, CommentResponseDto> commentMap = new HashMap<>();
+        for (CommentResponseDto dto : flatComments) {
+            commentMap.put(dto.getId(), dto);
+        }
+
+        List<CommentResponseDto> roots = new ArrayList<>();
+        for (CommentResponseDto dto : flatComments) {
+            if (dto.getParent_id() == null) {
+                roots.add(dto);
+            } else {
+                CommentResponseDto parent = commentMap.get(dto.getParent_id());
+                if (parent != null) {
+                    if (parent.getChildren() == null) {
+                        parent.setChildren(new ArrayList<>());
+                    }
+                    parent.getChildren().add(dto);
+                }
+            }
+        }
+        return roots;
     }
 }
 

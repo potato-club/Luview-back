@@ -12,17 +12,18 @@ import solo.project.dto.kakao.response.UserKakaoResponseDto;
 import solo.project.error.exception.ForbiddenException;
 import solo.project.kakao.KakaoApi;
 import solo.project.dto.jwt.JwtTokenProvider;
-import solo.project.dto.User.request.UserLoginRequestDto;
-import solo.project.dto.User.response.UserProfileResponseDto;
-import solo.project.dto.User.response.UserLoginResponseDto;
-import solo.project.dto.User.request.UserSignUpRequestDto;
+import solo.project.dto.user.request.UserLoginRequestDto;
+import solo.project.dto.user.response.UserProfileResponseDto;
+import solo.project.dto.user.response.UserLoginResponseDto;
+import solo.project.dto.user.request.UserSignUpRequestDto;
 import solo.project.entity.User;
 import solo.project.enums.LoginType;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.error.exception.UnAuthorizedException;
-import solo.project.repository.File.FileRepository;
+import solo.project.repository.file.FileRepository;
 import solo.project.repository.UserRepository;
+import solo.project.service.redis.RedisEmailAuthentication;
 import solo.project.service.redis.RedisJwtService;
 import solo.project.service.UserService;
 
@@ -39,6 +40,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaoApi kakaoApi;
     private final FileRepository fileRepository;
+    private final RedisEmailAuthentication redisEmailAuthentication;
 
     private User findByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
@@ -147,14 +149,22 @@ public class UserServiceImpl implements UserService {
             throw new UnAuthorizedException("401", ErrorCode.ACCESS_DENIED_EXCEPTION);
         }//이메일 존재 여부 확인
 
-        if(requestDto.getLoginType().equals(LoginType.NORMAL)){ //로컬은 2차 인증 후 토큰 발급
+        if (!redisEmailAuthentication.isEmailVerified(requestDto.getEmail())) {
+            throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
+        }
+
+        if (requestDto.getLoginType().equals(LoginType.NORMAL)) { // 로컬은 2차 인증 후 토큰 발급
             requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
             User user = requestDto.toEntity();
-            user.setEmailOtp(false);
+            // 회원가입 시, 이메일 인증이 완료되었으므로 인증 플래그를 true로 설정
+            user.setEmailOtp(true);
 
             userRepository.save(user);
-        }else {
+
+            // 회원가입 후, 사용했던 인증 플래그 삭제 (또는 만료 처리)
+            redisEmailAuthentication.deleteEmailOtpData("verified:" + requestDto.getEmail());
+        } else {
             throw new UnAuthorizedException("401_NOT_ALLOW", ErrorCode.ACCESS_DENIED_EXCEPTION);
         }
     }

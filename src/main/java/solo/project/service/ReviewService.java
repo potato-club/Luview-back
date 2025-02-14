@@ -2,9 +2,9 @@ package solo.project.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
-import solo.project.dto.Review.request.ReviewRequestDto;
-import solo.project.dto.Review.response.MainReviewResponseDto;
-import solo.project.dto.Review.response.ReviewResponseDto;
+import solo.project.dto.review.request.ReviewRequestDto;
+import solo.project.dto.review.response.MainReviewResponseDto;
+import solo.project.dto.review.response.ReviewResponseDto;
 import org.springframework.data.domain.Pageable;
 import solo.project.dto.file.FileRequestDto;
 

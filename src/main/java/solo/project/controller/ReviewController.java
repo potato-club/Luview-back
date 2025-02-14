@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import solo.project.dto.Review.request.ReviewRequestDto;
+import solo.project.dto.review.request.ReviewRequestDto;
 import solo.project.dto.file.FileRequestDto;
 import solo.project.service.ReviewService;
 import solo.project.service.redis.RedisSearchService;

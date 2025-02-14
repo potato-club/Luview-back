@@ -1,8 +1,8 @@
 package solo.project.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import solo.project.dto.Comment.CommentRequestDto;
-import solo.project.dto.Comment.CommentResponseDto;
+import solo.project.dto.comment.CommentRequestDto;
+import solo.project.dto.comment.CommentResponseDto;
 
 import java.util.List;
 

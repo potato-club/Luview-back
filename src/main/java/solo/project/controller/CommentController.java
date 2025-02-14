@@ -6,9 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import solo.project.dto.Comment.CommentRequestDto;
-import solo.project.dto.Comment.CommentResponseDto;
-import solo.project.entity.Comment;
+import solo.project.dto.comment.CommentRequestDto;
+import solo.project.dto.comment.CommentResponseDto;
 import solo.project.service.CommentService;
 
 import java.util.List;
