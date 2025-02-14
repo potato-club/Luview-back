@@ -150,19 +150,17 @@ public class UserServiceImpl implements UserService {
         }//이메일 존재 여부 확인
 
         if (!redisEmailAuthentication.isEmailVerified(requestDto.getEmail())) {
-            throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
+            throw new UnAuthorizedException("이메일 인증이 완료되지 않았습니다.",ErrorCode.NOT_VALID_EMAIL_EXCEPTION);
         }
 
         if (requestDto.getLoginType().equals(LoginType.NORMAL)) { // 로컬은 2차 인증 후 토큰 발급
             requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
             User user = requestDto.toEntity();
-            // 회원가입 시, 이메일 인증이 완료되었으므로 인증 플래그를 true로 설정
             user.setEmailOtp(true);
 
             userRepository.save(user);
 
-            // 회원가입 후, 사용했던 인증 플래그 삭제 (또는 만료 처리)
             redisEmailAuthentication.deleteEmailOtpData("verified:" + requestDto.getEmail());
         } else {
             throw new UnAuthorizedException("401_NOT_ALLOW", ErrorCode.ACCESS_DENIED_EXCEPTION);

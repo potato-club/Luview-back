@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import solo.project.dto.comment.CommentResponseDto;
+import solo.project.dto.mainpage.response.MyInfoResponseDto;
+import solo.project.dto.mainpage.response.PartnerInfoResponseDto;
 import solo.project.dto.reviewPlace.response.ReviewPlaceResponseDto;
 import solo.project.dto.file.FileResponseDto;
 
@@ -20,6 +22,12 @@ public class ReviewResponseDto {
 
   @Schema(description = "리뷰 id")
   private Long reviewId;
+
+  @Schema(description = "내 정보")
+  private List<MyInfoResponseDto> myInfos;
+
+  @Schema(description = "상대방 정보")
+  private List<PartnerInfoResponseDto> partnerInfos;
 
   @Schema(description = "제목")
   private String title;
@@ -36,9 +44,6 @@ public class ReviewResponseDto {
   @Schema(description = "작성일")
   private LocalDateTime createdAt;
 
-  @Schema(description = "작성자 닉네임")
-  private String nickname;
-
   @Schema(description = "댓글 수")
   private int commentCount;
 
@@ -53,5 +58,6 @@ public class ReviewResponseDto {
 
   @Schema(description = "댓글 목록")
   private List<CommentResponseDto> comments; // 댓글 목록
+
 }
 

@@ -28,7 +28,8 @@ public enum ErrorCode {
     ACCESS_TOKEN_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"2005","Failed to create access token!"),
     UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "401", "UnAuthorized User"),
     ALREADY_CHECKED_LIKE_EXCEPTION(HttpStatus.CONFLICT, "409", "409 Conflict"),
-    NOT_FOUND_LIKE_EXCEPTION(HttpStatus.NOT_FOUND, "404", "404 Not Found");
+    NOT_FOUND_LIKE_EXCEPTION(HttpStatus.NOT_FOUND, "404", "404 Not Found"),
+    NOT_VALID_EMAIL_EXCEPTION(HttpStatus.UNAUTHORIZED, "404", "UnAuthorized Email");
 
     private final HttpStatus status;
     private final String code;

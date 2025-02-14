@@ -5,8 +5,12 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import solo.project.dto.comment.CommentResponseDto;
+import solo.project.dto.jwt.UserDetailsImpl;
+import solo.project.dto.mainpage.response.MyInfoResponseDto;
+import solo.project.dto.mainpage.response.PartnerInfoResponseDto;
 import solo.project.dto.review.response.MainReviewResponseDto;
 import solo.project.dto.review.response.ReviewResponseDto;
 import solo.project.dto.reviewPlace.response.ReviewPlaceResponseDto;
@@ -14,6 +18,7 @@ import solo.project.dto.file.FileResponseDto;
 import solo.project.entity.*;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
+import solo.project.repository.mainpage.MainPageRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,6 +29,7 @@ import java.util.stream.Collectors;
 public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
+    private final MainPageRepository mainPageRepository;
 
     private final QReview qReview = QReview.review;
     private final QFile qFile = QFile.file;
@@ -125,7 +131,10 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                         .category(rp.getPlace().getCategory())
                         .rating(rp.getRating())
                         .build())
-                .collect(Collectors.toList());
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(ReviewPlaceResponseDto::getPlaceId, dto -> dto, (dto1, dto2) -> dto1),
+                        map -> new ArrayList<>(map.values())
+                        ));
 
         // 댓글 처리
         List<CommentResponseDto> flatCommentDtos = review.getComments().stream()
@@ -139,15 +148,21 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .collect(Collectors.toList());
         List<CommentResponseDto> commentDtos = buildCommentTree(flatCommentDtos);
 
+        Long myUserId= getCurrentUserId();
+
+        MyInfoResponseDto myInfo = mainPageRepository.getMyInfo(myUserId);
+        PartnerInfoResponseDto partnerInfo = mainPageRepository.getPartnerInfo(myUserId);
+
         return ReviewResponseDto.builder()
                 .reviewId(review.getId())
+                .myInfos(Collections.singletonList(myInfo))
+                .partnerInfos(Collections.singletonList(partnerInfo))
                 .title(review.getTitle())
                 .content(review.getContent())
                 .viewCount(review.getViewCount())
                 .likeCount(review.getLikeCount())
                 .commentCount(review.getCommentCount())
                 .createdAt(review.getCreatedDate())
-                .nickname(review.getUser().getNickname())
                 .reviewPlaces(reviewPlaceDtos)
                 .files(fileDtos)
                 .comments(commentDtos)
@@ -177,6 +192,14 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
             }
         }
         return roots;
+    }
+
+    private Long getCurrentUserId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetailsImpl) {
+            return ((UserDetailsImpl) principal).getId();
+        }
+        throw new RuntimeException("사용자 정보를 찾을 수 없습니다.");
     }
 }
 
