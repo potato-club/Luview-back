@@ -54,10 +54,21 @@ public class CoupleServiceImpl implements CoupleService {
     if (user == null) {
       throw new NotFoundException("로그인 후 커플 삭제 가능합니다.", ErrorCode.NOT_FOUND_EXCEPTION);
     }
-
     Couple couple = coupleRepository.findByUser1OrUser2(user,user)
         .orElseThrow(() -> new NotFoundException("사용자가 속한 커플이 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
 
     coupleRepository.delete(couple);
   }
+
+  //커플 확인
+  @Override
+  public Couple getCoupleDetails(HttpServletRequest request) {
+    User user = userService.findUserByToken(request);
+    if (user == null) {
+      throw new UnAuthorizedException("로그인 후 커플 정보를 조회할 수 있습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
+    }
+    return coupleRepository.findByUser1OrUser2(user, user)
+            .orElseThrow(() -> new NotFoundException("사용자가 속한 커플이 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+  }
+
 }
