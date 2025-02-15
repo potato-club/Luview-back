@@ -87,4 +87,11 @@ public class ReviewSearchController {
         return ResponseEntity.ok(clearTerms);
     }
 
+    @Operation(summary = "시간별 급상승 검색어")
+    @GetMapping("/trending")
+    public ResponseEntity<List<String>> getTrendingSearchTerms(HttpServletRequest request) {
+        List<String> trendingTerms = redisSearchService.getTrendingSearchTerms(request);
+        return ResponseEntity.ok(trendingTerms);
+    }
+
 }

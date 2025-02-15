@@ -18,7 +18,7 @@ public class UserSignUpRequestDto {
     @Schema(description = "Email")
     private String email;
 
-    @Schema(description = "일반 로그인 패스워드", example = "null or password")
+    @Schema(description = "일반 로그인 패스워드", example = "password")
     private String password;
 
     @Schema(description = "이름")
@@ -30,7 +30,7 @@ public class UserSignUpRequestDto {
     @Schema(description = "생년월일")
     private LocalDate birthDate;
 
-    @Schema(description = "NORMAL / KAKAO", example = "NORMAL / KAKAO")
+    @Schema(description = "NORMAL / KAKAO", example = "NORMAL")
     private LoginType loginType;
 
     public User toEntity() {
