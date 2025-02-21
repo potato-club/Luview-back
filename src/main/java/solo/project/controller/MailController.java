@@ -1,5 +1,6 @@
 package solo.project.controller;
 
+import io.jsonwebtoken.security.Password;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import solo.project.dto.mail.EmailCheckDto;
 import solo.project.dto.mail.EmailRequestDto;
+import solo.project.dto.mail.password.request.PasswordResetConfirmDto;
+import solo.project.dto.mail.password.request.PasswordResetRequestDto;
 import solo.project.error.ErrorCode;
 import solo.project.error.exception.NotFoundException;
 import solo.project.service.MailService;
@@ -34,5 +37,19 @@ public class MailController {
     public ResponseEntity<String> verifyEmail(String key, HttpServletResponse response) {
         mailService.verifyEmail(key, response);
         return ResponseEntity.ok("2차 인증이 정상적으로 처리되었습니다.");
+    }
+
+    @Operation(summary = "비밀번호 재설정 요청")
+    @PostMapping("/password_reset")
+    public ResponseEntity<String> requestPasswordReset(@RequestBody PasswordResetRequestDto requestDto) throws Exception {
+        String passwordReset=mailService.requestPasswordReset(requestDto);
+        return ResponseEntity.ok(passwordReset);
+    }
+
+    @Operation(summary = "비밀번호 재설정 확인")
+    @PostMapping("/confirm")
+    public ResponseEntity<String> confirmPasswordReset(@RequestBody PasswordResetConfirmDto requestDto) throws Exception {
+        String confirm = mailService.resetPassword(requestDto);
+        return ResponseEntity.ok(confirm);
     }
 }

@@ -58,4 +58,27 @@ public class RedisEmailAuthentication {
         return Boolean.TRUE.equals(value);
     }
 
+    public void setPasswordResetToken(String email, String code, long durationSeconds) {
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        String key = "password-reset:" + code;
+        Duration expireDuration = Duration.ofSeconds(durationSeconds);
+        valueOperations.set(key, email, expireDuration);
+    }
+
+    // 비밀번호 재설정 토큰 조회
+    public String getPasswordResetToken(String code) {
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        String key = "password-reset:" + code;
+        Object value = valueOperations.get(key);
+        if (value == null) {
+            throw new NotFoundException("비밀번호 재설정 토큰이 존재하지 않습니다: " , ErrorCode.NOT_FOUND_EXCEPTION);
+        }
+        return (String) value;
+    }
+
+    // 비밀번호 재설정 토큰 삭제 (재사용 방지)
+    public void deletePasswordResetToken(String code) {
+        String key = "password-reset:" + code;
+        redisTemplate.delete(key);
+    }
 }

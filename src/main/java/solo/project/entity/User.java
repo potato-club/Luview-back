@@ -107,4 +107,8 @@ public class User extends BaseTimeEntity{
         files.add(file);
         file.setUser(this);
     }
+
+    public void setPassword(String password){
+        this.password = password;
+    }
 }
