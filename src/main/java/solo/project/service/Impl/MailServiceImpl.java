@@ -27,7 +27,6 @@ import solo.project.service.redis.RedisEmailAuthentication;
 import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -65,7 +64,7 @@ public class MailServiceImpl implements MailService {
         } catch (MessagingException | UnsupportedEncodingException e) {
             log.error("메일 전송 중 오류 발생", e);
             throw new RuntimeException("메일 전송 실패", e);
-        }
+        }//나중에 코드 리팩터링시에 오류코드 추가
 
         // OTP 데이터 Redis에 저장 (5분 유효)
         redisEmailAuthentication.setEmailOtpDataExpire(emailKey, toEmail, 60 * 5);

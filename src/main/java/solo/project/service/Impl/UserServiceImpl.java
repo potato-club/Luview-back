@@ -149,15 +149,15 @@ public class UserServiceImpl implements UserService {
             throw new UnAuthorizedException("401", ErrorCode.ACCESS_DENIED_EXCEPTION);
         }//이메일 존재 여부 확인
 
-        if (!redisEmailAuthentication.isEmailVerified(requestDto.getEmail())) {
-            throw new UnAuthorizedException("이메일 인증이 완료되지 않았습니다.",ErrorCode.NOT_VALID_EMAIL_EXCEPTION);
-        }
+//        if (!redisEmailAuthentication.isEmailVerified(requestDto.getEmail())) {
+//            throw new UnAuthorizedException("이메일 인증이 완료되지 않았습니다.",ErrorCode.NOT_VALID_EMAIL_EXCEPTION);
+//        }
 
         if (requestDto.getLoginType().equals(LoginType.NORMAL)) { // 로컬은 2차 인증 후 토큰 발급
             requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
             User user = requestDto.toEntity();
-            user.setEmailOtp(true);
+            user.setEmailOtp(false); //이메일인증을 구현 다 해놨지만 사용 X 위 if문 풀고, 이 코드 true로 바꾸면 작동
 
             userRepository.save(user);
 
