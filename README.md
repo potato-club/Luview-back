@@ -52,7 +52,7 @@
 | 항목 | 사용 기술 |
 |:----|:---------|
 | Frontend | React.js, React Router, Tailwind CSS |
-| Backend | Spring Boot, JVAA 17 |
+| Backend | Spring Boot, JAVA 17 |
 | Database | MySQL, Redis (세션/토큰 관리) |
 | 기타 | AWS EC2, S3 (파일 업로드) |
 
