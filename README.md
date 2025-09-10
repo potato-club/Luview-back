@@ -1,4 +1,5 @@
 # 💕 Luview - 커플 기록 웹앱
+<img width="1194" height="699" alt="Frame 1707484186" src="https://github.com/user-attachments/assets/d10dab97-f30f-4544-813d-5308dbe83d5e" />
 
 ## 📌 프로젝트 소개
 
